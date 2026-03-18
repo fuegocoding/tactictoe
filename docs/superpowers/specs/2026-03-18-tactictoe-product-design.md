@@ -207,8 +207,8 @@
 | API | Next.js API routes or Fastify | Stateless, easy scaling |
 | Database | Supabase (PostgreSQL) | Auth + realtime + storage in one managed service |
 | Rating | Glicko-2 npm package | Don't hand-roll rating math |
-| Deployment | Vercel (frontend) + Railway/Fly.io (game server) | ~$20–50/month at launch |
-| Observability | Sentry + Vercel Analytics + UptimeRobot | Free tier sufficient at launch |
+| Deployment | Railway Pro (all services) | $20/month flat; simplifies ops for solo dev |
+| Observability | Sentry + Railway metrics + UptimeRobot | Railway provides built-in CPU/memory/network graphs; Sentry free tier for errors |
 
 ### Rules Engine Interface
 ```typescript
@@ -238,7 +238,19 @@ Each variant is a class implementing this interface. Server is variant-agnostic.
 **Note on IP rate limits:** Mobile carriers use CGNAT — many users share a single IP. The 3-room/IP limit is a spam deterrent, not an absolute block. If a room creation is rejected, the error message should suggest signing in as a workaround. This is a known limitation to revisit if abuse is low.
 
 ### API Service Decision
-**Decision: Next.js API routes (not Fastify).** For a solo developer deploying on Vercel, colocated API routes are the right default. Fastify would only be warranted if API performance becomes a bottleneck at scale, which is post-V2 territory. Revisit if needed.
+**Decision: Next.js deployed as a standalone Node.js service on Railway (not Vercel).** Since all services are on Railway Pro, we deploy Next.js as a Docker container (or Railway's Nixpacks build) exposing port 3000. API routes remain colocated with the frontend in the same Next.js app — no need for a separate API service. This reduces the number of services to manage.
+
+**Deployment architecture (Railway Pro, all-in):**
+| Service | Railway Config | Notes |
+|---|---|---|
+| Frontend + API | Next.js app, standalone Docker build | API routes handle auth, profiles, Elo, rooms, queue |
+| Game server | Node.js + Socket.io, separate Railway service | Stateful — must be a persistent process, not serverless |
+| Database | Railway PostgreSQL plugin | Managed Postgres; no need for Supabase |
+| Auth | Custom JWT + OAuth (no Supabase auth) | Without Supabase, use NextAuth.js for auth |
+
+**Implication for Supabase:** Supabase is no longer needed. Replace with: Railway PostgreSQL (database), NextAuth.js (auth + OAuth), and standard pg/Prisma for DB access. This removes a dependency and keeps everything in one billing account.
+
+**Implication for Supabase Realtime:** Lobby presence features that would have used Supabase Realtime will instead use the game server's Socket.io connection, which players already have open. This is simpler.
 
 ### Move Flow
 Client sends move → server validates → server updates state → broadcasts to all → server writes to DB
