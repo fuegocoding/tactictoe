@@ -219,7 +219,7 @@ describe('mini-board result detection', () => {
       boards: [
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
-        ['X', 'O', 'X', 'O', 'O', 'X', 'X', 'X', null], // board 2: cell 8 empty
+        ['X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', null], // board 2: cell 8 empty; X at 0,2,3,7 — no 3-in-a-row when X plays 8
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
