@@ -13,3 +13,5 @@ export type {
 export type { GameRules } from './rules/interface.js';
 
 export { checkBoardWinner, isBoardFull } from './rules/win-checker.js';
+
+export { StandardTTT } from './rules/standard-ttt.js';
