@@ -11,3 +11,5 @@ export type {
 } from './types.js';
 
 export type { GameRules } from './rules/interface.js';
+
+export { checkBoardWinner, isBoardFull } from './rules/win-checker.js';
