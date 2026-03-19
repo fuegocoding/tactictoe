@@ -37,13 +37,9 @@ COPY --from=builder /repo/apps/web/.next/static ./.next/static
 COPY --from=builder /repo/apps/web/public ./public
 # Prisma migrations folder
 COPY --from=builder /repo/apps/web/prisma ./prisma
-# Prisma CLI is not traced by Next.js standalone (it's a CLI tool, not imported) — copy explicitly
-COPY --from=builder /repo/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /repo/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /repo/node_modules/@prisma ./node_modules/@prisma
+# Install prisma CLI — pnpm uses symlinks so COPY from builder doesn't work
+RUN npm install -g prisma@5
 
 EXPOSE 3000
 
-# Run migrations then start. The standalone server.js is at the bundle root.
-# prisma is in node_modules because it's a prod dep.
-CMD ["sh", "-c", "node node_modules/.bin/prisma migrate deploy && node server.js"]
+CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
