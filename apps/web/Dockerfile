@@ -34,15 +34,17 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
 # Standalone bundle (self-contained — includes its own node_modules)
+# In a pnpm monorepo, standalone mirrors the repo structure:
+# server.js lands at apps/web/server.js inside the bundle
 COPY --from=builder /repo/apps/web/.next/standalone ./
-# These must be copied separately (standalone doesn't include them)
-COPY --from=builder /repo/apps/web/.next/static ./.next/static
-COPY --from=builder /repo/apps/web/public ./public
-# Prisma migrations folder
+# Static/public must match where server.js expects them (apps/web/.next/static, apps/web/public)
+COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /repo/apps/web/public ./apps/web/public
+# Prisma migrations folder (prisma migrate deploy runs from /app)
 COPY --from=builder /repo/apps/web/prisma ./prisma
 # Install prisma CLI — pnpm uses symlinks so COPY from builder doesn't work
 RUN npm install -g prisma@5
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
+CMD ["sh", "-c", "prisma migrate deploy && node apps/web/server.js"]
