@@ -74,7 +74,7 @@ export class StandardTTT implements GameRules {
     const s = castState(state);
     if (s.terminal !== null) return [];
     return s.board
-      .map((cell, i) => (cell === null ? { data: { cellIndex: i } } : null))
+      .map((cell, i): Move | null => (cell === null ? { data: { cellIndex: i } } : null))
       .filter((m): m is Move => m !== null);
   }
 
