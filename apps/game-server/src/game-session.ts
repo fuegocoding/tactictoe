@@ -143,8 +143,10 @@ export function handleDisconnect(
           : 'O'
         : null;
 
+      if (!current.gameState) return; // guard: should not happen in active game
+
       const payload: GameOverPayload = {
-        gameState: current.gameState!,
+        gameState: current.gameState,
         winner: winnerSymbol,
         reason: 'forfeit',
         winnerDisplayName: winner?.displayName ?? null,

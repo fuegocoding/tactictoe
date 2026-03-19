@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createRoomManager } from './room-manager.js';
-import { handleDisconnect, handleReconnect } from './game-session.js';
+import { startGame, handleMove, handleDisconnect, handleReconnect } from './game-session.js';
+import { UltimateTTT } from '@tactictoe/game-engine';
 import type { RoomState } from './types.js';
+import type { MakeMovePayload } from './types.js';
 
 // Minimal mock Server that records emissions
 function createMockIo() {
@@ -29,6 +31,174 @@ function createMockIo() {
 
   return { io, emissions, socketEmissions };
 }
+
+function createMockSocket(id: string) {
+  const emissions: { event: string; data: unknown }[] = [];
+  const socket = {
+    id,
+    emit(event: string, data: unknown) {
+      emissions.push({ event, data });
+    },
+  } as unknown as import('socket.io').Socket;
+  return { socket, emissions };
+}
+
+describe('startGame', () => {
+  it('emits game:started to room with initial state and players', () => {
+    const rm = createRoomManager();
+    const { io, emissions } = createMockIo();
+    const code = rm.generateCode();
+    const room = rm.createRoom(code, {
+      socketId: 'socket-x',
+      guestId: 'guest-x',
+      displayName: 'PlayerX',
+      playerIndex: 0,
+    }, 'ultimate_ttt');
+    rm.addPlayer(room, {
+      socketId: 'socket-o',
+      guestId: 'guest-o',
+      displayName: 'PlayerO',
+      playerIndex: 1,
+    });
+
+    startGame(io, room);
+
+    const started = emissions.find((e) => e.event === 'game:started');
+    expect(started).toBeDefined();
+    expect(room.status).toBe('active');
+    expect(room.gameState).not.toBeNull();
+    const payload = started!.data as { players: { displayName: string }[] };
+    expect(payload.players).toHaveLength(2);
+    expect(payload.players[0]!.displayName).toBe('PlayerX');
+  });
+});
+
+describe('handleMove', () => {
+  function makeGameRoom(rm: ReturnType<typeof createRoomManager>) {
+    const code = rm.generateCode();
+    const room = rm.createRoom(code, {
+      socketId: 'socket-x',
+      guestId: 'guest-x',
+      displayName: 'PlayerX',
+      playerIndex: 0,
+    }, 'ultimate_ttt');
+    rm.addPlayer(room, {
+      socketId: 'socket-o',
+      guestId: 'guest-o',
+      displayName: 'PlayerO',
+      playerIndex: 1,
+    });
+    const { io, emissions } = createMockIo();
+    startGame(io, room);
+    // Clear emissions after startGame so tests only see move emissions
+    emissions.length = 0;
+    return { room, code };
+  }
+
+  it('valid move emits game:state with updated state and lastMove', () => {
+    const rm = createRoomManager();
+    const { room, code } = makeGameRoom(rm);
+    const { io, emissions } = createMockIo();
+    const { socket } = createMockSocket('socket-x');
+
+    const payload: MakeMovePayload = { roomCode: code, boardIndex: 4, cellIndex: 4 };
+    handleMove(io, socket, payload, rm);
+
+    const update = emissions.find((e) => e.event === 'game:state');
+    expect(update).toBeDefined();
+    const data = update!.data as { lastMove: { boardIndex: number; cellIndex: number } };
+    expect(data.lastMove.boardIndex).toBe(4);
+    expect(data.lastMove.cellIndex).toBe(4);
+  });
+
+  it('out-of-turn move emits error to socket', () => {
+    const rm = createRoomManager();
+    const { room, code } = makeGameRoom(rm);
+    const { io } = createMockIo();
+    // O tries to go first (it's X's turn)
+    const { socket, emissions: socketEmissions } = createMockSocket('socket-o');
+
+    const payload: MakeMovePayload = { roomCode: code, boardIndex: 0, cellIndex: 0 };
+    handleMove(io, socket, payload, rm);
+
+    expect(socketEmissions.some((e) => e.event === 'error')).toBe(true);
+  });
+
+  it('engine-rejected (illegal) move emits error to socket', () => {
+    const rm = createRoomManager();
+    const { room, code } = makeGameRoom(rm);
+    const { io } = createMockIo();
+    const { socket, emissions: socketEmissions } = createMockSocket('socket-x');
+
+    // First move: board 4, cell 4 — sends opponent to board 4
+    handleMove(io, socket, { roomCode: code, boardIndex: 4, cellIndex: 4 }, rm);
+
+    // Now it's O's turn but X tries again (wrong turn)
+    handleMove(io, socket, { roomCode: code, boardIndex: 4, cellIndex: 0 }, rm);
+
+    expect(socketEmissions.some((e) => e.event === 'error')).toBe(true);
+  });
+
+  it('terminal move emits game:over with correct winner', async () => {
+    const rm = createRoomManager();
+    const code = rm.generateCode();
+    const { io, emissions } = createMockIo();
+
+    // Inject a near-terminal state: X needs one more win to win the meta-board
+    // boardResults: X has won boards 0,1 — needs board 2. Board 2 has X at cells 0,1 (needs 2).
+    // nextBoardConstraint: 2 (O just played cell 2 somewhere)
+    // Current player: X
+    const nearTerminal = {
+      variantId: 'ultimate_ttt',
+      currentPlayer: 'X' as const,
+      moveCount: 20,
+      boards: [
+        ['X','X','X','O','O',null,null,null,null], // board 0: won by X (top row)
+        ['X','X','X','O','O',null,null,null,null], // board 1: won by X (top row)
+        ['X','X',null,null,null,null,null,null,null], // board 2: X at 0,1 — needs cell 2
+        [null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null],
+      ],
+      boardResults: ['X','X',null,null,null,null,null,null,null] as ['X','X',null,null,null,null,null,null,null],
+      nextBoardConstraint: 2,
+      terminal: null,
+    };
+
+    const engine = new UltimateTTT();
+    const state = engine.deserialize(JSON.stringify(nearTerminal));
+
+    const room = rm.createRoom(code, {
+      socketId: 'socket-x',
+      guestId: 'guest-x',
+      displayName: 'PlayerX',
+      playerIndex: 0,
+    }, 'ultimate_ttt');
+    rm.addPlayer(room, {
+      socketId: 'socket-o',
+      guestId: 'guest-o',
+      displayName: 'PlayerO',
+      playerIndex: 1,
+    });
+    room.status = 'active';
+    room.gameState = state as import('@tactictoe/game-engine').UltimateTTTState;
+
+    const { socket } = createMockSocket('socket-x');
+
+    // X plays board 2, cell 2 — wins board 2, winning top row of meta (boards 0,1,2)
+    handleMove(io, socket, { roomCode: code, boardIndex: 2, cellIndex: 2 }, rm);
+
+    const gameOver = emissions.find((e) => e.event === 'game:over');
+    expect(gameOver).toBeDefined();
+    const data = gameOver!.data as { winner: string; reason: string };
+    expect(data.winner).toBe('X');
+    expect(data.reason).toBe('win');
+    expect(room.status).toBe('finished');
+  });
+});
 
 describe('handleDisconnect', () => {
   beforeEach(() => {

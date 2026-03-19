@@ -62,6 +62,18 @@ describe('RoomManager', () => {
     });
   });
 
+  describe('addPlayer', () => {
+    it('throws if room already has 2 players', () => {
+      const code = rm.generateCode();
+      rm.createRoom(code, makePlayer({ guestId: 'g-1', socketId: 's-1' }), 'ultimate_ttt');
+      const room = rm.getRoom(code)!;
+      rm.addPlayer(room, makePlayer({ guestId: 'g-2', socketId: 's-2', playerIndex: 1 }));
+      expect(() =>
+        rm.addPlayer(room, makePlayer({ guestId: 'g-3', socketId: 's-3', playerIndex: 0 }))
+      ).toThrow(/full/i);
+    });
+  });
+
   describe('getRoom', () => {
     it('returns undefined for unknown code', () => {
       expect(rm.getRoom('XXXXXX')).toBeUndefined();

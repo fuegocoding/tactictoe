@@ -46,6 +46,9 @@ class RoomManager {
   }
 
   addPlayer(room: RoomState, player: ConnectedPlayer): void {
+    if (room.players.length >= 2) {
+      throw new Error('Room is full');
+    }
     room.players.push(player);
   }
 
