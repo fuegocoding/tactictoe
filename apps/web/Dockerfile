@@ -17,6 +17,8 @@ COPY apps/web/ ./apps/web/
 WORKDIR /repo/apps/web
 # Generate Prisma client (placeholder URL — no real DB needed at build time)
 RUN DATABASE_URL="postgresql://x:x@localhost/x" pnpm db:generate
+# Remove next.config.ts if present — Next.js 14 doesn't support .ts config files
+RUN rm -f next.config.ts
 RUN pnpm build
 
 # ── Production image ───────────────────────────────────────────────────────────
