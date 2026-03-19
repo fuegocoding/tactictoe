@@ -15,6 +15,11 @@ WORKDIR /repo
 COPY packages/game-engine/ ./packages/game-engine/
 COPY apps/web/ ./apps/web/
 WORKDIR /repo/apps/web
+
+# Declare build-time args for NEXT_PUBLIC_ vars so Next.js bakes them in
+ARG NEXT_PUBLIC_GAME_SERVER_URL
+ENV NEXT_PUBLIC_GAME_SERVER_URL=$NEXT_PUBLIC_GAME_SERVER_URL
+
 # Generate Prisma client (placeholder URL — no real DB needed at build time)
 RUN DATABASE_URL="postgresql://x:x@localhost/x" pnpm db:generate
 # Remove next.config.ts if present — Next.js 14 doesn't support .ts config files
