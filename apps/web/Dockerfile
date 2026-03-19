@@ -26,6 +26,9 @@ RUN pnpm build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Install OpenSSL so Prisma can detect the version and use the correct engine binaries
+RUN apk add --no-cache openssl
+
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
