@@ -163,9 +163,13 @@ export function handleReconnect(io: Server, room: RoomState, newSocketId: string
     room.disconnectTimer = null;
   }
 
-  // Send them the current game state
+  // Find which player is reconnecting (their socketId was just updated to newSocketId)
+  const reconnectingPlayer = room.players.find((p) => p.socketId === newSocketId);
+
+  // Send them the current game state + their own playerIndex so the client can restore identity
   io.to(newSocketId).emit('game:reconnect', {
     gameState: room.gameState,
+    myPlayerIndex: reconnectingPlayer?.playerIndex ?? 0,
     players: room.players.map((p) => ({
       displayName: p.displayName,
       playerIndex: p.playerIndex,
