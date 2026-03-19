@@ -35,8 +35,12 @@ COPY --from=builder /repo/apps/web/.next/standalone ./
 # These must be copied separately (standalone doesn't include them)
 COPY --from=builder /repo/apps/web/.next/static ./.next/static
 COPY --from=builder /repo/apps/web/public ./public
-# Prisma migrations and the Prisma CLI (now a prod dep, so it's in standalone/node_modules)
+# Prisma migrations folder
 COPY --from=builder /repo/apps/web/prisma ./prisma
+# Prisma CLI is not traced by Next.js standalone (it's a CLI tool, not imported) — copy explicitly
+COPY --from=builder /repo/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /repo/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /repo/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 3000
 
