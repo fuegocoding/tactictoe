@@ -47,4 +47,4 @@ RUN npm install -g prisma@5
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma db push && node apps/web/server.js"]
+CMD ["sh", "-c", "prisma db push --skip-generate && node apps/web/server.js"]
