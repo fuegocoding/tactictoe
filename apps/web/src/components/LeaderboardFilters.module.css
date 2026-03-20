@@ -1,0 +1,15 @@
+.filters { display: flex; flex-direction: column; gap: var(--space-3); }
+.group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.pill {
+  padding: var(--space-2) var(--space-4);
+  border-radius: 9999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.pill:hover { background: var(--bg-hover); color: var(--text); }
+.pill.active { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
