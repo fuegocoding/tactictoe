@@ -19,3 +19,6 @@ export type { StandardTTTState } from './rules/standard-ttt.js';
 
 export { UltimateTTT } from './rules/ultimate-ttt.js';
 export type { UltimateTTTState, UltimateTTTMove } from './rules/ultimate-ttt.js';
+
+export { getStandardAIMove, getUltimateAIMove } from './ai/index.js';
+export type { AIDifficulty } from './ai/index.js';
