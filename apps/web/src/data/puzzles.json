@@ -1,0 +1,92 @@
+[
+  {
+    "id": "std-1",
+    "title": "Row Rush",
+    "description": "X to win in one move — complete the row.",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": ["X", "X", null, "O", "O", null, null, null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 2 }
+  },
+  {
+    "id": "std-2",
+    "title": "Column Strike",
+    "description": "X to win in one move — finish the column.",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": ["X", "O", null, "X", null, "O", null, null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 6 }
+  },
+  {
+    "id": "std-3",
+    "title": "Diagonal Descent",
+    "description": "X to win in one move — seal the diagonal.",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": ["X", "O", null, null, "X", "O", null, null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 8 }
+  },
+  {
+    "id": "std-4",
+    "title": "Win or Lose",
+    "description": "X must act now. Win before O completes their row.",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": ["O", "O", null, "X", "X", null, null, null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 5 }
+  },
+  {
+    "id": "std-5",
+    "title": "Anti-Diagonal",
+    "description": "X to win in one move — complete the anti-diagonal.",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": ["X", null, "X", null, "X", "O", "O", "O", null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 1 }
+  },
+  {
+    "id": "ult-1",
+    "title": "Meta Closer",
+    "description": "X to win a mini-board and clinch the match — find the move.",
+    "variant": "ultimate_ttt",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "boards": [
+        ["X", "X", "X", "O", "O", null, null, null, null],
+        ["X", null, "O", "X", null, "O", "X", null, null],
+        ["X", "X", null, "O", null, "O", null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        ["O", "O", "O", "X", "X", null, null, null, null],
+        [null, "X", null, "O", null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, "O", null, null, null, null],
+        ["X", "O", "X", null, "O", null, null, "O", null]
+      ],
+      "boardResults": ["X", "X", null, null, "O", null, null, null, "O"],
+      "nextBoardConstraint": 2,
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 2, "cellIndex": 2 }
+  }
+]

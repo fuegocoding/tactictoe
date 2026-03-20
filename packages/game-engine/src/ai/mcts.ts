@@ -1,4 +1,5 @@
-import type { GameRules, GameState, Move, Player } from '../types.js';
+import type { GameState, Move, Player } from '../types.js';
+import type { GameRules } from '../rules/interface.js';
 
 interface MCTSNode {
   state: GameState;
