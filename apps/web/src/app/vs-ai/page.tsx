@@ -95,7 +95,8 @@ export default function VsAIPage() {
     }).catch(() => setAiThinking(false));
 
     return () => { cancelled = true; };
-  }, [gameState, phase, aiThinking, aiPlayer, difficulty, variant]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState, phase, aiPlayer, difficulty, variant]);
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
