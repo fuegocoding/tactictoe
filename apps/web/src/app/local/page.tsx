@@ -2,9 +2,9 @@
 
 import { useState, useReducer, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { StandardTTT } from '@tactictoe/game-engine';
-import { UltimateTTT } from '@tactictoe/game-engine';
+import { StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT } from '@tactictoe/game-engine';
 import type { GameState, TerminalResult } from '@tactictoe/game-engine';
+import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
 import type { UltimateTTTState } from '@tactictoe/game-engine';
 
@@ -16,11 +16,22 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import styles from './page.module.css';
 
-type Variant = 'standard_3x3' | 'ultimate_ttt';
+type Variant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto';
 
-const engines = {
+const VARIANT_LABELS: Record<Variant, string> = {
+  standard_3x3: 'Standard 3×3',
+  ultimate_ttt: 'Ultimate TTT',
+  misere_ttt: 'Misère TTT',
+  wild_ttt: 'Wild TTT',
+  notakto: 'Notakto',
+};
+
+const engines: Record<Variant, GameRules> = {
   standard_3x3: new StandardTTT(),
   ultimate_ttt: new UltimateTTT(),
+  misere_ttt: new MisereTTT(),
+  wild_ttt: new WildTTT(),
+  notakto: new NotaktoTTT(),
 };
 
 interface LocalState {
@@ -31,6 +42,7 @@ interface LocalState {
   gameState: LocalGameState | null;
   scores: { x: number; o: number; draws: number };
   moveHistory: string[];
+  placingAs: 'X' | 'O';
 }
 
 type LocalAction =
@@ -40,7 +52,8 @@ type LocalAction =
   | { type: 'REMATCH' }
   | { type: 'NEW_GAME' }
   | { type: 'SET_VARIANT'; variant: Variant }
-  | { type: 'SET_NAME'; player: 1 | 2; name: string };
+  | { type: 'SET_NAME'; player: 1 | 2; name: string }
+  | { type: 'SET_PLACING_AS'; symbol: 'X' | 'O' };
 
 function reducer(state: LocalState, action: LocalAction): LocalState {
   switch (action.type) {
@@ -72,6 +85,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
     }
     case 'NEW_GAME':
       return { ...state, phase: 'setup', gameState: null, moveHistory: [] };
+    case 'SET_PLACING_AS':
+      return { ...state, placingAs: action.symbol };
     default:
       return state;
   }
@@ -85,6 +100,7 @@ const initialState: LocalState = {
   gameState: null,
   scores: { x: 0, o: 0, draws: 0 },
   moveHistory: [],
+  placingAs: 'X',
 };
 
 function formatMoveRows(moves: string[]) {
@@ -124,6 +140,8 @@ export default function LocalPage() {
 
     const move = state.variant === 'ultimate_ttt'
       ? { data: { boardIndex, cellIndex } }
+      : state.variant === 'wild_ttt'
+      ? { data: { cellIndex, symbol: state.placingAs } }
       : { data: { cellIndex } };
     
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
@@ -136,7 +154,7 @@ export default function LocalPage() {
     }
   };
 
-  const { phase, variant, player1Name, player2Name, gameState, scores, moveHistory } = state;
+  const { phase, variant, player1Name, player2Name, gameState, scores, moveHistory, placingAs } = state;
   const currentName = gameState?.currentPlayer === 'X' ? player1Name : player2Name;
   const moveRows = formatMoveRows(moveHistory);
 
@@ -154,18 +172,15 @@ export default function LocalPage() {
               <div className={styles.variantRow}>
                 <p className={styles.variantLabel}>Game mode</p>
                 <div className={styles.variantButtons}>
-                  <button
-                    className={`${styles.variantBtn} ${variant === 'ultimate_ttt' ? styles.selected : ''}`}
-                    onClick={() => dispatch({ type: 'SET_VARIANT', variant: 'ultimate_ttt' })}
-                  >
-                    Ultimate TTT
-                  </button>
-                  <button
-                    className={`${styles.variantBtn} ${variant === 'standard_3x3' ? styles.selected : ''}`}
-                    onClick={() => dispatch({ type: 'SET_VARIANT', variant: 'standard_3x3' })}
-                  >
-                    Standard 3×3
-                  </button>
+                  {(Object.keys(VARIANT_LABELS) as Variant[]).map((v) => (
+                    <button
+                      key={v}
+                      className={`${styles.variantBtn} ${variant === v ? styles.selected : ''}`}
+                      onClick={() => dispatch({ type: 'SET_VARIANT', variant: v })}
+                    >
+                      {VARIANT_LABELS[v]}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -216,7 +231,29 @@ export default function LocalPage() {
 
           <div className={styles.mainBoard}>
             {phase === 'playing' && (
-              <p className={styles.turnBanner}>{currentName}'s turn ({gameState.currentPlayer})</p>
+              <p className={styles.turnBanner}>
+                {variant === 'notakto'
+                  ? `${currentName}'s turn`
+                  : `${currentName}'s turn (${gameState.currentPlayer})`}
+              </p>
+            )}
+
+            {phase === 'playing' && variant === 'wild_ttt' && (
+              <div className={styles.wildPicker}>
+                <span className={styles.wildPickerLabel}>Place as:</span>
+                <button
+                  className={`${styles.wildBtn} ${styles.x} ${placingAs === 'X' ? styles.active : ''}`}
+                  onClick={() => dispatch({ type: 'SET_PLACING_AS', symbol: 'X' })}
+                >
+                  X
+                </button>
+                <button
+                  className={`${styles.wildBtn} ${styles.o} ${placingAs === 'O' ? styles.active : ''}`}
+                  onClick={() => dispatch({ type: 'SET_PLACING_AS', symbol: 'O' })}
+                >
+                  O
+                </button>
+              </div>
             )}
 
             {phase === 'over' && gameState.terminal && (
