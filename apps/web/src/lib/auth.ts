@@ -31,15 +31,22 @@ export const authOptions: NextAuthOptions = {
   // PrismaAdapter is still used for OAuth account/user creation.
   session: { strategy: 'jwt' },
   callbacks: {
-    jwt({ token, user }) {
-      // Attach user ID to the JWT on initial sign-in
-      if (user?.id) token.userId = user.id;
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.userId = user.id;
+        // Look up username once at sign-in and cache in JWT (no per-request DB query)
+        const profile = await prisma.profile.findUnique({
+          where: { userId: user.id },
+          select: { username: true },
+        });
+        token.username = profile?.username ?? null;
+      }
       return token;
     },
     session({ session, token }) {
-      // Expose user ID in the session object available to client components
       if (token.userId && session.user) {
         session.user.id = token.userId as string;
+        if (token.username) session.user.username = token.username;
       }
       return session;
     },
