@@ -12,8 +12,6 @@ import CopyButton from '@/components/ui/CopyButton';
 import type { GameState, UltimateTTTState, StandardTTTState } from '@tactictoe/game-engine';
 import styles from './page.module.css';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface PlayerInfo {
   displayName: string;
   playerIndex: 0 | 1;
@@ -65,7 +63,17 @@ const initialState: RoomState = {
   error: null,
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function formatMoveRows(moves: string[]) {
+  const rows = [];
+  for (let i = 0; i < moves.length; i += 2) {
+    rows.push({
+      num: Math.floor(i / 2) + 1,
+      x: moves[i],
+      o: moves[i + 1] || '',
+    });
+  }
+  return rows;
+}
 
 export default function RoomPage() {
   const params = useParams();
@@ -80,6 +88,9 @@ export default function RoomPage() {
   const [initialRating, setInitialRating] = useState<number | null>(null);
   const [finalRating, setFinalRating] = useState<number | null>(null);
 
+  const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const prevStateRef = useRef<GameState | null>(null);
+  const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
 
   const mySymbol: 'X' | 'O' | null =
@@ -87,7 +98,6 @@ export default function RoomPage() {
       ? roomState.myPlayerIndex === 0 ? 'X' : 'O'
       : null;
 
-  // Gate on `status === 'connected'` so board goes non-interactive during reconnect
   const isMyTurn =
     status === 'connected' &&
     roomState.gameState !== null &&
@@ -95,7 +105,50 @@ export default function RoomPage() {
     mySymbol !== null &&
     roomState.gameState.currentPlayer === mySymbol;
 
-  // ── Join logic ────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (movesRef.current) {
+      movesRef.current.scrollTop = movesRef.current.scrollHeight;
+    }
+  }, [moveHistory]);
+
+  useEffect(() => {
+    const prevState = prevStateRef.current;
+    if (roomState.gameState) {
+      if (!prevState || roomState.gameState.moveCount <= prevState.moveCount) {
+        if (roomState.gameState.moveCount === 0) setMoveHistory([]);
+      } else if (roomState.gameState.moveCount === prevState.moveCount + 1) {
+        let coordinate = '';
+        if (roomState.gameState.variantId === 'ultimate_ttt') {
+          const oldBoards = (prevState as UltimateTTTState).boards;
+          const newBoards = (roomState.gameState as UltimateTTTState).boards;
+          out: for (let b = 0; b < 9; b++) {
+            for (let c = 0; c < 9; c++) {
+              if (oldBoards[b]![c] !== newBoards[b]![c]) {
+                const overallCol = (b % 3) * 3 + (c % 3);
+                const overallRow = Math.floor(b / 3) * 3 + Math.floor(c / 3);
+                coordinate = `${String.fromCharCode(97 + overallCol)}${overallRow + 1}`;
+                break out;
+              }
+            }
+          }
+        } else {
+          const oldBoard = (prevState as StandardTTTState).board;
+          const newBoard = (roomState.gameState as StandardTTTState).board;
+          for (let c = 0; c < 9; c++) {
+            if (oldBoard[c] !== newBoard[c]) {
+              coordinate = `${String.fromCharCode(97 + (c % 3))}${Math.floor(c / 3) + 1}`;
+              break;
+            }
+          }
+        }
+        if (coordinate) setMoveHistory(prev => [...prev, coordinate]);
+      } else {
+        setMoveHistory(prev => [...prev, '...']);
+      }
+      prevStateRef.current = roomState.gameState;
+    }
+  }, [roomState.gameState]);
+
   useEffect(() => {
     if (status !== 'connected' || !guest || joined.current) return;
     joined.current = true;
@@ -134,20 +187,16 @@ export default function RoomPage() {
     }
   }, [roomState.phase, rated]);
 
-  // ── Socket event listeners ────────────────────────────────────────────────────
   useEffect(() => {
     function onRoomJoined(data: { roomCode: string; playerIndex: 0 | 1; players: PlayerInfo[] }) {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.playerIndex, players: data.players });
     }
-
     function onGameStarted(data: { gameState: GameState; players: PlayerInfo[] }) {
       dispatch({ type: 'GAME_STARTED', gameState: data.gameState, players: data.players });
     }
-
     function onGameState(data: { gameState: GameState }) {
       dispatch({ type: 'STATE_UPDATE', gameState: data.gameState });
     }
-
     function onGameOver(data: {
       gameState: GameState;
       winner: 'X' | 'O' | null;
@@ -157,16 +206,13 @@ export default function RoomPage() {
       dispatch({ type: 'STATE_UPDATE', gameState: data.gameState });
       dispatch({ type: 'GAME_OVER', winner: data.winner, reason: data.reason, winnerDisplayName: data.winnerDisplayName });
     }
-
     function onGameReconnect(data: { gameState: GameState; myPlayerIndex: 0 | 1; players: PlayerInfo[] }) {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.myPlayerIndex, players: data.players });
       dispatch({ type: 'GAME_STARTED', gameState: data.gameState, players: data.players });
     }
-
     function onError(data: { message: string }) {
       dispatch({ type: 'ERROR', message: data.message });
     }
-
     function onSpectating() {
       dispatch({ type: 'ERROR', message: 'This room is full. Watching as spectator.' });
     }
@@ -190,7 +236,6 @@ export default function RoomPage() {
     };
   }, [socket]);
 
-  // ── Move handler ──────────────────────────────────────────────────────────────
   const handleMove = useCallback(
     (boardIndex: number, cellIndex: number) => {
       socket.emit('game:move', { roomCode: code, boardIndex, cellIndex });
@@ -200,118 +245,152 @@ export default function RoomPage() {
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  // ── Determine game-over result class ──────────────────────────────────────────
   const gameOverClass = roomState.winner === mySymbol
     ? styles.win
     : roomState.winner === null
     ? styles.draw
     : styles.lose;
 
+  const moveRows = formatMoveRows(moveHistory);
+
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.header}>
-        <span className={styles.roomCode}>{code}</span>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span className={styles.roomCode}>Room: {code}</span>
+          <div className={styles.status}>
+            <span className={`${styles.statusDot} ${status === 'connected' ? styles.connected : ''}`} />
+            {status === 'connected' ? 'Connected' : 'Connecting…'}
+          </div>
+        </div>
         <div className={styles.headerActions}>
-          <CopyButton text={shareUrl} />
           <Button variant="ghost" size="sm" onClick={() => router.push('/')}>Leave</Button>
         </div>
       </div>
 
-      {/* Connection status */}
-      {status !== 'connected' && (
-        <div className={styles.status}>
-          <span className={styles.statusDot} />
-          Connecting…
-        </div>
-      )}
+      {roomState.error && <div className={styles.error}>{roomState.error}</div>}
 
-      {/* Waiting phase */}
-      {roomState.phase === 'waiting' && status === 'connected' && (
+      {roomState.phase === 'waiting' && status === 'connected' && !roomState.error && (
         <div className={styles.waiting}>
           <p className={styles.waitingTitle}>Waiting for opponent…</p>
           <p className={styles.waitingCode}>{code}</p>
-          <p className={styles.waitingHint}>Share this code or link with a friend</p>
+          <p className={styles.waitingHint}>Share this code or link with a friend to join instantly.</p>
           <CopyButton text={shareUrl} />
         </div>
       )}
 
-      {/* Player cards */}
-      {roomState.players.length > 0 && (
-        <div className={styles.players}>
-          {roomState.players.map((p) => {
-            const sym = p.playerIndex === 0 ? 'X' : 'O';
-            const isMe = p.playerIndex === roomState.myPlayerIndex;
-            const isActive = roomState.gameState?.currentPlayer === sym && roomState.phase === 'playing';
-            return (
-              <div key={p.playerIndex} className={`${styles.player} ${isActive ? styles.active : ''}`}>
-                <span className={styles.playerSymbol}>{sym}</span>
-                <div>
-                  <div className={styles.playerName}>{p.displayName}</div>
-                  {isMe && <div className={styles.playerYou}>you</div>}
+      {(roomState.phase === 'playing' || roomState.phase === 'over') && roomState.gameState && (
+        <div className={styles.gameLayout}>
+
+          <div className={styles.sidePanel}>
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>Move History</div>
+              <div className={styles.movesList} ref={movesRef}>
+                {moveRows.length === 0 ? (
+                  <div className={styles.emptyMoves}>No moves yet</div>
+                ) : (
+                  moveRows.map((row, idx) => (
+                    <div className={styles.moveRow} key={idx}>
+                      <span className={styles.moveNum}>{row.num}.</span>
+                      <span className={styles.moveX}>{row.x}</span>
+                      <span className={styles.moveO}>{row.o}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.mainBoard}>
+            {roomState.phase === 'playing' && (
+              <p className={styles.turnBanner}>
+                {isMyTurn ? 'Your turn' : "Opponent's turn"}
+              </p>
+            )}
+
+            {roomState.phase === 'over' && (
+              <div>
+                <h2 className={`${styles.gameOverTitle} ${gameOverClass}`}>
+                  {roomState.winner === mySymbol
+                    ? 'You win!'
+                    : roomState.winner === null
+                    ? "It's a draw!"
+                    : 'You lose.'}
+                </h2>
+                {roomState.reason === 'forfeit' && (
+                  <p className={styles.gameOverSub}>
+                    {roomState.winner === mySymbol ? 'Opponent disconnected.' : 'You were disconnected.'}
+                  </p>
+                )}
+                {rated && initialRating !== null && finalRating !== null && (
+                  <p className={styles.gameOverSub}>
+                    Rating change: {finalRating - initialRating > 0 ? '+' : ''}{finalRating - initialRating} ({finalRating})
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 'var(--space-2)' }}>
+              {roomState.gameState.variantId === 'ultimate_ttt' ? (
+                <UltimateBoard
+                  boards={(roomState.gameState as UltimateTTTState).boards}
+                  boardResults={(roomState.gameState as UltimateTTTState).boardResults}
+                  nextBoardConstraint={(roomState.gameState as UltimateTTTState).nextBoardConstraint}
+                  currentPlayer={roomState.gameState.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={handleMove}
+                />
+              ) : (
+                <StandardBoard
+                  board={(roomState.gameState as StandardTTTState).board}
+                  currentPlayer={roomState.gameState.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className={styles.sidePanel}>
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <span>Players</span>
+                <CopyButton text={shareUrl} />
+              </div>
+              <div className={styles.panelContent}>
+                <div className={styles.playersList}>
+                  {roomState.players.map((p) => {
+                    const sym = p.playerIndex === 0 ? 'X' : 'O';
+                    const isMe = p.playerIndex === roomState.myPlayerIndex;
+                    const isActive = roomState.gameState?.currentPlayer === sym && roomState.phase === 'playing';
+                    return (
+                      <div key={p.playerIndex} className={`${styles.playerCard} ${isActive ? styles.active : ''}`}>
+                        <span className={styles.playerSymbol} style={{ color: sym === 'X' ? 'var(--mark-x)' : 'var(--mark-o)' }}>
+                          {sym}
+                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span className={styles.playerName}>{p.displayName}</span>
+                          {isMe && <span className={styles.playerYou}>You</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            );
-          })}
+            </div>
+            
+            {roomState.phase === 'over' && (
+              <div className={styles.panel}>
+                <div className={styles.panelHeader}>Game Over</div>
+                <div className={styles.panelContent}>
+                  <Button variant="primary" onClick={() => router.push('/')} full>Back to Lobby</Button>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
       )}
-
-      {/* Turn banner */}
-      {roomState.phase === 'playing' && roomState.gameState && (
-        <div className={`${styles.turnBanner} ${isMyTurn ? styles.mine : styles.theirs}`}>
-          {isMyTurn ? 'Your turn' : "Opponent's turn"}
-        </div>
-      )}
-
-      {/* Board */}
-      {roomState.gameState && roomState.phase !== 'waiting' && (
-        <div className={styles.boardWrap}>
-          {roomState.gameState.variantId === 'ultimate_ttt' ? (
-            <UltimateBoard
-              boards={(roomState.gameState as UltimateTTTState).boards}
-              boardResults={(roomState.gameState as UltimateTTTState).boardResults}
-              nextBoardConstraint={(roomState.gameState as UltimateTTTState).nextBoardConstraint}
-              currentPlayer={roomState.gameState.currentPlayer}
-              disabled={!isMyTurn}
-              onMove={handleMove}
-            />
-          ) : (
-            <StandardBoard
-              board={(roomState.gameState as StandardTTTState).board}
-              currentPlayer={roomState.gameState.currentPlayer}
-              disabled={!isMyTurn}
-              onMove={(_, cellIndex) => handleMove(0, cellIndex)}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Game over */}
-      {roomState.phase === 'over' && (
-        <div className={styles.gameOver}>
-          <h2 className={`${styles.gameOverTitle} ${gameOverClass}`}>
-            {roomState.winner === mySymbol
-              ? 'You win!'
-              : roomState.winner === null
-              ? "It's a draw!"
-              : 'You lose.'}
-          </h2>
-          {roomState.reason === 'forfeit' && (
-            <p className={styles.gameOverSub}>
-              {roomState.winner === mySymbol ? 'Opponent disconnected.' : 'You were disconnected.'}
-            </p>
-          )}
-          {rated && initialRating !== null && finalRating !== null && (
-            <p className={styles.gameOverSub} style={{ marginTop: 'var(--space-2)' }}>
-              Rating change: {finalRating - initialRating > 0 ? '+' : ''}{finalRating - initialRating} ({finalRating})
-            </p>
-          )}
-          <Button onClick={() => router.push('/')}>Back to Lobby</Button>
-        </div>
-      )}
-
-      {/* Error */}
-      {roomState.error && <div className={styles.error}>{roomState.error}</div>}
     </div>
   );
 }

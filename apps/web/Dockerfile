@@ -6,6 +6,7 @@ FROM base AS deps
 WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/game-engine/package.json ./packages/game-engine/
+COPY packages/glicko2/package.json ./packages/glicko2/
 COPY apps/web/package.json ./apps/web/
 RUN pnpm install --frozen-lockfile
 
@@ -13,6 +14,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 WORKDIR /repo
 COPY packages/game-engine/ ./packages/game-engine/
+COPY packages/glicko2/ ./packages/glicko2/
 COPY apps/web/ ./apps/web/
 WORKDIR /repo/apps/web
 

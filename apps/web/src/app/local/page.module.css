@@ -1,11 +1,11 @@
 .page {
-  max-width: 700px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: var(--space-8) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  align-items: center;
+  min-height: 100vh;
 }
 
 .header { text-align: center; }
@@ -18,13 +18,14 @@
 
 .subtitle { font-size: var(--text-sm); color: var(--text-muted); }
 
-.setup { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: var(--space-4); }
+/* Setup phase uses a centered card */
+.setupWrap { width: 100%; display: flex; justify-content: center; }
+.setup { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
 
 .playerRow { display: flex; gap: var(--space-3); align-items: flex-end; }
 .playerRow > * { flex: 1; }
 
 .variantRow { display: flex; flex-direction: column; gap: var(--space-2); }
-
 .variantLabel {
   font-size: var(--text-xs);
   font-weight: 600;
@@ -34,7 +35,6 @@
 }
 
 .variantButtons { display: flex; gap: var(--space-2); }
-
 .variantBtn {
   flex: 1;
   padding: var(--space-3) var(--space-4);
@@ -48,47 +48,121 @@
   transition: all 0.12s;
   text-align: center;
 }
-
 .variantBtn:hover { background: var(--bg-hover); color: var(--text); }
 .variantBtn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-subtle); font-weight: 600; }
 
-.game { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); align-items: center; }
-
-.turnBanner {
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.boardWrap { width: 100%; display: flex; justify-content: center; }
-
-.scoreboard {
+/* 3-Column Game Layout */
+.gameLayout {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-6);
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap; /* responsive wrap on smaller screens */
   width: 100%;
-  max-width: 360px;
 }
 
-.scoreCard {
+.sidePanel {
+  width: 100%;
+  max-width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.mainBoard {
   flex: 1;
+  min-width: 320px;
+  max-width: 650px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-3);
+  gap: var(--space-4);
+}
+
+/* Panel Card UI */
+.panel {
   background: var(--bg-raised);
   border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.panelHeader {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.panelContent {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Move History specific styles */
+.movesList {
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  max-height: 480px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.moveRow {
+  display: flex;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.moveRow:nth-child(even) { background: var(--bg-subtle); }
+.moveNum { width: 32px; color: var(--text-faint); font-weight: 500; }
+.moveX, .moveO { flex: 1; color: var(--text); }
+.moveX { color: var(--mark-x); font-weight: 500; }
+.moveO { color: var(--mark-o); font-weight: 500; }
+
+.emptyMoves {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-style: italic;
+}
+
+/* Scoreboard */
+.scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scoreCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-hover);
   border-radius: var(--radius);
 }
 
-.scoreName { font-size: var(--text-xs); color: var(--text-muted); font-weight: 500; }
-.scoreValue { font-size: var(--text-2xl); font-weight: 700; color: var(--text); }
-.scoreValue.x { color: var(--mark-x); }
-.scoreValue.o { color: var(--mark-o); }
+.scoreCard.active {
+  background: var(--accent-subtle);
+  box-shadow: 0 0 0 2px var(--accent) inset;
+}
 
-.gameOver {
+.scoreName { font-size: var(--text-sm); font-weight: 600; color: var(--text); }
+.scoreValue { font-size: var(--text-xl); font-weight: 700; color: var(--text); }
+
+.turnBanner {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--accent);
   text-align: center;
-  padding: var(--space-6);
 }
 
 .gameOverTitle {
@@ -96,24 +170,20 @@
   font-weight: 700;
   color: var(--success);
   margin-bottom: var(--space-2);
+  text-align: center;
 }
-
 .gameOverTitle.draw { color: var(--text-muted); }
 
 .gameActions {
   display: flex;
-  gap: var(--space-3);
-  justify-content: center;
-  margin-top: var(--space-5);
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .backLink {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
+  align-self: center;
+  margin-top: var(--space-6);
   color: var(--text-muted);
-  align-self: flex-start;
+  font-size: var(--text-sm);
 }
-
-.backLink:hover { color: var(--text); }
+.backLink:hover { color: var(--text); text-decoration: underline; }
