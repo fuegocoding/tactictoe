@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { StandardTTT, UltimateTTT } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
@@ -38,9 +38,24 @@ export default function VsAIPage() {
   const [aiThinking, setAiThinking] = useState(false);
   const [scores, setScores] = useState({ human: 0, ai: 0, draws: 0 });
   const [winner, setWinner] = useState<Player | null | undefined>(undefined);
+  const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const movesRef = useRef<HTMLDivElement>(null);
 
   const ai = useAI(variant, difficulty);
   const aiPlayer: Player = humanPlayer === 'X' ? 'O' : 'X';
+
+  useEffect(() => {
+    if (movesRef.current) movesRef.current.scrollTop = movesRef.current.scrollHeight;
+  }, [moveHistory]);
+
+  function formatCoord(boardIndex: number, cellIndex: number): string {
+    if (variant === 'ultimate_ttt') {
+      const col = (boardIndex % 3) * 3 + (cellIndex % 3);
+      const row = Math.floor(boardIndex / 3) * 3 + Math.floor(cellIndex / 3);
+      return `${String.fromCharCode(97 + col)}${row + 1}`;
+    }
+    return `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
+  }
 
   const startGame = () => {
     const engine = engines[variant];
@@ -49,6 +64,7 @@ export default function VsAIPage() {
     setPhase('playing');
     setWinner(undefined);
     setAiThinking(false);
+    setMoveHistory([]);
   };
 
   // Trigger AI move when it's the AI's turn
@@ -74,6 +90,8 @@ export default function VsAIPage() {
         const boardIndex = variant === 'ultimate_ttt' ? move.boardIndex : 0;
         const result = engine.applyMove(gameState, { data: { boardIndex, cellIndex: move.cellIndex } }, aiPlayer);
         if (result.ok) {
+          const coord = formatCoord(boardIndex, move.cellIndex);
+          setMoveHistory(prev => [...prev, coord]);
           const term = engine.checkTerminal(result.state);
           if (term) {
             setGameState(result.state);
@@ -103,6 +121,7 @@ export default function VsAIPage() {
     const engine = engines[variant];
     const result = engine.applyMove(gameState, { data: { boardIndex, cellIndex } }, humanPlayer);
     if (!result.ok) return;
+    setMoveHistory(prev => [...prev, formatCoord(boardIndex, cellIndex)]);
     const term = engine.checkTerminal(result.state);
     if (term) {
       setGameState(result.state);
@@ -262,6 +281,25 @@ export default function VsAIPage() {
                 onMove={(_, cellIndex) => handleMove(0, cellIndex)}
               />
             )}
+          </div>
+
+          <div className={localStyles.sidePanel}>
+            <div className={localStyles.panel}>
+              <div className={localStyles.panelHeader}>Move History</div>
+              <div className={localStyles.movesList} ref={movesRef}>
+                {moveHistory.length === 0 ? (
+                  <div className={localStyles.emptyMoves}>No moves yet</div>
+                ) : (
+                  Array.from({ length: Math.ceil(moveHistory.length / 2) }, (_, i) => (
+                    <div className={localStyles.moveRow} key={i}>
+                      <span className={localStyles.moveNum}>{i + 1}.</span>
+                      <span className={localStyles.moveX}>{moveHistory[i * 2] ?? ''}</span>
+                      <span className={localStyles.moveO}>{moveHistory[i * 2 + 1] ?? ''}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
