@@ -25,6 +25,7 @@ export function UltimateBoard({
   boards,
   boardResults,
   nextBoardConstraint,
+  currentPlayer,
   disabled,
   onMove,
 }: UltimateBoardProps) {
@@ -47,9 +48,10 @@ export function UltimateBoard({
             key={boardIndex}
             style={{
               padding: '4px',
-              border: playable ? '2px solid #4ade80' : '2px solid #374151',
-              borderRadius: '4px',
+              border: playable ? '2px solid var(--board-active-border)' : '2px solid var(--board-inactive-border)',
+              borderRadius: 'var(--radius-sm)',
               position: 'relative',
+              background: 'var(--board-cell-bg)',
             }}
           >
             {result !== null && (
@@ -63,9 +65,10 @@ export function UltimateBoard({
                   justifyContent: 'center',
                   fontSize: 'clamp(24px, 4vw, 48px)',
                   fontWeight: 'bold',
-                  background: 'rgba(0,0,0,0.6)',
+                  background: 'var(--board-result-overlay)',
                   zIndex: 1,
                   borderRadius: '2px',
+                  color: result === 'X' ? 'var(--mark-x)' : result === 'O' ? 'var(--mark-o)' : 'var(--text-muted)',
                 }}
               >
                 {result === 'draw' ? '=' : result}
@@ -90,6 +93,10 @@ export function UltimateBoard({
                     fontSize: 'clamp(12px, 2vw, 20px)',
                     fontWeight: 'bold',
                     cursor: !playable || cell !== null ? 'default' : 'pointer',
+                    background: 'var(--board-cell-bg)',
+                    border: '1px solid var(--board-cell-border)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
                   }}
                 >
                   {cell ?? ''}

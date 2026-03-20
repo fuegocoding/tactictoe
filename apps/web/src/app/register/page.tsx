@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import styles from '../login/page.module.css';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,44 +17,53 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-
+    setError(null);
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, username, password }),
     });
-
-    if (!res.ok) {
-      const data = await res.json() as { error?: string };
-      setError(data.error ?? 'Registration failed');
-      setLoading(false);
-      return;
-    }
-
+    const data = await res.json();
+    if (!res.ok) { setError(data.error ?? 'Registration failed'); setLoading(false); return; }
     await signIn('credentials', { email, password, redirect: false });
-    setLoading(false);
     router.push('/');
-  }
+  };
 
   return (
-    <main style={{ maxWidth: 400, margin: '80px auto', padding: '0 16px' }}>
-      <h1>Create account</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: 8, fontSize: 16 }} />
-        <input type="text" placeholder="Username (3–20 chars, letters/numbers/_)" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={20} style={{ padding: 8, fontSize: 16 }} />
-        <input type="password" placeholder="Password (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} style={{ padding: 8, fontSize: 16 }} />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ padding: '10px 0', fontSize: 16 }}>
-          {loading ? 'Creating account…' : 'Create account'}
-        </button>
-      </form>
-      <p style={{ marginTop: 16, textAlign: 'center' }}>
-        Already have an account? <a href="/login">Sign in</a>
-      </p>
-    </main>
+    <div className={styles.page}>
+      <Card className={styles.card}>
+        <h1 className={styles.title}>Create account</h1>
+        <p className={styles.subtitle}>Join TacticToe and start playing.</p>
+
+        {error && <div className={styles.error}>{error}</div>}
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input label="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required />
+          <Input
+            label="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            hint="3–20 characters. Letters, numbers, underscores."
+            pattern="^[a-zA-Z0-9_]{3,20}$"
+            required
+          />
+          <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} hint="At least 8 characters." minLength={8} required />
+          <Button type="submit" loading={loading} full>Create account</Button>
+        </form>
+
+        <div className={styles.divider}>or</div>
+
+        <Button variant="secondary" full onClick={() => signIn('google', { callbackUrl: '/' })}>
+          Continue with Google
+        </Button>
+
+        <p className={styles.footer}>
+          Already have an account? <Link href="/login">Sign in</Link>
+        </p>
+      </Card>
+    </div>
   );
 }

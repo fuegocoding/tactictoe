@@ -2,7 +2,7 @@ import type { GameRules, Player } from './interface.js';
 import type { Board, GameState, Move, MoveResult, TerminalResult, VariantConfig } from '../types.js';
 import { checkBoardWinner, isBoardFull } from './win-checker.js';
 
-interface StandardTTTState extends GameState {
+export interface StandardTTTState extends GameState {
   variantId: 'standard_3x3';
   board: Board;
   terminal: TerminalResult | null;

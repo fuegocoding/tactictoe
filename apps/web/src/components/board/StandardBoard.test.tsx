@@ -29,7 +29,7 @@ describe('StandardBoard', () => {
     );
     const buttons = screen.getAllByRole('button');
     fireEvent.click(buttons[4]!);
-    expect(onMove).toHaveBeenCalledWith(4);
+    expect(onMove).toHaveBeenCalledWith(0, 4);
   });
 
   it('does not call onMove when clicking an occupied cell', () => {

@@ -6,7 +6,10 @@ import { useSession } from 'next-auth/react';
 import { useGuestSession } from '@/hooks/useGuestSession';
 import { useSocket } from '@/hooks/useSocket';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
+import Button from '@/components/ui/Button';
+import CopyButton from '@/components/ui/CopyButton';
 import type { UltimateTTTState } from '@tactictoe/game-engine';
+import styles from './page.module.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -173,73 +176,87 @@ export default function RoomPage() {
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
+  // ── Determine game-over result class ──────────────────────────────────────────
+  const gameOverClass = roomState.winner === mySymbol
+    ? styles.win
+    : roomState.winner === null
+    ? styles.draw
+    : styles.lose;
+
   return (
-    <main style={{ maxWidth: 700, margin: '32px auto', padding: '0 16px' }}>
+    <div className={styles.page}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div>
-          <h1 style={{ fontSize: 22, margin: 0 }}>
-            Room: <code style={{ letterSpacing: 4, fontSize: 20 }}>{code}</code>
-          </h1>
-          {mySymbol && (
-            <p style={{ margin: '4px 0 0', color: '#9ca3af', fontSize: 14 }}>
-              You are playing as <strong>{mySymbol}</strong>
-            </p>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => navigator.clipboard.writeText(shareUrl)} style={{ padding: '6px 12px', fontSize: 14 }}>
-            Copy Link
-          </button>
-          <button onClick={() => router.push('/')} style={{ padding: '6px 12px', fontSize: 14 }}>
-            Leave
-          </button>
+      <div className={styles.header}>
+        <span className={styles.roomCode}>{code}</span>
+        <div className={styles.headerActions}>
+          <CopyButton text={shareUrl} />
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')}>Leave</Button>
         </div>
       </div>
 
-      {status !== 'connected' && <p style={{ color: '#f59e0b' }}>Connecting…</p>}
-
-      {roomState.phase === 'waiting' && status === 'connected' && (
-        <div style={{ marginBottom: 20 }}>
-          <p>Waiting for opponent…</p>
-          <p style={{ color: '#9ca3af', fontSize: 14 }}>Share code: <strong>{code}</strong></p>
+      {/* Connection status */}
+      {status !== 'connected' && (
+        <div className={styles.status}>
+          <span className={styles.statusDot} />
+          Connecting…
         </div>
       )}
 
+      {/* Waiting phase */}
+      {roomState.phase === 'waiting' && status === 'connected' && (
+        <div className={styles.waiting}>
+          <p className={styles.waitingTitle}>Waiting for opponent…</p>
+          <p className={styles.waitingCode}>{code}</p>
+          <p className={styles.waitingHint}>Share this code or link with a friend</p>
+          <CopyButton text={shareUrl} />
+        </div>
+      )}
+
+      {/* Player cards */}
       {roomState.players.length > 0 && (
-        <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
+        <div className={styles.players}>
           {roomState.players.map((p) => {
             const sym = p.playerIndex === 0 ? 'X' : 'O';
             const isMe = p.playerIndex === roomState.myPlayerIndex;
+            const isActive = roomState.gameState?.currentPlayer === sym && roomState.phase === 'playing';
             return (
-              <div key={p.playerIndex} style={{ fontWeight: isMe ? 'bold' : 'normal' }}>
-                {sym} — {p.displayName} {isMe ? '(you)' : ''}
+              <div key={p.playerIndex} className={`${styles.player} ${isActive ? styles.active : ''}`}>
+                <span className={styles.playerSymbol}>{sym}</span>
+                <div>
+                  <div className={styles.playerName}>{p.displayName}</div>
+                  {isMe && <div className={styles.playerYou}>you</div>}
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
+      {/* Turn banner */}
       {roomState.phase === 'playing' && roomState.gameState && (
-        <p style={{ marginBottom: 12, color: isMyTurn ? '#4ade80' : '#9ca3af' }}>
+        <div className={`${styles.turnBanner} ${isMyTurn ? styles.mine : styles.theirs}`}>
           {isMyTurn ? 'Your turn' : "Opponent's turn"}
-        </p>
+        </div>
       )}
 
+      {/* Board */}
       {roomState.gameState && roomState.phase !== 'waiting' && (
-        <UltimateBoard
-          boards={roomState.gameState.boards}
-          boardResults={roomState.gameState.boardResults}
-          nextBoardConstraint={roomState.gameState.nextBoardConstraint}
-          currentPlayer={roomState.gameState.currentPlayer}
-          disabled={!isMyTurn}
-          onMove={handleMove}
-        />
+        <div className={styles.boardWrap}>
+          <UltimateBoard
+            boards={roomState.gameState.boards}
+            boardResults={roomState.gameState.boardResults}
+            nextBoardConstraint={roomState.gameState.nextBoardConstraint}
+            currentPlayer={roomState.gameState.currentPlayer}
+            disabled={!isMyTurn}
+            onMove={handleMove}
+          />
+        </div>
       )}
 
+      {/* Game over */}
       {roomState.phase === 'over' && (
-        <div style={{ marginTop: 24, padding: 16, border: '2px solid #4ade80', borderRadius: 8 }}>
-          <h2 style={{ marginTop: 0 }}>
+        <div className={styles.gameOver}>
+          <h2 className={`${styles.gameOverTitle} ${gameOverClass}`}>
             {roomState.winner === mySymbol
               ? 'You win!'
               : roomState.winner === null
@@ -247,17 +264,16 @@ export default function RoomPage() {
               : 'You lose.'}
           </h2>
           {roomState.reason === 'forfeit' && (
-            <p style={{ color: '#f59e0b', fontSize: 14 }}>
+            <p className={styles.gameOverSub}>
               {roomState.winner === mySymbol ? 'Opponent disconnected.' : 'You were disconnected.'}
             </p>
           )}
-          <button onClick={() => router.push('/')} style={{ padding: '10px 20px', fontSize: 16 }}>
-            Back to Lobby
-          </button>
+          <Button onClick={() => router.push('/')}>Back to Lobby</Button>
         </div>
       )}
 
-      {roomState.error && <p style={{ color: 'red', marginTop: 16 }}>{roomState.error}</p>}
-    </main>
+      {/* Error */}
+      {roomState.error && <div className={styles.error}>{roomState.error}</div>}
+    </div>
   );
 }

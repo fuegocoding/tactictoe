@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import styles from './page.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,37 +16,40 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError(null);
     const result = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
-    if (result?.error) {
-      setError('Invalid email or password');
-    } else {
-      router.push('/');
-    }
-  }
+    if (result?.error) { setError('Invalid email or password'); return; }
+    router.push('/');
+  };
 
   return (
-    <main style={{ maxWidth: 400, margin: '80px auto', padding: '0 16px' }}>
-      <h1>Sign in</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: 8, fontSize: 16 }} />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ padding: 8, fontSize: 16 }} />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ padding: '10px 0', fontSize: 16 }}>
-          {loading ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
-      <hr style={{ margin: '24px 0' }} />
-      <button onClick={() => signIn('google', { callbackUrl: '/' })} style={{ width: '100%', padding: '10px 0', fontSize: 16 }}>
-        Continue with Google
-      </button>
-      <p style={{ marginTop: 16, textAlign: 'center' }}>
-        No account? <a href="/register">Register</a>
-      </p>
-    </main>
+    <div className={styles.page}>
+      <Card className={styles.card}>
+        <h1 className={styles.title}>Sign in</h1>
+        <p className={styles.subtitle}>Welcome back to TacticToe.</p>
+
+        {error && <div className={styles.error}>{error}</div>}
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input label="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required />
+          <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" required />
+          <Button type="submit" loading={loading} full>Sign in</Button>
+        </form>
+
+        <div className={styles.divider}>or</div>
+
+        <Button variant="secondary" full onClick={() => signIn('google', { callbackUrl: '/' })}>
+          Continue with Google
+        </Button>
+
+        <p className={styles.footer}>
+          No account? <Link href="/register">Create one</Link>
+        </p>
+      </Card>
+    </div>
   );
 }
