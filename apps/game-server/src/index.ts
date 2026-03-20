@@ -1,12 +1,16 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { roomManager } from './room-manager.js';
+import { QueueManager } from './queue-manager.js';
 import { startGame, handleMove, handleDisconnect, handleReconnect } from './game-session.js';
 import type {
   CreateRoomPayload,
   JoinRoomPayload,
   MakeMovePayload,
   ConnectedPlayer,
+  JoinQueuePayload,
+  QueueMatchedPayload,
+  QueueStatusPayload,
 } from './types.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
@@ -38,6 +42,8 @@ const io = new Server(httpServer, {
 function generateDisplayName(): string {
   return `Guest#${Math.floor(1000 + Math.random() * 9000)}`;
 }
+
+const qm = new QueueManager();
 
 // ─── Socket.io event handlers ─────────────────────────────────────────────────
 
@@ -129,9 +135,57 @@ io.on('connection', (socket) => {
     handleMove(io, socket, payload);
   });
 
+  // ── Queue ────────────────────────────────────────────────────────────────────
+  socket.on('queue:join', (payload: JoinQueuePayload) => {
+    const { variantId, guestId, displayName } = payload;
+
+    if (!['ultimate_ttt', 'standard_3x3'].includes(variantId)) {
+      socket.emit('error', { message: 'Unknown variant' });
+      return;
+    }
+
+    qm.join(variantId, { socketId: socket.id, guestId, displayName, joinedAt: Date.now() });
+
+    const pair = qm.tryMatch(variantId);
+    if (pair) {
+      const [p1, p2] = pair;
+      const code = roomManager.generateCode();
+
+      const host: ConnectedPlayer = { socketId: p1.socketId, guestId: p1.guestId, displayName: p1.displayName, playerIndex: 0 };
+      roomManager.createRoom(code, host, variantId);
+      const room = roomManager.getRoom(code)!;
+
+      const guest: ConnectedPlayer = { socketId: p2.socketId, guestId: p2.guestId, displayName: p2.displayName, playerIndex: 1 };
+      roomManager.addPlayer(room, guest);
+
+      const p1Socket = io.sockets.sockets.get(p1.socketId);
+      const p2Socket = io.sockets.sockets.get(p2.socketId);
+
+      p1Socket?.join(code);
+      p2Socket?.join(code);
+
+      const matchPayloadP1: QueueMatchedPayload = { roomCode: code, playerIndex: 0 };
+      const matchPayloadP2: QueueMatchedPayload = { roomCode: code, playerIndex: 1 };
+
+      p1Socket?.emit('queue:matched', matchPayloadP1);
+      p2Socket?.emit('queue:matched', matchPayloadP2);
+
+      startGame(io, room);
+    } else {
+      const position = qm.getPosition(socket.id);
+      socket.emit('queue:status', { position, variantId } satisfies QueueStatusPayload);
+    }
+  });
+
+  socket.on('queue:leave', () => {
+    qm.leave(socket.id);
+    socket.emit('queue:left', {});
+  });
+
   // ── Disconnect ───────────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     console.log(`[disconnect] ${socket.id}`);
+    qm.leave(socket.id);
     const result = roomManager.removeSocket(socket.id);
     if (result?.wasPlayer) {
       const room = roomManager.getRoom(result.roomCode);

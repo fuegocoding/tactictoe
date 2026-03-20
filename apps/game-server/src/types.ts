@@ -1,4 +1,4 @@
-import type { UltimateTTTState } from '@tactictoe/game-engine';
+import type { GameState } from '@tactictoe/game-engine';
 
 export type RoomStatus = 'waiting' | 'active' | 'finished';
 
@@ -14,7 +14,7 @@ export interface RoomState {
   status: RoomStatus;
   players: ConnectedPlayer[];        // max 2
   spectators: string[];              // socket IDs
-  gameState: UltimateTTTState | null;
+  gameState: GameState | null;
   variantId: string;
   disconnectTimer: ReturnType<typeof setTimeout> | null;
   createdAt: number;                 // Date.now()
@@ -54,17 +54,17 @@ export interface RoomJoinedPayload {
 }
 
 export interface GameStartedPayload {
-  gameState: UltimateTTTState;
+  gameState: GameState;
   players: { displayName: string; playerIndex: 0 | 1 }[];
 }
 
 export interface GameStateUpdatePayload {
-  gameState: UltimateTTTState;
+  gameState: GameState;
   lastMove: { boardIndex: number; cellIndex: number };
 }
 
 export interface GameOverPayload {
-  gameState: UltimateTTTState;
+  gameState: GameState;
   winner: 'X' | 'O' | null;
   reason: 'win' | 'draw' | 'forfeit';
   winnerDisplayName: string | null;
@@ -72,4 +72,20 @@ export interface GameOverPayload {
 
 export interface ErrorPayload {
   message: string;
+}
+
+export interface JoinQueuePayload {
+  variantId: string;
+  guestId: string;
+  displayName: string;
+}
+
+export interface QueueMatchedPayload {
+  roomCode: string;
+  playerIndex: number;
+}
+
+export interface QueueStatusPayload {
+  position: number;   // 1-based position in queue
+  variantId: string;
 }

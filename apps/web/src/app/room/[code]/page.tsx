@@ -6,9 +6,10 @@ import { useSession } from 'next-auth/react';
 import { useGuestSession } from '@/hooks/useGuestSession';
 import { useSocket } from '@/hooks/useSocket';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
+import { StandardBoard } from '@/components/board/StandardBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
-import type { UltimateTTTState } from '@tactictoe/game-engine';
+import type { GameState, UltimateTTTState, StandardTTTState } from '@tactictoe/game-engine';
 import styles from './page.module.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -22,7 +23,7 @@ interface RoomState {
   phase: 'waiting' | 'playing' | 'over';
   myPlayerIndex: 0 | 1 | null;
   players: PlayerInfo[];
-  gameState: UltimateTTTState | null;
+  gameState: GameState | null;
   winner: 'X' | 'O' | null;
   winnerDisplayName: string | null;
   reason: 'win' | 'draw' | 'forfeit' | null;
@@ -31,8 +32,8 @@ interface RoomState {
 
 type RoomAction =
   | { type: 'SET_MY_INDEX'; playerIndex: 0 | 1; players?: PlayerInfo[] }
-  | { type: 'GAME_STARTED'; gameState: UltimateTTTState; players: PlayerInfo[] }
-  | { type: 'STATE_UPDATE'; gameState: UltimateTTTState }
+  | { type: 'GAME_STARTED'; gameState: GameState; players: PlayerInfo[] }
+  | { type: 'STATE_UPDATE'; gameState: GameState }
   | { type: 'GAME_OVER'; winner: 'X' | 'O' | null; reason: 'win' | 'draw' | 'forfeit'; winnerDisplayName: string | null }
   | { type: 'ERROR'; message: string };
 
@@ -116,16 +117,16 @@ export default function RoomPage() {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.playerIndex, players: data.players });
     }
 
-    function onGameStarted(data: { gameState: UltimateTTTState; players: PlayerInfo[] }) {
+    function onGameStarted(data: { gameState: GameState; players: PlayerInfo[] }) {
       dispatch({ type: 'GAME_STARTED', gameState: data.gameState, players: data.players });
     }
 
-    function onGameState(data: { gameState: UltimateTTTState }) {
+    function onGameState(data: { gameState: GameState }) {
       dispatch({ type: 'STATE_UPDATE', gameState: data.gameState });
     }
 
     function onGameOver(data: {
-      gameState: UltimateTTTState;
+      gameState: GameState;
       winner: 'X' | 'O' | null;
       reason: 'win' | 'draw' | 'forfeit';
       winnerDisplayName: string | null;
@@ -134,7 +135,7 @@ export default function RoomPage() {
       dispatch({ type: 'GAME_OVER', winner: data.winner, reason: data.reason, winnerDisplayName: data.winnerDisplayName });
     }
 
-    function onGameReconnect(data: { gameState: UltimateTTTState; myPlayerIndex: 0 | 1; players: PlayerInfo[] }) {
+    function onGameReconnect(data: { gameState: GameState; myPlayerIndex: 0 | 1; players: PlayerInfo[] }) {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.myPlayerIndex, players: data.players });
       dispatch({ type: 'GAME_STARTED', gameState: data.gameState, players: data.players });
     }
@@ -242,14 +243,23 @@ export default function RoomPage() {
       {/* Board */}
       {roomState.gameState && roomState.phase !== 'waiting' && (
         <div className={styles.boardWrap}>
-          <UltimateBoard
-            boards={roomState.gameState.boards}
-            boardResults={roomState.gameState.boardResults}
-            nextBoardConstraint={roomState.gameState.nextBoardConstraint}
-            currentPlayer={roomState.gameState.currentPlayer}
-            disabled={!isMyTurn}
-            onMove={handleMove}
-          />
+          {roomState.gameState.variantId === 'ultimate_ttt' ? (
+            <UltimateBoard
+              boards={(roomState.gameState as UltimateTTTState).boards}
+              boardResults={(roomState.gameState as UltimateTTTState).boardResults}
+              nextBoardConstraint={(roomState.gameState as UltimateTTTState).nextBoardConstraint}
+              currentPlayer={roomState.gameState.currentPlayer}
+              disabled={!isMyTurn}
+              onMove={handleMove}
+            />
+          ) : (
+            <StandardBoard
+              board={(roomState.gameState as StandardTTTState).board}
+              currentPlayer={roomState.gameState.currentPlayer}
+              disabled={!isMyTurn}
+              onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+            />
+          )}
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import type { Server, Socket } from 'socket.io';
-import { UltimateTTT, type UltimateTTTState } from '@tactictoe/game-engine';
+import { UltimateTTT, StandardTTT, type GameRules, type GameState } from '@tactictoe/game-engine';
 import { roomManager as defaultRoomManager, createRoomManager } from './room-manager.js';
 
 // Allow injecting a room manager for tests
@@ -14,11 +14,12 @@ import type {
 
 const DISCONNECT_GRACE_MS = 60_000; // 60 seconds
 
-const engines: Record<string, UltimateTTT> = {
+const engines: Record<string, GameRules> = {
   ultimate_ttt: new UltimateTTT(),
+  standard_3x3: new StandardTTT(),
 };
 
-function getEngine(variantId: string): UltimateTTT {
+function getEngine(variantId: string): GameRules {
   const engine = engines[variantId];
   if (!engine) throw new Error(`Unknown variant: ${variantId}`);
   return engine;
@@ -27,7 +28,7 @@ function getEngine(variantId: string): UltimateTTT {
 /** Called when two players are in the room and the game should begin. */
 export function startGame(io: Server, room: RoomState): void {
   const engine = getEngine(room.variantId);
-  room.gameState = engine.initialize({ variantId: room.variantId }) as UltimateTTTState;
+  room.gameState = engine.initialize({ variantId: room.variantId });
   room.status = 'active';
 
   const payload: GameStartedPayload = {
@@ -83,7 +84,7 @@ export function handleMove(
     return;
   }
 
-  room.gameState = result.state as UltimateTTTState;
+  room.gameState = result.state;
   const terminal = engine.checkTerminal(room.gameState);
 
   if (terminal !== null) {
