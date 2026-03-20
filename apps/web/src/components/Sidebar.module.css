@@ -1,0 +1,117 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--bg-raised);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  padding: var(--space-6) var(--space-4);
+  overflow-y: auto;
+}
+
+.logo {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: var(--space-8);
+  padding: 0 var(--space-2);
+}
+
+.logo span { color: var(--accent); }
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  font-weight: 600;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.navItem:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.navItem.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.icon {
+  font-size: 1.25rem;
+  width: 24px;
+  text-align: center;
+}
+
+.spacer { flex: 1; min-height: var(--space-8); }
+
+.profileSection {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.userInfo {
+  padding: 0 var(--space-2);
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.userStatus {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.themeToggleWrap {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 var(--space-2);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  /* On small screens, we might switch to a bottom bar or a hamburger menu. 
+     For now, just hide the sidebar and rely on a mobile-specific solution later,
+     or we can make a collapsed icon-only sidebar. Let's make it icon-only. */
+  .sidebar { width: var(--sidebar-width-mobile); padding: var(--space-4) var(--space-2); align-items: center; }
+  .logo { font-size: var(--text-xl); padding: 0; text-align: center; letter-spacing: 0; }
+  .logo span { display: none; }
+  .logo::before { content: "T"; color: var(--accent); }
+  .navItem { padding: var(--space-3); justify-content: center; }
+  .navLabel { display: none; }
+  .userInfo { display: none; }
+}

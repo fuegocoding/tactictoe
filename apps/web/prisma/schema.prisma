@@ -60,6 +60,10 @@ model User {
   accounts Account[]
   sessions Session[]
 
+  ratings   Rating[]
+  matches1  Match[] @relation("MatchPlayer1")
+  matches2  Match[] @relation("MatchPlayer2")
+
   @@map("users")
 }
 
@@ -91,4 +95,46 @@ model GuestSession {
   createdAt        DateTime @default(now())
 
   @@map("guest_sessions")
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  userId     String
+  variantId  String   // 'ultimate_ttt'
+  rating     Int      @default(1500)
+  rd         Int      @default(350)  // ratings deviation
+  volatility Float    @default(0.06)
+  wins       Int      @default(0)
+  losses     Int      @default(0)
+  draws      Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, variantId])
+  @@index([variantId, rating(sort: Desc)])
+}
+
+model Match {
+  id            String   @id @default(cuid())
+  variantId     String
+  rated         Boolean  @default(false)
+  player1Id     String?  // null for guests
+  player2Id     String?  // null for guests
+  player1Guest  String?  // guestId if no account
+  player2Guest  String?  // guestId if no account
+  player1Name   String
+  player2Name   String
+  winner        String?  // 'X', 'O', or null for draw
+  reason        String   // 'win', 'draw', 'forfeit'
+  ratingDelta1  Int?     // rating change for player1 (null if unrated)
+  ratingDelta2  Int?
+  createdAt     DateTime @default(now())
+
+  player1 User? @relation("MatchPlayer1", fields: [player1Id], references: [id])
+  player2 User? @relation("MatchPlayer2", fields: [player2Id], references: [id])
+
+  @@index([player1Id, createdAt(sort: Desc)])
+  @@index([player2Id, createdAt(sort: Desc)])
+  @@index([variantId, createdAt(sort: Desc)])
 }

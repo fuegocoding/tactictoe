@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
-import Nav from '@/components/Nav';
+import Sidebar from '@/components/Sidebar';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -19,10 +19,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>
-          <Nav />
-          <main style={{ minHeight: `calc(100vh - var(--nav-height))` }}>
-            {children}
-          </main>
+          <div className="app-layout">
+            <Sidebar />
+            <main className="app-main">
+              {children}
+            </main>
+          </div>
         </Providers>
       </body>
     </html>
