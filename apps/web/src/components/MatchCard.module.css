@@ -1,0 +1,29 @@
+.card {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: inherit;
+  font-size: var(--text-sm);
+  transition: background 0.12s;
+}
+.card:hover { background: var(--bg-hover); }
+
+.result {
+  font-weight: 800;
+  font-size: var(--text-base);
+  text-align: center;
+}
+.result.w { color: var(--success); }
+.result.l { color: var(--error); }
+.result.d { color: var(--text-muted); }
+
+.opponent { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.variant  { color: var(--text-muted); white-space: nowrap; }
+.date     { color: var(--text-faint); white-space: nowrap; }
+.delta    { font-size: var(--text-xs); font-weight: 600; white-space: nowrap; }
+.delta.pos { color: var(--success); }
+.delta.neg { color: var(--error); }
