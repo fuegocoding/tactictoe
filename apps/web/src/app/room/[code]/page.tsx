@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer, useCallback, useRef } from 'react';
+import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useGuestSession } from '@/hooks/useGuestSession';
@@ -76,6 +76,10 @@ export default function RoomPage() {
   const { socket, status } = useSocket();
   const [roomState, dispatch] = useReducer(roomReducer, initialState);
 
+  const [rated, setRated] = useState(false);
+  const [initialRating, setInitialRating] = useState<number | null>(null);
+  const [finalRating, setFinalRating] = useState<number | null>(null);
+
   const joined = useRef(false);
 
   const mySymbol: 'X' | 'O' | null =
@@ -97,6 +101,15 @@ export default function RoomPage() {
     joined.current = true;
 
     const savedIndex = sessionStorage.getItem(`room:${code}:playerIndex`);
+    const isRated = sessionStorage.getItem(`room:${code}:rated`) === 'true';
+
+    if (isRated) {
+      setRated(true);
+      fetch('/api/ratings/me?variant=ultimate_ttt').then(res => res.json()).then(data => {
+        if (data.rating) setInitialRating(data.rating.rating);
+      });
+      sessionStorage.removeItem(`room:${code}:rated`);
+    }
 
     if (savedIndex !== null) {
       const idx = parseInt(savedIndex, 10) as 0 | 1;
@@ -110,6 +123,16 @@ export default function RoomPage() {
       });
     }
   }, [status, guest, session, socket, code]);
+
+  useEffect(() => {
+    if (roomState.phase === 'over' && rated) {
+      setTimeout(() => {
+        fetch('/api/ratings/me?variant=ultimate_ttt').then(res => res.json()).then(data => {
+          if (data.rating) setFinalRating(data.rating.rating);
+        });
+      }, 500);
+    }
+  }, [roomState.phase, rated]);
 
   // ── Socket event listeners ────────────────────────────────────────────────────
   useEffect(() => {
@@ -276,6 +299,11 @@ export default function RoomPage() {
           {roomState.reason === 'forfeit' && (
             <p className={styles.gameOverSub}>
               {roomState.winner === mySymbol ? 'Opponent disconnected.' : 'You were disconnected.'}
+            </p>
+          )}
+          {rated && initialRating !== null && finalRating !== null && (
+            <p className={styles.gameOverSub} style={{ marginTop: 'var(--space-2)' }}>
+              Rating change: {finalRating - initialRating > 0 ? '+' : ''}{finalRating - initialRating} ({finalRating})
             </p>
           )}
           <Button onClick={() => router.push('/')}>Back to Lobby</Button>

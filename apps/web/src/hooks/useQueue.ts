@@ -9,9 +9,11 @@ interface UseQueueResult {
   queueState: QueueState;
   position: number;
   join: (variantId: string, guestId: string, displayName: string) => void;
+  joinRated: (variantId: string, guestId: string, userId: string, displayName: string) => void;
   leave: () => void;
   matchedRoomCode: string | null;
   matchedPlayerIndex: number | null;
+  matchedRated: boolean | null;
 }
 
 export function useQueue(): UseQueueResult {
@@ -19,6 +21,7 @@ export function useQueue(): UseQueueResult {
   const [position, setPosition] = useState(0);
   const [matchedRoomCode, setMatchedRoomCode] = useState<string | null>(null);
   const [matchedPlayerIndex, setMatchedPlayerIndex] = useState<number | null>(null);
+  const [matchedRated, setMatchedRated] = useState<boolean | null>(null);
   const listenersAttached = useRef(false);
 
   useEffect(() => {
@@ -31,10 +34,11 @@ export function useQueue(): UseQueueResult {
       setQueueState('waiting');
     });
 
-    socket.on('queue:matched', ({ roomCode, playerIndex }: { roomCode: string; playerIndex: number }) => {
+    socket.on('queue:matched', ({ roomCode, playerIndex, rated }: { roomCode: string; playerIndex: number; rated?: boolean }) => {
       setQueueState('matched');
       setMatchedRoomCode(roomCode);
       setMatchedPlayerIndex(playerIndex);
+      setMatchedRated(rated ?? false);
     });
 
     socket.on('queue:left', () => {
@@ -56,10 +60,16 @@ export function useQueue(): UseQueueResult {
     socket.emit('queue:join', { variantId, guestId, displayName });
   }, []);
 
+  const joinRated = useCallback((variantId: string, guestId: string, userId: string, displayName: string) => {
+    const socket = getSocket();
+    setQueueState('waiting');
+    socket.emit('queue:join:rated', { variantId, guestId, userId, displayName });
+  }, []);
+
   const leave = useCallback(() => {
     const socket = getSocket();
     socket.emit('queue:leave');
   }, []);
 
-  return { queueState, position, join, leave, matchedRoomCode, matchedPlayerIndex };
+  return { queueState, position, join, joinRated, leave, matchedRoomCode, matchedPlayerIndex, matchedRated };
 }

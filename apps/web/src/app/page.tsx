@@ -6,13 +6,15 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useGuestSession } from '@/hooks/useGuestSession';
 import { useQueue } from '@/hooks/useQueue';
+import { useSocket } from '@/hooks/useSocket';
 import { getSocket } from '@/lib/socket-client';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import RatingBadge from '@/components/RatingBadge';
 import styles from './page.module.css';
 
-type TabId = 'quick' | 'private';
+type TabId = 'quick' | 'private' | 'ranked';
 type VariantId = 'ultimate_ttt' | 'standard_3x3';
 
 const VARIANTS: { id: VariantId; label: string; description: string }[] = [
@@ -25,24 +27,40 @@ export default function LobbyPage() {
   const { data: session } = useSession();
   const guestSession = useGuestSession();
   const queue = useQueue();
+  useSocket(); // Explicitly connect the socket on the lobby page
 
   const [tab, setTab] = useState<TabId>('quick');
   const [variant, setVariant] = useState<VariantId>('ultimate_ttt');
   const [joinCode, setJoinCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [myRating, setMyRating] = useState<{ rating: number; rd: number; wins: number; losses: number } | null>(null);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/ratings/me?variant=ultimate_ttt').then(res => res.json()).then(data => {
+        if (data.rating) setMyRating(data.rating);
+      });
+    }
+  }, [session]);
 
   // When matched, store playerIndex and redirect
   useEffect(() => {
     if (queue.queueState === 'matched' && queue.matchedRoomCode !== null && queue.matchedPlayerIndex !== null) {
       sessionStorage.setItem(`room:${queue.matchedRoomCode}:playerIndex`, String(queue.matchedPlayerIndex));
+      if (queue.matchedRated) sessionStorage.setItem(`room:${queue.matchedRoomCode}:rated`, 'true');
       router.push(`/room/${queue.matchedRoomCode}`);
     }
-  }, [queue.queueState, queue.matchedRoomCode, queue.matchedPlayerIndex, router]);
+  }, [queue.queueState, queue.matchedRoomCode, queue.matchedPlayerIndex, queue.matchedRated, router]);
 
   const handleQuickMatch = () => {
     if (!guestSession) return;
     queue.join(variant, guestSession.guestId, session?.user?.name ?? guestSession.displayName);
+  };
+
+  const handleRankedMatch = () => {
+    if (!guestSession || !session?.user?.id) return;
+    queue.joinRated('ultimate_ttt', guestSession.guestId, session.user.id, session.user.name ?? guestSession.displayName);
   };
 
   const handleCancelQueue = () => {
@@ -81,6 +99,11 @@ export default function LobbyPage() {
       <div className={styles.hero}>
         <h1 className={styles.title}>Tactic<span>Toe</span></h1>
         <p className={styles.subtitle}>Competitive Tic-Tac-Toe and its deeper variants.</p>
+        {myRating && (
+          <div style={{ marginTop: 'var(--space-3)' }}>
+            <RatingBadge rating={myRating.rating} rd={myRating.rd} wins={myRating.wins} losses={myRating.losses} />
+          </div>
+        )}
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -106,6 +129,9 @@ export default function LobbyPage() {
         <div className={styles.tabs} style={{ marginTop: 'var(--space-5)' }}>
           <button className={`${styles.tab} ${tab === 'quick' ? styles.activeTab : ''}`} onClick={() => setTab('quick')}>
             Quick Match
+          </button>
+          <button className={`${styles.tab} ${tab === 'ranked' ? styles.activeTab : ''}`} onClick={() => { setTab('ranked'); setVariant('ultimate_ttt'); }}>
+            Ranked
           </button>
           <button className={`${styles.tab} ${tab === 'private' ? styles.activeTab : ''}`} onClick={() => setTab('private')}>
             Private Room
@@ -146,6 +172,34 @@ export default function LobbyPage() {
                 <Button type="submit" variant="secondary">Join</Button>
               </div>
             </form>
+          </div>
+        )}
+
+        {tab === 'ranked' && (
+          <div className={styles.section}>
+            {!session ? (
+              <>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
+                  Rated games require an account. Your rating is permanent and tracked across sessions.
+                </p>
+                <Button onClick={() => router.push('/login')} variant="secondary" full>Sign in to play ranked</Button>
+              </>
+            ) : queue.queueState === 'waiting' ? (
+              <>
+                <div className={styles.queueStatus}>
+                  <div className={styles.queueDot} />
+                  Finding rated opponent…
+                </div>
+                <Button variant="secondary" onClick={handleCancelQueue} full>Cancel</Button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
+                  Ultimate TTT · Rated · All time controls standard
+                </p>
+                <Button onClick={handleRankedMatch} full>Find Ranked Match</Button>
+              </>
+            )}
           </div>
         )}
       </Card>
