@@ -129,6 +129,7 @@ model Match {
   reason        String   // 'win', 'draw', 'forfeit'
   ratingDelta1  Int?     // rating change for player1 (null if unrated)
   ratingDelta2  Int?
+  moveHistory   Json?    // Array<{boardIndex: number, cellIndex: number, player: 'X' | 'O'}>
   createdAt     DateTime @default(now())
 
   player1 User? @relation("MatchPlayer1", fields: [player1Id], references: [id])

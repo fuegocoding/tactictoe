@@ -18,10 +18,11 @@ export interface GameResultPayload {
   winner: 'X' | 'O' | null; // null = draw
   reason: 'win' | 'draw' | 'forfeit';
   rated: boolean;
+  moveHistory?: Array<{ boardIndex: number; cellIndex: number; player: 'X' | 'O' }>;
 }
 
 export async function processGameResult(payload: GameResultPayload) {
-  const { variantId, player1, player2, winner, reason, rated } = payload;
+  const { variantId, player1, player2, winner, reason, rated, moveHistory } = payload;
 
   // Determine outcome from player1's perspective
   const outcome1 = winner === null ? 'draw' : winner === player1.playerSymbol ? 'win' : 'loss';
@@ -85,6 +86,7 @@ export async function processGameResult(payload: GameResultPayload) {
       reason,
       ratingDelta1: delta1,
       ratingDelta2: delta2,
+      moveHistory: moveHistory ?? null,
     },
   });
 
