@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Globe, Monitor, Grid3x3, BookOpen, Trophy } from 'lucide-react';
+import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import Avatar from './Avatar';
 import Button from './ui/Button';
@@ -27,6 +27,10 @@ export default function Sidebar() {
         <Link href="/local" className={`${styles.navItem} ${pathname === '/local' ? styles.active : ''}`}>
           <span className={styles.icon}><Monitor size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Play Local</span>
+        </Link>
+        <Link href="/vs-ai" className={`${styles.navItem} ${pathname === '/vs-ai' ? styles.active : ''}`}>
+          <span className={styles.icon}><Bot size={18} strokeWidth={1.75} /></span>
+          <span className={styles.navLabel}>vs AI</span>
         </Link>
         <Link href="/leaderboard" className={`${styles.navItem} ${pathname === '/leaderboard' ? styles.active : ''}`}>
           <span className={styles.icon}><Trophy size={18} strokeWidth={1.75} /></span>

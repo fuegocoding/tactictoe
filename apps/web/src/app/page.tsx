@@ -209,6 +209,11 @@ export default function LobbyPage() {
         <Link href="/local">Play locally on this screen →</Link>
       </p>
 
+      <p className={styles.localLink}>
+        Want to practice?{' '}
+        <Link href="/vs-ai">Play vs AI →</Link>
+      </p>
+
       {!session && (
         <p className={styles.guestCta}>
           Playing as guest.{' '}
