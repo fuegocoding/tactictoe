@@ -198,6 +198,25 @@ describe('handleMove', () => {
     expect(data.reason).toBe('win');
     expect(room.status).toBe('finished');
   });
+
+  it('accumulates moveHistory during a game', () => {
+    const rm = createRoomManager();
+    const { room, code } = makeGameRoom(rm);
+    const { io } = createMockIo();
+    const { socket: socketX } = createMockSocket('socket-x');
+    const { socket: socketO } = createMockSocket('socket-o');
+
+    expect(room.moveHistory).toHaveLength(0);
+
+    handleMove(io, socketX, { roomCode: code, boardIndex: 4, cellIndex: 4 }, rm);
+    expect(room.moveHistory).toHaveLength(1);
+    expect(room.moveHistory[0]).toMatchObject({ boardIndex: 4, cellIndex: 4, player: 'X' });
+
+    // O must play in board 4 (the cell X just played determines next board)
+    handleMove(io, socketO, { roomCode: code, boardIndex: 4, cellIndex: 0 }, rm);
+    expect(room.moveHistory).toHaveLength(2);
+    expect(room.moveHistory[1]).toMatchObject({ boardIndex: 4, cellIndex: 0, player: 'O' });
+  });
 });
 
 describe('handleDisconnect', () => {

@@ -10,6 +10,7 @@ import type {
   GameStartedPayload,
   GameStateUpdatePayload,
   GameOverPayload,
+  MoveRecord,
 } from './types.js';
 
 const DISCONNECT_GRACE_MS = 60_000; // 60 seconds
@@ -36,6 +37,7 @@ async function reportResult(room: RoomState, winner: 'X' | 'O' | null, reason: s
         winner,
         reason,
         rated: room.rated,
+        moveHistory: room.moveHistory,
       }),
     });
   } catch (err) {
@@ -115,6 +117,12 @@ export function handleMove(
   }
 
   room.gameState = result.state;
+  const moveRecord: MoveRecord = {
+    boardIndex: payload.boardIndex,
+    cellIndex: payload.cellIndex,
+    player: playerSymbol,
+  };
+  room.moveHistory.push(moveRecord);
   const terminal = engine.checkTerminal(room.gameState);
 
   if (terminal !== null) {

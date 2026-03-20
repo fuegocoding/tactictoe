@@ -2,6 +2,12 @@ import type { GameState } from '@tactictoe/game-engine';
 
 export type RoomStatus = 'waiting' | 'active' | 'finished';
 
+export interface MoveRecord {
+  boardIndex: number;
+  cellIndex: number;
+  player: 'X' | 'O';
+}
+
 export interface ConnectedPlayer {
   socketId: string;
   guestId: string;       // UUID: stable within a session, used for reconnection
@@ -20,6 +26,7 @@ export interface RoomState {
   rated: boolean;
   disconnectTimer: ReturnType<typeof setTimeout> | null;
   createdAt: number;                 // Date.now()
+  moveHistory: MoveRecord[];         // accumulates during the game
 }
 
 // ─── Socket.io event payloads (client → server) ───────────────────────────────

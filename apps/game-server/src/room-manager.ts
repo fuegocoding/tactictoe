@@ -37,6 +37,7 @@ class RoomManager {
       rated,
       disconnectTimer: null,
       createdAt: Date.now(),
+      moveHistory: [],
     };
     this.rooms.set(code, room);
     return room;
