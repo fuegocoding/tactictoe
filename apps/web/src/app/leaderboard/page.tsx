@@ -41,10 +41,10 @@ async function getLeaderboardRows(variantId: string, period: string) {
     }),
   ]);
 
-  const activeUserIds = [...new Set([
+  const activeUserIds = Array.from(new Set([
     ...p1Rows.map(r => r.player1Id!),
     ...p2Rows.map(r => r.player2Id!),
-  ])];
+  ]));
 
   if (activeUserIds.length === 0) return [];
 

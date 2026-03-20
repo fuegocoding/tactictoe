@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
 import { rateGame, DEFAULT_RATING, type Rating } from '@tactictoe/glicko2';
 
@@ -86,7 +87,7 @@ export async function processGameResult(payload: GameResultPayload) {
       reason,
       ratingDelta1: delta1,
       ratingDelta2: delta2,
-      moveHistory: moveHistory ?? null,
+      moveHistory: moveHistory ?? Prisma.DbNull,
     },
   });
 
