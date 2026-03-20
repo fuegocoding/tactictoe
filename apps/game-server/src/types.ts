@@ -5,6 +5,7 @@ export type RoomStatus = 'waiting' | 'active' | 'finished';
 export interface ConnectedPlayer {
   socketId: string;
   guestId: string;       // UUID: stable within a session, used for reconnection
+  userId?: string;       // Set if authenticated
   displayName: string;   // e.g. "Guest#4271"
   playerIndex: 0 | 1;   // 0 = X, 1 = O
 }
@@ -16,6 +17,7 @@ export interface RoomState {
   spectators: string[];              // socket IDs
   gameState: GameState | null;
   variantId: string;
+  rated: boolean;
   disconnectTimer: ReturnType<typeof setTimeout> | null;
   createdAt: number;                 // Date.now()
 }
@@ -83,9 +85,18 @@ export interface JoinQueuePayload {
 export interface QueueMatchedPayload {
   roomCode: string;
   playerIndex: number;
+  rated?: boolean;
 }
 
 export interface QueueStatusPayload {
   position: number;   // 1-based position in queue
   variantId: string;
+  rated?: boolean;
+}
+
+export interface JoinRatedQueuePayload {
+  variantId: string;
+  guestId: string;
+  userId: string;
+  displayName: string;
 }

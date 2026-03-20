@@ -14,6 +14,36 @@ import type {
 
 const DISCONNECT_GRACE_MS = 60_000; // 60 seconds
 
+const WEB_SERVER_URL = process.env['WEB_SERVER_URL'];
+const GAME_SERVER_SECRET = process.env['GAME_SERVER_SECRET'];
+
+async function reportResult(room: RoomState, winner: 'X' | 'O' | null, reason: string) {
+  if (!room.rated || !WEB_SERVER_URL) return;
+  const [p1, p2] = room.players;
+  if (!p1 || !p2) return;
+
+  try {
+    await fetch(`${WEB_SERVER_URL}/api/ratings/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-game-server-secret': GAME_SERVER_SECRET ?? '',
+      },
+      body: JSON.stringify({
+        variantId: room.variantId,
+        player1: { userId: p1.userId, guestId: p1.guestId, displayName: p1.displayName, playerSymbol: p1.playerIndex === 0 ? 'X' : 'O' },
+        player2: { userId: p2.userId, guestId: p2.guestId, displayName: p2.displayName, playerSymbol: p2.playerIndex === 0 ? 'X' : 'O' },
+        winner,
+        reason,
+        rated: room.rated,
+      }),
+    });
+  } catch (err) {
+    console.error('Failed to report game result:', err);
+    // Non-fatal — game continues even if rating update fails
+  }
+}
+
 const engines: Record<string, GameRules> = {
   ultimate_ttt: new UltimateTTT(),
   standard_3x3: new StandardTTT(),
@@ -100,6 +130,7 @@ export function handleMove(
       reason: terminal.reason,
       winnerDisplayName: winnerPlayer?.displayName ?? null,
     };
+    reportResult(room, terminal.winner, terminal.reason);
     io.to(room.roomCode).emit('game:over', gameOverPayload);
   } else {
     const updatePayload: GameStateUpdatePayload = {
@@ -152,6 +183,7 @@ export function handleDisconnect(
         reason: 'forfeit',
         winnerDisplayName: winner?.displayName ?? null,
       };
+      reportResult(current, winnerSymbol, 'forfeit');
       io.to(roomCode).emit('game:over', payload);
     }
   }, DISCONNECT_GRACE_MS);

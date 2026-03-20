@@ -9,6 +9,7 @@ import type {
   MakeMovePayload,
   ConnectedPlayer,
   JoinQueuePayload,
+  JoinRatedQueuePayload,
   QueueMatchedPayload,
   QueueStatusPayload,
 } from './types.js';
@@ -174,6 +175,47 @@ io.on('connection', (socket) => {
     } else {
       const position = qm.getPosition(socket.id);
       socket.emit('queue:status', { position, variantId } satisfies QueueStatusPayload);
+    }
+  });
+
+  socket.on('queue:join:rated', (payload: JoinRatedQueuePayload) => {
+    const { variantId, guestId, userId, displayName } = payload;
+
+    if (!['ultimate_ttt'].includes(variantId)) {
+      socket.emit('error', { message: 'This variant is not available for rated play' });
+      return;
+    }
+
+    qm.joinRated(variantId, { socketId: socket.id, guestId, userId, displayName, joinedAt: Date.now() });
+
+    const pair = qm.tryMatchRated(variantId);
+    if (pair) {
+      const [p1, p2] = pair;
+      const code = roomManager.generateCode();
+
+      const host: ConnectedPlayer = { socketId: p1.socketId, guestId: p1.guestId, userId: p1.userId, displayName: p1.displayName, playerIndex: 0 };
+      roomManager.createRoom(code, host, variantId, true);
+      const room = roomManager.getRoom(code)!;
+
+      const guest: ConnectedPlayer = { socketId: p2.socketId, guestId: p2.guestId, userId: p2.userId, displayName: p2.displayName, playerIndex: 1 };
+      roomManager.addPlayer(room, guest);
+
+      const p1Socket = io.sockets.sockets.get(p1.socketId);
+      const p2Socket = io.sockets.sockets.get(p2.socketId);
+
+      p1Socket?.join(code);
+      p2Socket?.join(code);
+
+      const matchPayloadP1: QueueMatchedPayload = { roomCode: code, playerIndex: 0, rated: true };
+      const matchPayloadP2: QueueMatchedPayload = { roomCode: code, playerIndex: 1, rated: true };
+
+      p1Socket?.emit('queue:matched', matchPayloadP1);
+      p2Socket?.emit('queue:matched', matchPayloadP2);
+
+      startGame(io, room);
+    } else {
+      const position = qm.getPosition(socket.id);
+      socket.emit('queue:status', { position, variantId, rated: true } satisfies QueueStatusPayload);
     }
   });
 

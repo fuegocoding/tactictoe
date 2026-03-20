@@ -23,7 +23,7 @@ class RoomManager {
     throw new Error('Failed to generate unique room code after 50 attempts');
   }
 
-  createRoom(code: string, host: ConnectedPlayer, variantId: string): RoomState {
+  createRoom(code: string, host: ConnectedPlayer, variantId: string, rated: boolean = false): RoomState {
     if (this.rooms.size >= MAX_ROOMS) {
       throw new Error('Room capacity reached');
     }
@@ -34,6 +34,7 @@ class RoomManager {
       spectators: [],
       gameState: null,
       variantId,
+      rated,
       disconnectTimer: null,
       createdAt: Date.now(),
     };
