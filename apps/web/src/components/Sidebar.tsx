@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { Globe, Monitor, Grid3x3, BookOpen } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import Button from './ui/Button';
 import styles from './Sidebar.module.css';
@@ -19,19 +20,19 @@ export default function Sidebar() {
 
       <nav className={styles.navLinks}>
         <Link href="/" className={`${styles.navItem} ${pathname === '/' ? styles.active : ''}`}>
-          <span className={styles.icon}>🌐</span>
+          <span className={styles.icon}><Globe size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Play Online</span>
         </Link>
         <Link href="/local" className={`${styles.navItem} ${pathname === '/local' ? styles.active : ''}`}>
-          <span className={styles.icon}>🤝</span>
+          <span className={styles.icon}><Monitor size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Play Local</span>
         </Link>
         <Link href="/puzzles" className={`${styles.navItem} ${pathname === '/puzzles' ? styles.active : ''}`}>
-          <span className={styles.icon}>🧩</span>
+          <span className={styles.icon}><Grid3x3 size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Puzzles</span>
         </Link>
         <Link href="/learn" className={`${styles.navItem} ${pathname === '/learn' ? styles.active : ''}`}>
-          <span className={styles.icon}>🎓</span>
+          <span className={styles.icon}><BookOpen size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Learn</span>
         </Link>
       </nav>

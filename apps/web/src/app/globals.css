@@ -102,12 +102,12 @@ button { cursor: pointer; border: none; background: none; }
   --border:        #2a2a2a;
   --border-strong: #3a3a3a;
 
-  --accent:        #22c55e;
-  --accent-hover:  #16a34a;
-  --accent-subtle: #052e16;
+  --accent:        #f59e0b;
+  --accent-hover:  #d97706;
+  --accent-subtle: #1c1200;
   --accent-text:   #000000;
 
-  --success:       #22c55e;
+  --success:       #4ade80;
   --success-subtle:#052e16;
   --error:         #f87171;
   --error-subtle:  #450a0a;
@@ -115,11 +115,11 @@ button { cursor: pointer; border: none; background: none; }
 
   --board-cell-bg:       #1a1a1a;
   --board-cell-border:   #2a2a2a;
-  --board-active-border: #22c55e;
+  --board-active-border: #f59e0b;
   --board-inactive-border: #2a2a2a;
   --board-result-overlay: rgba(15, 15, 15, 0.85);
   --mark-x:        #f3f4f6;
-  --mark-o:        #22c55e;
+  --mark-o:        #f59e0b;
 
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow:        0 2px 8px rgba(0, 0, 0, 0.5);

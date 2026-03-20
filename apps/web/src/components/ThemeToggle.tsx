@@ -1,5 +1,6 @@
 'use client';
 
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function ThemeToggle() {
@@ -20,10 +21,9 @@ export default function ThemeToggle() {
         background: 'none',
         border: 'none',
         cursor: 'pointer',
-        fontSize: 18,
       }}
     >
-      {theme === 'light' ? '☾' : '☀'}
+      {theme === 'light' ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
     </button>
   );
 }
