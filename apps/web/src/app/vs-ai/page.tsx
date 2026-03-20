@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { StandardTTT, UltimateTTT } from '@tactictoe/game-engine';
+import { StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
+import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
 import type { UltimateTTTState } from '@tactictoe/game-engine';
 import { StandardBoard } from '@/components/board/StandardBoard';
@@ -15,11 +16,22 @@ import { useAI } from '@/hooks/useAI';
 import styles from './page.module.css';
 import localStyles from '../local/page.module.css';
 
-type Variant = 'standard_3x3' | 'ultimate_ttt';
+type Variant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto';
 
-const engines = {
+const VARIANT_LABELS: Record<Variant, string> = {
+  standard_3x3: 'Standard 3×3',
+  ultimate_ttt: 'Ultimate TTT',
+  misere_ttt: 'Misère TTT',
+  wild_ttt: 'Wild TTT',
+  notakto: 'Notakto',
+};
+
+const engines: Record<Variant, GameRules> = {
   standard_3x3: new StandardTTT(),
   ultimate_ttt: new UltimateTTT(),
+  misere_ttt: new MisereTTT(),
+  wild_ttt: new WildTTT(),
+  notakto: new NotaktoTTT(),
 };
 
 const DIFFICULTY_LABELS: Record<AIDifficulty, string> = {
@@ -39,6 +51,7 @@ export default function VsAIPage() {
   const [scores, setScores] = useState({ human: 0, ai: 0, draws: 0 });
   const [winner, setWinner] = useState<Player | null | undefined>(undefined);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [placingAs, setPlacingAs] = useState<'X' | 'O'>('X');
   const movesRef = useRef<HTMLDivElement>(null);
 
   const ai = useAI(variant, difficulty);
@@ -88,7 +101,11 @@ export default function VsAIPage() {
         if (cancelled) return;
         const engine = engines[variant];
         const boardIndex = variant === 'ultimate_ttt' ? move.boardIndex : 0;
-        const result = engine.applyMove(gameState, { data: { boardIndex, cellIndex: move.cellIndex } }, aiPlayer);
+        const moveData =
+          variant === 'ultimate_ttt' ? { boardIndex, cellIndex: move.cellIndex } :
+          variant === 'wild_ttt' ? { cellIndex: move.cellIndex, symbol: move.symbol } :
+          { cellIndex: move.cellIndex };
+        const result = engine.applyMove(gameState, { data: moveData }, aiPlayer);
         if (result.ok) {
           const coord = formatCoord(boardIndex, move.cellIndex);
           setMoveHistory(prev => [...prev, coord]);
@@ -119,7 +136,11 @@ export default function VsAIPage() {
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
     const engine = engines[variant];
-    const result = engine.applyMove(gameState, { data: { boardIndex, cellIndex } }, humanPlayer);
+    const moveData =
+      variant === 'ultimate_ttt' ? { boardIndex, cellIndex } :
+      variant === 'wild_ttt' ? { cellIndex, symbol: placingAs } :
+      { cellIndex };
+    const result = engine.applyMove(gameState, { data: moveData }, humanPlayer);
     if (!result.ok) return;
     setMoveHistory(prev => [...prev, formatCoord(boardIndex, cellIndex)]);
     const term = engine.checkTerminal(result.state);
@@ -155,13 +176,13 @@ export default function VsAIPage() {
               <div className={localStyles.variantRow}>
                 <p className={localStyles.variantLabel}>Game mode</p>
                 <div className={localStyles.variantButtons}>
-                  {(['ultimate_ttt', 'standard_3x3'] as Variant[]).map(v => (
+                  {(['ultimate_ttt', 'standard_3x3', 'misere_ttt', 'wild_ttt', 'notakto'] as Variant[]).map(v => (
                     <button
                       key={v}
                       className={`${localStyles.variantBtn} ${variant === v ? localStyles.selected : ''}`}
                       onClick={() => setVariant(v)}
                     >
-                      {v === 'ultimate_ttt' ? 'Ultimate TTT' : 'Standard 3×3'}
+                      {VARIANT_LABELS[v]}
                     </button>
                   ))}
                 </div>
@@ -240,7 +261,7 @@ export default function VsAIPage() {
                       </>
                     ) : (
                       <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
-                        Your turn ({humanPlayer})
+                        Your turn{variant !== 'notakto' && ` (${humanPlayer})`}
                       </span>
                     )}
                   </div>
@@ -264,6 +285,19 @@ export default function VsAIPage() {
           </div>
 
           <div className={localStyles.mainBoard}>
+            {variant === 'wild_ttt' && phase === 'playing' && gameState?.currentPlayer === humanPlayer && (
+              <div className={localStyles.wildPicker}>
+                <span className={localStyles.wildPickerLabel}>Place as:</span>
+                <button
+                  className={`${localStyles.wildBtn} ${localStyles.x} ${placingAs === 'X' ? localStyles.active : ''}`}
+                  onClick={() => setPlacingAs('X')}
+                >X</button>
+                <button
+                  className={`${localStyles.wildBtn} ${localStyles.o} ${placingAs === 'O' ? localStyles.active : ''}`}
+                  onClick={() => setPlacingAs('O')}
+                >O</button>
+              </div>
+            )}
             {variant === 'ultimate_ttt' ? (
               <UltimateBoard
                 boards={(gameState as UltimateTTTState).boards}
