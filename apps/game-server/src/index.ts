@@ -79,7 +79,10 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Check if this is a reconnection (guestId matches a disconnected player)
+    // Check if this is a pre-assigned player (from matchmaking) or a reconnect after disconnect.
+    // Both cases share socketId === '' — pre-assigned players start with '' and disconnected players
+    // are reset to '' by removeSocket(). The difference is room.status: 'waiting' = arriving from
+    // matchmaking for the first time; 'active' = reconnecting mid-game.
     const reconnectingPlayer = room.players.find(
       (p) => p.guestId === payload.guestId && p.socketId === ''
     );
@@ -87,8 +90,22 @@ io.on('connection', (socket) => {
     if (reconnectingPlayer) {
       roomManager.reconnectPlayer(room, payload.guestId, socket.id);
       socket.join(payload.roomCode);
-      handleReconnect(io, room, socket.id);
-      console.log(`[room:reconnect] code=${payload.roomCode} guest=${payload.guestId}`);
+
+      if (room.status === 'active') {
+        // Mid-game reconnect — restore state
+        handleReconnect(io, room, socket.id);
+        console.log(`[room:reconnect] code=${payload.roomCode} guest=${payload.guestId}`);
+      } else {
+        // Matched player arriving at room page — confirm their slot
+        const playerList = room.players.map((p) => ({ displayName: p.displayName, playerIndex: p.playerIndex }));
+        socket.emit('room:joined', { roomCode: payload.roomCode, playerIndex: reconnectingPlayer.playerIndex, players: playerList });
+
+        // Start the game once both players have arrived
+        if (room.players.every((p) => p.socketId !== '')) {
+          startGame(io, room);
+        }
+        console.log(`[room:ready] code=${payload.roomCode} guest=${payload.guestId} playerIndex=${reconnectingPlayer.playerIndex}`);
+      }
       return;
     }
 
@@ -152,26 +169,23 @@ io.on('connection', (socket) => {
       const [p1, p2] = pair;
       const code = roomManager.generateCode();
 
-      const host: ConnectedPlayer = { socketId: p1.socketId, guestId: p1.guestId, displayName: p1.displayName, playerIndex: 0 };
+      // socketId: '' — players are pre-assigned but not yet on the room page.
+      // startGame() is deferred until both emit room:join from the room page.
+      const host: ConnectedPlayer = { socketId: '', guestId: p1.guestId, displayName: p1.displayName, playerIndex: 0 };
       roomManager.createRoom(code, host, variantId);
       const room = roomManager.getRoom(code)!;
 
-      const guest: ConnectedPlayer = { socketId: p2.socketId, guestId: p2.guestId, displayName: p2.displayName, playerIndex: 1 };
+      const guest: ConnectedPlayer = { socketId: '', guestId: p2.guestId, displayName: p2.displayName, playerIndex: 1 };
       roomManager.addPlayer(room, guest);
 
       const p1Socket = io.sockets.sockets.get(p1.socketId);
       const p2Socket = io.sockets.sockets.get(p2.socketId);
-
-      p1Socket?.join(code);
-      p2Socket?.join(code);
 
       const matchPayloadP1: QueueMatchedPayload = { roomCode: code, playerIndex: 0 };
       const matchPayloadP2: QueueMatchedPayload = { roomCode: code, playerIndex: 1 };
 
       p1Socket?.emit('queue:matched', matchPayloadP1);
       p2Socket?.emit('queue:matched', matchPayloadP2);
-
-      startGame(io, room);
     } else {
       const position = qm.getPosition(socket.id);
       socket.emit('queue:status', { position, variantId } satisfies QueueStatusPayload);
@@ -193,26 +207,23 @@ io.on('connection', (socket) => {
       const [p1, p2] = pair;
       const code = roomManager.generateCode();
 
-      const host: ConnectedPlayer = { socketId: p1.socketId, guestId: p1.guestId, userId: p1.userId, displayName: p1.displayName, playerIndex: 0 };
+      // socketId: '' — players are pre-assigned but not yet on the room page.
+      // startGame() is deferred until both emit room:join from the room page.
+      const host: ConnectedPlayer = { socketId: '', guestId: p1.guestId, userId: p1.userId, displayName: p1.displayName, playerIndex: 0 };
       roomManager.createRoom(code, host, variantId, true);
       const room = roomManager.getRoom(code)!;
 
-      const guest: ConnectedPlayer = { socketId: p2.socketId, guestId: p2.guestId, userId: p2.userId, displayName: p2.displayName, playerIndex: 1 };
+      const guest: ConnectedPlayer = { socketId: '', guestId: p2.guestId, userId: p2.userId, displayName: p2.displayName, playerIndex: 1 };
       roomManager.addPlayer(room, guest);
 
       const p1Socket = io.sockets.sockets.get(p1.socketId);
       const p2Socket = io.sockets.sockets.get(p2.socketId);
-
-      p1Socket?.join(code);
-      p2Socket?.join(code);
 
       const matchPayloadP1: QueueMatchedPayload = { roomCode: code, playerIndex: 0, rated: true };
       const matchPayloadP2: QueueMatchedPayload = { roomCode: code, playerIndex: 1, rated: true };
 
       p1Socket?.emit('queue:matched', matchPayloadP1);
       p2Socket?.emit('queue:matched', matchPayloadP2);
-
-      startGame(io, room);
     } else {
       const position = qm.getPosition(socket.id);
       socket.emit('queue:status', { position, variantId, rated: true } satisfies QueueStatusPayload);

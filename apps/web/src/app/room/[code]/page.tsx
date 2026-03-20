@@ -165,16 +165,20 @@ export default function RoomPage() {
     }
 
     if (savedIndex !== null) {
+      // Optimistically set playerIndex from matchmaking data while we wait for server confirmation.
       const idx = parseInt(savedIndex, 10) as 0 | 1;
       dispatch({ type: 'SET_MY_INDEX', playerIndex: idx });
       sessionStorage.removeItem(`room:${code}:playerIndex`);
-    } else {
-      socket.emit('room:join', {
-        roomCode: code,
-        guestId: guest.guestId,
-        displayName: session?.user?.name ?? guest.displayName,
-      });
     }
+
+    // Always emit room:join so the server knows we've arrived at the room page.
+    // For matchmaking: this triggers startGame() once both players have joined.
+    // For private rooms: this is the standard join flow.
+    socket.emit('room:join', {
+      roomCode: code,
+      guestId: guest.guestId,
+      displayName: session?.user?.name ?? guest.displayName,
+    });
   }, [status, guest, session, socket, code]);
 
   useEffect(() => {
