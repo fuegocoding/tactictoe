@@ -10,6 +10,7 @@ import { StandardBoard } from '@/components/board/StandardBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
 import type { GameState, UltimateTTTState, StandardTTTState } from '@tactictoe/game-engine';
+import { QRCodeSVG } from 'qrcode.react';
 import styles from './page.module.css';
 
 interface PlayerInfo {
@@ -26,14 +27,16 @@ interface RoomState {
   winnerDisplayName: string | null;
   reason: 'win' | 'draw' | 'forfeit' | null;
   error: string | null;
+  matchId: string | null;
 }
 
 type RoomAction =
-  | { type: 'SET_MY_INDEX'; playerIndex: 0 | 1; players?: PlayerInfo[] }
+  | { type: 'SET_MY_INDEX'; playerIndex: 0 | 1 | null; players?: PlayerInfo[] }
   | { type: 'GAME_STARTED'; gameState: GameState; players: PlayerInfo[] }
   | { type: 'STATE_UPDATE'; gameState: GameState }
   | { type: 'GAME_OVER'; winner: 'X' | 'O' | null; reason: 'win' | 'draw' | 'forfeit'; winnerDisplayName: string | null }
-  | { type: 'ERROR'; message: string };
+  | { type: 'ERROR'; message: string }
+  | { type: 'MATCH_SAVED'; matchId: string };
 
 function roomReducer(state: RoomState, action: RoomAction): RoomState {
   switch (action.type) {
@@ -47,6 +50,8 @@ function roomReducer(state: RoomState, action: RoomAction): RoomState {
       return { ...state, phase: 'over', winner: action.winner, reason: action.reason, winnerDisplayName: action.winnerDisplayName };
     case 'ERROR':
       return { ...state, error: action.message };
+    case 'MATCH_SAVED':
+      return { ...state, matchId: action.matchId };
     default:
       return state;
   }
@@ -61,6 +66,7 @@ const initialState: RoomState = {
   winnerDisplayName: null,
   reason: null,
   error: null,
+  matchId: null,
 };
 
 function formatMoveRows(moves: string[]) {
@@ -220,6 +226,13 @@ export default function RoomPage() {
     function onSpectating() {
       dispatch({ type: 'ERROR', message: 'This room is full. Watching as spectator.' });
     }
+    function onSpectatorSync(data: { gameState: GameState; players: PlayerInfo[] }) {
+      dispatch({ type: 'SET_MY_INDEX', playerIndex: null, players: data.players });
+      dispatch({ type: 'GAME_STARTED', gameState: data.gameState, players: data.players });
+    }
+    function onMatchSaved(data: { matchId: string }) {
+      dispatch({ type: 'MATCH_SAVED', matchId: data.matchId });
+    }
 
     socket.on('room:joined', onRoomJoined);
     socket.on('game:started', onGameStarted);
@@ -228,6 +241,8 @@ export default function RoomPage() {
     socket.on('game:reconnect', onGameReconnect);
     socket.on('error', onError);
     socket.on('room:spectating', onSpectating);
+    socket.on('game:spectator_sync', onSpectatorSync);
+    socket.on('game:match_saved', onMatchSaved);
 
     return () => {
       socket.off('room:joined', onRoomJoined);
@@ -237,6 +252,8 @@ export default function RoomPage() {
       socket.off('game:reconnect', onGameReconnect);
       socket.off('error', onError);
       socket.off('room:spectating', onSpectating);
+      socket.off('game:spectator_sync', onSpectatorSync);
+      socket.off('game:match_saved', onMatchSaved);
     };
   }, [socket]);
 
@@ -278,8 +295,11 @@ export default function RoomPage() {
         <div className={styles.waiting}>
           <p className={styles.waitingTitle}>Waiting for opponent…</p>
           <p className={styles.waitingCode}>{code}</p>
-          <p className={styles.waitingHint}>Share this code or link with a friend to join instantly.</p>
+          <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
           <CopyButton text={shareUrl} />
+          <div style={{ marginTop: 'var(--space-4)', background: 'white', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)' }}>
+            <QRCodeSVG value={shareUrl} size={160} />
+          </div>
         </div>
       )}
 
@@ -387,6 +407,11 @@ export default function RoomPage() {
               <div className={styles.panel}>
                 <div className={styles.panelHeader}>Game Over</div>
                 <div className={styles.panelContent}>
+                  {roomState.matchId && (
+                    <div style={{ marginBottom: 'var(--space-3)' }}>
+                      <Button variant="secondary" onClick={() => router.push(`/replay/${roomState.matchId}`)} full>Watch Replay</Button>
+                    </div>
+                  )}
                   <Button variant="primary" onClick={() => router.push('/')} full>Back to Lobby</Button>
                 </div>
               </div>

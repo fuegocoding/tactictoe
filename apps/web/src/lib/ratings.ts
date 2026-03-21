@@ -73,7 +73,7 @@ export async function processGameResult(payload: GameResultPayload) {
   }
 
   // Always record the match
-  await prisma.match.create({
+  const match = await prisma.match.create({
     data: {
       variantId,
       rated: rated && !!player1.userId && !!player2.userId,
@@ -91,5 +91,5 @@ export async function processGameResult(payload: GameResultPayload) {
     },
   });
 
-  return { delta1, delta2 };
+  return { delta1, delta2, matchId: match.id };
 }

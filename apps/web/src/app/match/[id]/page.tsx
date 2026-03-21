@@ -88,6 +88,12 @@ export default async function MatchPage({ params }: Props) {
 
       <p className={styles.result}>{result}</p>
 
+      <div style={{ margin: 'var(--space-4) 0' }}>
+        <Link href={`/replay/${match.id}`} style={{ display: 'inline-block', padding: 'var(--space-2) var(--space-4)', background: 'var(--primary)', color: 'white', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontWeight: 500 }}>
+          ▶ Watch Interactive Replay
+        </Link>
+      </div>
+
       <section className={styles.movesSection}>
         <h2 className={styles.sectionTitle}>Move History</h2>
         {moves === null ? (

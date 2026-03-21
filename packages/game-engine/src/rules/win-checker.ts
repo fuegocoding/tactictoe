@@ -18,8 +18,8 @@ const WIN_LINES = [
 export function checkBoardWinner(board: Board): Player | null {
   for (const [a, b, c] of WIN_LINES) {
     const cell = board[a];
-    if (cell !== null && cell === board[b] && cell === board[c]) {
-      return cell;
+    if (cell !== null && cell !== undefined && cell === board[b] && cell === board[c]) {
+      return cell as Player;
     }
   }
   return null;

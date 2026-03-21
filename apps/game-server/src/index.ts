@@ -109,12 +109,19 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // New player joining
     if (room.players.length >= 2) {
       // Join as spectator
       roomManager.addSpectator(room, socket.id);
       socket.join(payload.roomCode);
       socket.emit('room:spectating', { roomCode: payload.roomCode });
+      
+      // If the game is already playing or finished, synchronize the board immediately
+      if ((room.status === 'active' || room.status === 'finished') && room.gameState) {
+        socket.emit('game:spectator_sync', {
+          gameState: room.gameState,
+          players: room.players.map((p) => ({ displayName: p.displayName, playerIndex: p.playerIndex }))
+        });
+      }
       return;
     }
 
