@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT } from '@tactictoe/game-engine';
+import {
+  StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
+  VanishingTTT, VANISHING_FADE_AFTER,
+  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
+} from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
@@ -10,46 +14,68 @@ import type { UltimateTTTState } from '@tactictoe/game-engine';
 import type { GomokuState } from '@tactictoe/game-engine';
 import type { SOSTTTState } from '@tactictoe/game-engine';
 import type { NumericalTTTState } from '@tactictoe/game-engine';
+import type { VanishingTTTState } from '@tactictoe/game-engine';
+import type { TTT3DState } from '@tactictoe/game-engine';
+import type { TTT4DState } from '@tactictoe/game-engine';
+import type { OrderChaosState } from '@tactictoe/game-engine';
+import type { TacticToeState } from '@tactictoe/game-engine';
+import type { Ultimate3DState } from '@tactictoe/game-engine';
 import { StandardBoard } from '@/components/board/StandardBoard';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
+import { ThreeDBoard } from '@/components/board/ThreeDBoard';
+import { FourDBoard } from '@/components/board/FourDBoard';
+import { TacticToeBoard } from '@/components/board/TacticToeBoard';
+import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import { useAI } from '@/hooks/useAI';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle } from 'lucide-react';
+import type { AIVariant } from '@/hooks/useAI';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
 import styles from './page.module.css';
 import localStyles from '../local/page.module.css';
 
-type Variant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto' | 'gomoku' | 'sos_ttt' | 'numerical_ttt';
+type Variant =
+  | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
+  | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
-  standard_3x3: { label: 'Standard', description: 'Classic. Quick casual games.', Icon: Grid3x3 },
-  ultimate_ttt: { label: 'Ultimate', description: '9 boards in one. The flagship.', Icon: Table2 },
-  misere_ttt: { label: 'Misère', description: 'Force your opponent to get 3-in-a-row to win.', Icon: Target },
-  wild_ttt: { label: 'Wild', description: 'Choose to place X or O on every turn.', Icon: Asterisk },
-  notakto: { label: 'Notakto', description: 'Both players place X. Avoid making 3-in-a-row!', Icon: Ban },
-  gomoku: { label: 'Gomoku', description: '15x15 board. First to 5 in a row wins. Deep strategy.', Icon: Grip },
-  sos_ttt: { label: 'SOS', description: 'Place S or O to spell S-O-S for points + extra turns.', Icon: Type },
-  numerical_ttt: { label: 'Numerical', description: 'Place numbers to sum precisely to 15.', Icon: Hash },
+  standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
+  ultimate_ttt:  { label: 'Ultimate',    description: '9 boards in one. The flagship.',                        Icon: Table2 },
+  misere_ttt:    { label: 'Misère',      description: 'Force your opponent to get 3-in-a-row to win.',         Icon: Target },
+  wild_ttt:      { label: 'Wild',        description: 'Choose to place X or O on every turn.',                 Icon: Asterisk },
+  notakto:       { label: 'Notakto',     description: 'Both players place X. Avoid making 3-in-a-row!',        Icon: Ban },
+  gomoku:        { label: 'Gomoku',      description: '15×15 board. First to 5-in-a-row wins.',                Icon: Grip },
+  sos_ttt:       { label: 'SOS',         description: 'Spell S-O-S for points + extra turns.',                 Icon: Type },
+  numerical_ttt: { label: 'Numerical',   description: 'Sum exactly 15 with three numbers.',                    Icon: Hash },
+  vanishing_ttt: { label: 'Vanishing',   description: 'Pieces disappear after 6 moves. Can you remember?',    Icon: Eye },
+  ttt_3d:        { label: '3D TTT',      description: '3×3×3 cube. Win in any dimension.',                     Icon: Layers },
+  ttt_4d:        { label: '4D TTT',      description: '3×3×3×3 hypercube. 4-dimensional strategy.',           Icon: Box },
+  order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
+  tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
+  ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
 };
 
 const engines: Record<Variant, GameRules> = {
-  standard_3x3: new StandardTTT(),
-  ultimate_ttt: new UltimateTTT(),
-  misere_ttt: new MisereTTT(),
-  wild_ttt: new WildTTT(),
-  notakto: new NotaktoTTT(),
-  gomoku: new Gomoku(),
-  sos_ttt: new SOSTTT(),
+  standard_3x3:  new StandardTTT(),
+  ultimate_ttt:  new UltimateTTT(),
+  misere_ttt:    new MisereTTT(),
+  wild_ttt:      new WildTTT(),
+  notakto:       new NotaktoTTT(),
+  gomoku:        new Gomoku(),
+  sos_ttt:       new SOSTTT(),
   numerical_ttt: new NumericalTTT(),
+  vanishing_ttt: new VanishingTTT(),
+  ttt_3d:        new TTT3D(),
+  ttt_4d:        new TTT4D(),
+  order_chaos:   new OrderChaos(),
+  tactic_toe:    new TacticToe(),
+  ultimate_3d:   new Ultimate3D(),
 };
 
-const DIFFICULTY_LABELS: Record<AIDifficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-};
+const DIFFICULTY_LABELS: Record<AIDifficulty, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
 
 export default function VsAIPage() {
   const [variant, setVariant] = useState<Variant>('ultimate_ttt');
@@ -63,9 +89,11 @@ export default function VsAIPage() {
   const [winner, setWinner] = useState<Player | null | undefined>(undefined);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [placingAs, setPlacingAs] = useState<string | number>('X');
+  const [tacticMoveMode, setTacticMoveMode] = useState<'place' | 'move_obstacle'>('place');
+  const [tacticSelectedObstacle, setTacticSelectedObstacle] = useState<number | null>(null);
   const movesRef = useRef<HTMLDivElement>(null);
 
-  const ai = useAI(variant, difficulty);
+  const ai = useAI(variant as AIVariant, difficulty);
   const aiPlayer: Player = humanPlayer === 'X' ? 'O' : 'X';
 
   useEffect(() => {
@@ -78,24 +106,27 @@ export default function VsAIPage() {
       const row = Math.floor(boardIndex / 3) * 3 + Math.floor(cellIndex / 3);
       return `${String.fromCharCode(97 + col)}${row + 1}`;
     }
-    if (variant === 'gomoku') {
-      return `${String.fromCharCode(97 + (cellIndex % 15))}${Math.floor(cellIndex / 15) + 1}`;
-    }
-    if (variant === 'sos_ttt') {
-      return `${String.fromCharCode(97 + (cellIndex % 8))}${Math.floor(cellIndex / 8) + 1}`;
-    }
+    if (variant === 'gomoku') return `${String.fromCharCode(97 + (cellIndex % 15))}${Math.floor(cellIndex / 15) + 1}`;
+    if (variant === 'sos_ttt') return `${String.fromCharCode(97 + (cellIndex % 8))}${Math.floor(cellIndex / 8) + 1}`;
+    if (variant === 'order_chaos') return `${String.fromCharCode(97 + (cellIndex % 6))}${Math.floor(cellIndex / 6) + 1}`;
+    if (variant === 'ttt_3d') return `L${boardIndex + 1}${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
+    if (variant === 'ttt_4d') return `[${Math.floor(boardIndex / 3) + 1},${(boardIndex % 3) + 1},${Math.floor(cellIndex / 3) + 1},${(cellIndex % 3) + 1}]`;
+    if (variant === 'ultimate_3d') return `M${boardIndex}[m${Math.floor(cellIndex / 9) + 1}(${Math.floor((cellIndex % 9) / 3) + 1},${(cellIndex % 3) + 1})]`;
     return `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
   }
 
   const startGame = () => {
     const engine = engines[variant];
-    const state = engine.initialize({ variantId: variant });
+    const seed = Date.now();
+    const state = engine.initialize({ variantId: variant, seed });
     setGameState(state);
     setPhase('playing');
     setWinner(undefined);
     setAiThinking(false);
     setMoveHistory([]);
     setPlacingAs(variant === 'sos_ttt' ? 'S' : variant === 'numerical_ttt' ? 1 : 'X');
+    setTacticMoveMode('place');
+    setTacticSelectedObstacle(null);
   };
 
   // Trigger AI move when it's the AI's turn
@@ -104,31 +135,60 @@ export default function VsAIPage() {
     if (gameState.currentPlayer !== aiPlayer) return;
 
     setAiThinking(true);
-
-    // Minimum visual delay so user sees the "AI is thinking" indicator
     const minDelay = difficulty === 'easy' ? 300 : difficulty === 'medium' ? 500 : 800;
     const startTime = Date.now();
-
     let cancelled = false;
 
     ai.getMove(gameState, aiPlayer).then(move => {
       if (cancelled) return;
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, minDelay - elapsed);
+
       setTimeout(() => {
         if (cancelled) return;
         const engine = engines[variant];
-        const boardIndex = variant === 'ultimate_ttt' ? move.boardIndex : 0;
-        const moveData =
-          variant === 'ultimate_ttt' ? { boardIndex, cellIndex: move.cellIndex } :
-          (variant === 'wild_ttt' || variant === 'sos_ttt') ? { cellIndex: move.cellIndex, symbol: move.symbol } :
-          variant === 'numerical_ttt' ? { cellIndex: move.cellIndex, numberPlaced: move.numberPlaced } :
-          { cellIndex: move.cellIndex };
-        const result = engine.applyMove(gameState, { data: moveData }, aiPlayer);
+        let moveData: unknown;
+        let coordStr = '';
+
+        if (variant === 'ultimate_ttt') {
+          moveData = { boardIndex: move.boardIndex, cellIndex: move.cellIndex };
+          coordStr = formatCoord(move.boardIndex, move.cellIndex);
+        } else if (variant === 'ttt_3d') {
+          const globalIndex = move.boardIndex * 9 + move.cellIndex;
+          moveData = { cellIndex: globalIndex };
+          coordStr = formatCoord(move.boardIndex, move.cellIndex);
+        } else if (variant === 'ttt_4d') {
+          const globalIndex = move.boardIndex * 9 + move.cellIndex;
+          moveData = { cellIndex: globalIndex };
+          coordStr = formatCoord(move.boardIndex, move.cellIndex);
+        } else if (variant === 'wild_ttt' || variant === 'sos_ttt') {
+          moveData = { cellIndex: move.cellIndex, symbol: move.symbol };
+          coordStr = `${formatCoord(0, move.cellIndex)} (${move.symbol})`;
+        } else if (variant === 'numerical_ttt') {
+          moveData = { cellIndex: move.cellIndex, numberPlaced: move.numberPlaced };
+          coordStr = `${formatCoord(0, move.cellIndex)} (${move.numberPlaced})`;
+        } else if (variant === 'order_chaos') {
+          moveData = { cellIndex: move.cellIndex, symbol: move.symbol };
+          coordStr = `${formatCoord(0, move.cellIndex)} (${move.symbol})`;
+        } else if (variant === 'tactic_toe') {
+          if (move.tacticType === 'place') {
+            moveData = { type: 'place', cellIndex: move.cellIndex };
+            const gi = move.cellIndex;
+            coordStr = `L${Math.floor(gi / 9) + 1}(${Math.floor((gi % 9) / 3) + 1},${(gi % 3) + 1})`;
+          } else {
+            moveData = { type: 'move_obstacle', fromCell: move.fromCell, toCell: move.toCell };
+            coordStr = `▪${move.fromCell}→${move.toCell}`;
+          }
+        } else if (variant === 'ultimate_3d') {
+          moveData = { macroCell: move.boardIndex, microCell: move.cellIndex };
+          coordStr = `M${move.boardIndex}[m${Math.floor(move.cellIndex / 9) + 1}(${Math.floor((move.cellIndex % 9) / 3) + 1},${(move.cellIndex % 3) + 1})]`;
+        } else {
+          moveData = { cellIndex: move.cellIndex };
+          coordStr = formatCoord(0, move.cellIndex);
+        }
+
+        const result = engine.applyMove(gameState!, { data: moveData }, aiPlayer);
         if (result.ok) {
-          const coordStr = (variant === 'wild_ttt' || variant === 'sos_ttt') ? `${formatCoord(boardIndex, move.cellIndex)} (${move.symbol})` : 
-                           variant === 'numerical_ttt' ? `${formatCoord(boardIndex, move.cellIndex)} (${move.numberPlaced})` : 
-                           formatCoord(boardIndex, move.cellIndex);
           setMoveHistory(prev => [...prev, coordStr]);
           const term = engine.checkTerminal(result.state);
           if (term) {
@@ -146,10 +206,8 @@ export default function VsAIPage() {
             setGameState(result.state);
             if (variant === 'numerical_ttt') {
               const nextState = result.state as NumericalTTTState;
-              const nextAvailable = nextState.currentPlayer === humanPlayer 
-                ? (humanPlayer === 'X' ? nextState.availableOdds : nextState.availableEvens)
-                : [];
-              if (nextAvailable.length > 0) setPlacingAs(nextAvailable[0]!);
+              const nextAvail = humanPlayer === 'X' ? nextState.availableOdds : nextState.availableEvens;
+              if (nextAvail.length > 0) setPlacingAs(nextAvail[0]!);
             }
           }
         }
@@ -163,15 +221,39 @@ export default function VsAIPage() {
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    if (variant === 'tactic_toe' || variant === 'ultimate_3d') return; // handled separately
     const engine = engines[variant];
-    const moveData =
-      variant === 'ultimate_ttt' ? { boardIndex, cellIndex } :
-      (variant === 'wild_ttt' || variant === 'sos_ttt') ? { cellIndex, symbol: placingAs } :
-      variant === 'numerical_ttt' ? { cellIndex, numberPlaced: typeof placingAs === 'number' ? placingAs : Number(placingAs) } :
-      { cellIndex };
+
+    let moveData: unknown;
+    let coordStr = '';
+
+    if (variant === 'ultimate_ttt') {
+      moveData = { boardIndex, cellIndex };
+      coordStr = formatCoord(boardIndex, cellIndex);
+    } else if (variant === 'ttt_3d') {
+      const globalIndex = boardIndex * 9 + cellIndex;
+      moveData = { cellIndex: globalIndex };
+      coordStr = formatCoord(boardIndex, cellIndex);
+    } else if (variant === 'ttt_4d') {
+      const globalIndex = boardIndex * 9 + cellIndex;
+      moveData = { cellIndex: globalIndex };
+      coordStr = formatCoord(boardIndex, cellIndex);
+    } else if (variant === 'wild_ttt' || variant === 'sos_ttt') {
+      moveData = { cellIndex, symbol: placingAs };
+      coordStr = `${formatCoord(0, cellIndex)} (${placingAs})`;
+    } else if (variant === 'numerical_ttt') {
+      moveData = { cellIndex, numberPlaced: typeof placingAs === 'number' ? placingAs : Number(placingAs) };
+      coordStr = `${formatCoord(0, cellIndex)} (${placingAs})`;
+    } else if (variant === 'order_chaos') {
+      moveData = { cellIndex, symbol: placingAs };
+      coordStr = `${formatCoord(0, cellIndex)} (${placingAs})`;
+    } else {
+      moveData = { cellIndex };
+      coordStr = formatCoord(0, cellIndex);
+    }
+
     const result = engine.applyMove(gameState, { data: moveData }, humanPlayer);
     if (!result.ok) return;
-    const coordStr = (variant === 'wild_ttt' || variant === 'sos_ttt' || variant === 'numerical_ttt') ? `${formatCoord(boardIndex, cellIndex)} (${placingAs})` : formatCoord(boardIndex, cellIndex);
     setMoveHistory(prev => [...prev, coordStr]);
     const term = engine.checkTerminal(result.state);
     if (term) {
@@ -187,10 +269,98 @@ export default function VsAIPage() {
       });
     } else {
       setGameState(result.state);
+      if (variant === 'numerical_ttt') {
+        const nextState = result.state as NumericalTTTState;
+        const nextAvail = humanPlayer === 'X' ? nextState.availableOdds : nextState.availableEvens;
+        if (nextAvail.length > 0) setPlacingAs(nextAvail[0]!);
+      }
+    }
+  };
+
+  const handleUltimate3DMove = (macroCell: number, microCell: number) => {
+    if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    const engine = engines['ultimate_3d'];
+    const result = engine.applyMove(gameState, { data: { macroCell, microCell } }, humanPlayer);
+    if (!result.ok) return;
+    const coord = `M${macroCell}[m${Math.floor(microCell / 9) + 1}(${Math.floor((microCell % 9) / 3) + 1},${(microCell % 3) + 1})]`;
+    setMoveHistory(prev => [...prev, coord]);
+    const term = engine.checkTerminal(result.state);
+    if (term) {
+      setGameState(result.state); setPhase('over'); setWinner(term.winner);
+      setScores(prev => {
+        const next = { ...prev };
+        if (term.winner === humanPlayer) next.human++;
+        else if (term.winner === aiPlayer) next.ai++;
+        else next.draws++;
+        return next;
+      });
+    } else {
+      setGameState(result.state);
+    }
+  };
+
+  const handleTacticCell = (globalIndex: number) => {
+    if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    const engine = engines['tactic_toe'];
+    const s = gameState as TacticToeState;
+
+    if (tacticMoveMode === 'place') {
+      const result = engine.applyMove(s, { data: { type: 'place', cellIndex: globalIndex } }, humanPlayer);
+      if (!result.ok) return;
+      const coord = `L${Math.floor(globalIndex / 9) + 1}(${Math.floor((globalIndex % 9) / 3) + 1},${(globalIndex % 3) + 1})`;
+      setMoveHistory(prev => [...prev, coord]);
+      const term = engine.checkTerminal(result.state);
+      if (term) {
+        setGameState(result.state); setPhase('over'); setWinner(term.winner);
+        setScores(prev => {
+          const next = { ...prev };
+          if (term.winner === humanPlayer) next.human++;
+          else if (term.winner === aiPlayer) next.ai++;
+          else next.draws++;
+          return next;
+        });
+      } else {
+        setGameState(result.state);
+        setTacticMoveMode('place');
+        setTacticSelectedObstacle(null);
+      }
+    } else {
+      const cell = s.board[globalIndex];
+      if (tacticSelectedObstacle === null) {
+        if (cell === 'B') setTacticSelectedObstacle(globalIndex);
+      } else {
+        if (cell === null) {
+          const result = engine.applyMove(s, { data: { type: 'move_obstacle', fromCell: tacticSelectedObstacle, toCell: globalIndex } }, humanPlayer);
+          if (!result.ok) { setTacticSelectedObstacle(null); return; }
+          const coord = `▪${tacticSelectedObstacle}→${globalIndex}`;
+          setMoveHistory(prev => [...prev, coord]);
+          setTacticSelectedObstacle(null);
+          setTacticMoveMode('place');
+          const term = engine.checkTerminal(result.state);
+          if (term) {
+            setGameState(result.state); setPhase('over'); setWinner(term.winner);
+          } else {
+            setGameState(result.state);
+          }
+        } else if (cell === 'B') {
+          setTacticSelectedObstacle(globalIndex);
+        } else {
+          setTacticSelectedObstacle(null);
+        }
+      }
     }
   };
 
   const isMyTurn = phase === 'playing' && gameState?.currentPlayer === humanPlayer && !aiThinking;
+
+  /** Visible board for Vanishing TTT */
+  function getVanishingVisible(s: VanishingTTTState): (string | number | null)[] {
+    return s.board.map((cell, i) => {
+      if (cell === null) return null;
+      const age = s.moveCount - (s.moveDates[i] ?? 0);
+      return age > VANISHING_FADE_AFTER ? null : cell;
+    });
+  }
 
   return (
     <div className={localStyles.page}>
@@ -201,7 +371,7 @@ export default function VsAIPage() {
 
       {phase === 'setup' && (
         <div className={localStyles.setupWrap}>
-          <Card style={{ width: '100%', maxWidth: 440 }}>
+          <Card style={{ width: '100%', maxWidth: 520 }}>
             <div className={localStyles.setup}>
               <div className={localStyles.variantRow}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -211,17 +381,14 @@ export default function VsAIPage() {
                       <HelpCircle size={14} style={{ marginRight: 4 }} />
                       {VARIANT_INFO[variant]?.description}
                     </div>
-                    <a href={`/learn#${variant}`} className={localStyles.learnMoreLink}>
-                      Learn more →
-                    </a>
+                    <a href={`/learn#${variant}`} className={localStyles.learnMoreLink}>Learn more →</a>
                   </div>
                 </div>
-                <div className={localStyles.variantButtons}>
+                <div className={localStyles.variantButtons} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                   {(Object.keys(VARIANT_INFO) as Variant[]).map(v => {
-                    const { label, Icon } = VARIANT_INFO[v];
+                    const { label, Icon } = VARIANT_INFO[v]!;
                     return (
-                      <button
-                        key={v}
+                      <button key={v}
                         className={`${localStyles.variantBtn} ${variant === v ? localStyles.selected : ''}`}
                         onClick={() => setVariant(v)}
                       >
@@ -237,13 +404,10 @@ export default function VsAIPage() {
                 <p className={localStyles.variantLabel}>Difficulty</p>
                 <div className={styles.diffRow}>
                   {(['easy', 'medium', 'hard'] as AIDifficulty[]).map(d => (
-                    <button
-                      key={d}
+                    <button key={d}
                       className={`${styles.diffBtn} ${difficulty === d ? styles.selected : ''}`}
                       onClick={() => setDifficulty(d)}
-                    >
-                      {DIFFICULTY_LABELS[d]}
-                    </button>
+                    >{DIFFICULTY_LABELS[d]}</button>
                   ))}
                 </div>
               </div>
@@ -252,24 +416,15 @@ export default function VsAIPage() {
                 <p className={localStyles.variantLabel}>Play as</p>
                 <div className={styles.sideRow}>
                   {(['X', 'O'] as Player[]).map(p => (
-                    <button
-                      key={p}
+                    <button key={p}
                       className={`${styles.sideBtn} ${humanPlayer === p ? styles.selected : ''}`}
                       onClick={() => setHumanPlayer(p)}
-                    >
-                      {p} {p === 'X' ? '(First)' : '(Second)'}
-                    </button>
+                    >{p} {p === 'X' ? '(First)' : '(Second)'}</button>
                   ))}
                 </div>
               </div>
 
-              <Input
-                label="Your name"
-                value={playerName}
-                onChange={e => setPlayerName(e.target.value)}
-                placeholder="You"
-              />
-
+              <Input label="Your name" value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="You" />
               <Button onClick={startGame} full>Start Game</Button>
             </div>
           </Card>
@@ -304,10 +459,7 @@ export default function VsAIPage() {
                 {phase === 'playing' && (
                   <div className={styles.thinking}>
                     {aiThinking ? (
-                      <>
-                        <div className={styles.thinkingDot} />
-                        AI is thinking…
-                      </>
+                      <><div className={styles.thinkingDot} />AI is thinking…</>
                     ) : (
                       <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
                         Your turn{variant !== 'notakto' && ` (${humanPlayer})`}
@@ -334,33 +486,56 @@ export default function VsAIPage() {
           </div>
 
           <div className={localStyles.mainBoard}>
-            {(variant === 'wild_ttt' || variant === 'sos_ttt') && phase === 'playing' && gameState?.currentPlayer === humanPlayer && !aiThinking && (
+            {/* Symbol pickers */}
+            {(variant === 'wild_ttt' || variant === 'sos_ttt') && isMyTurn && (
               <div className={localStyles.wildPicker}>
                 <span className={localStyles.wildPickerLabel}>Place as:</span>
-                <button
-                  className={`${localStyles.wildBtn} ${localStyles.x} ${placingAs === (variant === 'sos_ttt' ? 'S' : 'X') ? localStyles.active : ''}`}
-                  onClick={() => setPlacingAs(variant === 'sos_ttt' ? 'S' : 'X')}
-                >{variant === 'sos_ttt' ? 'S' : 'X'}</button>
-                <button
-                  className={`${localStyles.wildBtn} ${localStyles.o} ${placingAs === 'O' ? localStyles.active : ''}`}
-                  onClick={() => setPlacingAs('O')}
-                >O</button>
+                {(variant === 'sos_ttt' ? ['S', 'O'] : ['X', 'O']).map(sym => (
+                  <button key={sym}
+                    className={`${localStyles.wildBtn} ${sym === 'X' || sym === 'S' ? localStyles.x : localStyles.o} ${placingAs === sym ? localStyles.active : ''}`}
+                    onClick={() => setPlacingAs(sym)}
+                  >{sym}</button>
+                ))}
               </div>
             )}
-            {variant === 'numerical_ttt' && phase === 'playing' && gameState?.currentPlayer === humanPlayer && !aiThinking && (
+            {variant === 'order_chaos' && isMyTurn && (
+              <div className={localStyles.wildPicker}>
+                <span className={localStyles.wildPickerLabel}>Place symbol:</span>
+                {['X', 'O'].map(sym => (
+                  <button key={sym}
+                    className={`${localStyles.wildBtn} ${sym === 'X' ? localStyles.x : localStyles.o} ${placingAs === sym ? localStyles.active : ''}`}
+                    onClick={() => setPlacingAs(sym)}
+                  >{sym}</button>
+                ))}
+              </div>
+            )}
+            {variant === 'numerical_ttt' && isMyTurn && gameState && (
               <div className={localStyles.wildPicker}>
                 <span className={localStyles.wildPickerLabel}>Available Numbers:</span>
-                { ((gameState as NumericalTTTState)[humanPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
-                  <button
-                    key={num}
+                {((gameState as NumericalTTTState)[humanPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
+                  <button key={num}
                     className={`${localStyles.wildBtn} ${localStyles.x} ${placingAs === num ? localStyles.active : ''}`}
                     onClick={() => setPlacingAs(num)}
-                  >
-                    {num}
-                  </button>
-                )) }
+                  >{num}</button>
+                ))}
               </div>
             )}
+            {variant === 'vanishing_ttt' && phase === 'playing' && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                Pieces fade after {VANISHING_FADE_AFTER} moves — but remain on the board!
+              </div>
+            )}
+            {variant === 'tactic_toe' && isMyTurn && (
+              <div className={localStyles.wildPicker}>
+                <span className={localStyles.wildPickerLabel}>Action:</span>
+                <button className={`${localStyles.wildBtn} ${localStyles.x} ${tacticMoveMode === 'place' ? localStyles.active : ''}`}
+                  onClick={() => { setTacticMoveMode('place'); setTacticSelectedObstacle(null); }}>Place</button>
+                <button className={`${localStyles.wildBtn} ${localStyles.o} ${tacticMoveMode === 'move_obstacle' ? localStyles.active : ''}`}
+                  onClick={() => { setTacticMoveMode('move_obstacle'); setTacticSelectedObstacle(null); }}>Move Obstacle</button>
+              </div>
+            )}
+
+            {/* Boards */}
             {variant === 'ultimate_ttt' ? (
               <UltimateBoard
                 boards={(gameState as UltimateTTTState).boards}
@@ -371,30 +546,51 @@ export default function VsAIPage() {
                 onMove={handleMove}
               />
             ) : variant === 'gomoku' ? (
-              <GridBoard
-                board={(gameState as GomokuState).board}
-                cols={15}
-                rows={15}
-                currentPlayer={gameState.currentPlayer as 'X' | 'O'}
-                disabled={!isMyTurn}
-                onMove={(_, cellIndex) => handleMove(0, cellIndex)}
-              />
+              <GridBoard board={(gameState as GomokuState).board} cols={15} rows={15}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
+                onMove={(_, ci) => handleMove(0, ci)} />
             ) : variant === 'sos_ttt' ? (
-              <GridBoard
-                board={(gameState as SOSTTTState).board}
-                cols={8}
-                rows={8}
+              <GridBoard board={(gameState as SOSTTTState).board} cols={8} rows={8}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
+                onMove={(_, ci) => handleMove(0, ci)} />
+            ) : variant === 'order_chaos' ? (
+              <GridBoard board={(gameState as OrderChaosState).board} cols={6} rows={6}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
+                onMove={(_, ci) => handleMove(0, ci)} />
+            ) : variant === 'vanishing_ttt' ? (
+              <StandardBoard
+                board={getVanishingVisible(gameState as VanishingTTTState) as any}
+                currentPlayer={gameState.currentPlayer} disabled={!isMyTurn}
+                onMove={(_, ci) => handleMove(0, ci)} />
+            ) : variant === 'ttt_3d' ? (
+              <ThreeDBoard board={(gameState as TTT3DState).board}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
+                onMove={handleMove} />
+            ) : variant === 'ttt_4d' ? (
+              <FourDBoard board={(gameState as TTT4DState).board}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
+                onMove={handleMove} />
+            ) : variant === 'tactic_toe' ? (
+              <TacticToeBoard board={(gameState as TacticToeState).board}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                 disabled={!isMyTurn}
-                onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                moveMode={isMyTurn ? tacticMoveMode : 'place'}
+                selectedObstacle={isMyTurn ? tacticSelectedObstacle : null}
+                onCellClick={handleTacticCell} />
+            ) : variant === 'ultimate_3d' ? (
+              <Ultimate3DBoard
+                microBoards={(gameState as Ultimate3DState).microBoards}
+                macroResults={(gameState as Ultimate3DState).macroResults}
+                nextMacroConstraint={(gameState as Ultimate3DState).nextMacroConstraint}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                disabled={!isMyTurn}
+                onMove={handleUltimate3DMove}
               />
             ) : (
               <StandardBoard
                 board={(gameState as StandardTTTState).board}
-                currentPlayer={gameState.currentPlayer}
-                disabled={!isMyTurn}
-                onMove={(_, cellIndex) => handleMove(0, cellIndex)}
-              />
+                currentPlayer={gameState.currentPlayer} disabled={!isMyTurn}
+                onMove={(_, ci) => handleMove(0, ci)} />
             )}
           </div>
 

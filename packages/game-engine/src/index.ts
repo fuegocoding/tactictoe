@@ -46,3 +46,30 @@ export type { NumericalTTTState, NumericalTTTMove } from './rules/numerical-ttt.
 
 export { getGomokuAIMove, getSOSAIMove, getNumericalAIMove } from './ai/index.js';
 
+export { VanishingTTT, VANISHING_FADE_AFTER } from './rules/vanishing-ttt.js';
+export type { VanishingTTTState } from './rules/vanishing-ttt.js';
+
+export { TTT3D, WIN_LINES_3D } from './rules/ttt-3d.js';
+export type { TTT3DState } from './rules/ttt-3d.js';
+
+export { TTT4D, WIN_LINES_4D } from './rules/ttt-4d.js';
+export type { TTT4DState } from './rules/ttt-4d.js';
+
+export { OrderChaos } from './rules/order-chaos.js';
+export type { OrderChaosState, OrderChaosMove } from './rules/order-chaos.js';
+
+export { TacticToe } from './rules/tactic-toe.js';
+export type { TacticToeState, TacticToeMove } from './rules/tactic-toe.js';
+
+export { Ultimate3D } from './rules/ultimate-3d.js';
+export type { Ultimate3DState, Ultimate3DMove } from './rules/ultimate-3d.js';
+
+export {
+  getVanishingAIMove,
+  getTTT3DAIMove,
+  getTTT4DAIMove,
+  getOrderChaosAIMove,
+  getTacticToeAIMove,
+  getUltimate3DAIMove,
+} from './ai/index.js';
+export type { OrderChaosAIMove, TacticToeAIMove, Ultimate3DAIMove } from './ai/index.js';

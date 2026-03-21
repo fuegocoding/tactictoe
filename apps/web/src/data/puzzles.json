@@ -65,6 +65,97 @@
     "solution": { "boardIndex": 0, "cellIndex": 1 }
   },
   {
+    "id": "std-6",
+    "title": "Fork Setup",
+    "description": "X to create a fork — a position with two ways to win next move.",
+    "variant": "standard_3x3",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "board": ["X", "O", null, null, null, null, null, "O", "X"],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 4 }
+  },
+  {
+    "id": "std-7",
+    "title": "Block and Build",
+    "description": "O is one move from winning. Block AND set up your own win.",
+    "variant": "standard_3x3",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "board": ["O", null, "O", "X", null, null, null, null, "X"],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 1 }
+  },
+  {
+    "id": "std-8",
+    "title": "Double Threat",
+    "description": "Find the move that creates two simultaneous threats.",
+    "variant": "standard_3x3",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "board": [null, "O", null, null, "X", null, "X", "O", null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 0 }
+  },
+  {
+    "id": "std-9",
+    "title": "Corner Counter",
+    "description": "O took the center. Find the best counter-play.",
+    "variant": "standard_3x3",
+    "difficulty": "advanced",
+    "player": "X",
+    "state": {
+      "board": [null, "O", null, "O", "O", null, "X", null, "X"],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 5 }
+  },
+  {
+    "id": "std-10",
+    "title": "Forced Win",
+    "description": "X can win in two moves no matter what O does. Find the key first move.",
+    "variant": "standard_3x3",
+    "difficulty": "advanced",
+    "player": "X",
+    "state": {
+      "board": ["X", null, null, null, "O", null, null, null, "X"],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 2 }
+  },
+  {
+    "id": "std-11",
+    "title": "Save the Draw",
+    "description": "O is about to win. Block their winning move!",
+    "variant": "standard_3x3",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": [null, "O", "X", "X", "O", null, null, null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 7 }
+  },
+  {
+    "id": "std-12",
+    "title": "Two Roads",
+    "description": "X has a fork opportunity. Find the square that wins regardless of O's response.",
+    "variant": "standard_3x3",
+    "difficulty": "advanced",
+    "player": "X",
+    "state": {
+      "board": ["X", null, "O", null, "X", null, "O", null, null],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 8 }
+  },
+  {
     "id": "ult-1",
     "title": "Meta Closer",
     "description": "X to win a mini-board and clinch the match — find the move.",
@@ -88,5 +179,139 @@
       "currentPlayer": "X"
     },
     "solution": { "boardIndex": 2, "cellIndex": 2 }
+  },
+  {
+    "id": "ult-2",
+    "title": "Chain Reaction",
+    "description": "Winning this mini-board sends O into a lost position. Find the move.",
+    "variant": "ultimate_ttt",
+    "difficulty": "advanced",
+    "player": "X",
+    "state": {
+      "boards": [
+        ["X", "O", "X", "O", "X", "O", null, null, null],
+        ["O", "X", "O", "X", "O", "X", "O", null, null],
+        ["X", null, "O", null, "X", null, "O", null, null],
+        ["O", "X", null, "X", "O", null, "X", null, null],
+        ["X", "O", "X", "O", "X", "O", "X", "O", "X"],
+        [null, "X", null, "O", null, "X", null, "O", null],
+        ["O", null, "X", null, "O", null, "X", null, "O"],
+        [null, "X", null, "O", "X", "O", null, null, null],
+        ["X", "O", null, "O", "X", null, null, null, "X"]
+      ],
+      "boardResults": [null, "O", null, "X", "X", null, null, null, null],
+      "nextBoardConstraint": 2,
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 2, "cellIndex": 7 }
+  },
+  {
+    "id": "ult-3",
+    "title": "Board Control",
+    "description": "X can win the top-right mini-board to take a strategic position.",
+    "variant": "ultimate_ttt",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "boards": [
+        ["X", "O", "X", "O", "X", "O", "O", "X", "O"],
+        ["X", "O", "X", "O", "X", "O", "X", "O", "X"],
+        ["X", "X", null, "O", "O", null, null, null, null],
+        ["O", "X", "O", "X", "O", "X", "O", "X", "O"],
+        ["X", null, "O", null, "X", null, "O", null, "X"],
+        ["O", "X", "O", "X", "O", "X", "O", "X", "O"],
+        ["X", "O", "X", "O", "X", "O", "X", "O", "X"],
+        ["O", "X", "O", "X", "O", "X", "O", "X", "O"],
+        ["X", "O", "X", "O", "X", "O", "X", "O", "X"]
+      ],
+      "boardResults": ["draw", "X", null, "draw", null, "draw", "X", "draw", "X"],
+      "nextBoardConstraint": 2,
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 2, "cellIndex": 2 }
+  },
+  {
+    "id": "misere-1",
+    "title": "Misère Trap",
+    "description": "In Misère, completing a line LOSES. X to play — avoid defeat while trapping O.",
+    "variant": "misere_ttt",
+    "difficulty": "intermediate",
+    "player": "X",
+    "state": {
+      "board": ["X", "O", null, null, "O", null, null, null, "X"],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 5 }
+  },
+  {
+    "id": "misere-2",
+    "title": "Forced Hand",
+    "description": "Misère — every move has consequences. Find the only safe square.",
+    "variant": "misere_ttt",
+    "difficulty": "advanced",
+    "player": "O",
+    "state": {
+      "board": ["X", null, "O", "O", "X", null, null, null, "X"],
+      "currentPlayer": "O"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 5 }
+  },
+  {
+    "id": "gomoku-1",
+    "title": "Five in a Row",
+    "description": "X is one move away from winning. Complete the sequence!",
+    "variant": "gomoku",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": [
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,"X","X","X","X",null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+      ],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 68 }
+  },
+  {
+    "id": "gomoku-2",
+    "title": "Diagonal Surge",
+    "description": "X can win diagonally — find the completing cell.",
+    "variant": "gomoku",
+    "difficulty": "beginner",
+    "player": "X",
+    "state": {
+      "board": [
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,"X",null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,"X",null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,"X",null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,"X",null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+        null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+      ],
+      "currentPlayer": "X"
+    },
+    "solution": { "boardIndex": 0, "cellIndex": 96 }
   }
 ]
