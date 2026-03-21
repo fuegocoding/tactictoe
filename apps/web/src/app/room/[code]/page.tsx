@@ -347,20 +347,20 @@ export default function RoomPage() {
           <div className={styles.mainBoard}>
             {roomState.phase === 'playing' && (
               <p className={styles.turnBanner}>
-                {roomState.gameState.variantId === 'notakto_ttt'
+                {roomState.gameState!.variantId === 'notakto_ttt'
                   ? (isMyTurn ? 'Your turn' : "Opponent's turn")
                   : (isMyTurn ? 'Your turn' : "Opponent's turn")}
               </p>
             )}
 
-            {roomState.phase === 'playing' && (roomState.gameState.variantId === 'wild_ttt' || roomState.gameState.variantId === 'sos_ttt') && (
+            {roomState.phase === 'playing' && (roomState.gameState!.variantId === 'wild_ttt' || roomState.gameState!.variantId === 'sos_ttt') && (
               <div className={styles.wildPicker}>
                 <span className={styles.wildPickerLabel}>Place as:</span>
                 <button
-                  className={`${styles.wildBtn} ${styles.x} ${placingAs === (roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X') ? styles.active : ''}`}
-                  onClick={() => setPlacingAs(roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X')}
+                  className={`${styles.wildBtn} ${styles.x} ${placingAs === (roomState.gameState!.variantId === 'sos_ttt' ? 'S' : 'X') ? styles.active : ''}`}
+                  onClick={() => setPlacingAs(roomState.gameState!.variantId === 'sos_ttt' ? 'S' : 'X')}
                 >
-                  {roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X'}
+                  {roomState.gameState!.variantId === 'sos_ttt' ? 'S' : 'X'}
                 </button>
                 <button
                   className={`${styles.wildBtn} ${styles.o} ${placingAs === 'O' ? styles.active : ''}`}
@@ -370,12 +370,12 @@ export default function RoomPage() {
                 </button>
               </div>
             )}
-            {roomState.phase === 'playing' && roomState.gameState.variantId === 'numerical_ttt' && roomState.gameState && (
+            {roomState.phase === 'playing' && roomState.gameState!.variantId === 'numerical_ttt' && roomState.gameState && (
               <div className={styles.wildPicker}>
                 <span className={styles.wildPickerLabel}>
-                  {roomState.gameState.currentPlayer === 'X' ? 'Available Odds:' : 'Available Evens:'}
+                  {roomState.gameState!.currentPlayer === 'X' ? 'Available Odds:' : 'Available Evens:'}
                 </span>
-                { ((roomState.gameState as NumericalTTTState)[roomState.gameState.currentPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
+                { ((roomState.gameState as NumericalTTTState)[roomState.gameState!.currentPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
                   <button
                     key={num}
                     className={`${styles.wildBtn} ${styles.x} ${placingAs === num ? styles.active : ''}`}

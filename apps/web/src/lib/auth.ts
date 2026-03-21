@@ -34,19 +34,25 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user?.id) {
         token.userId = user.id;
-        // Look up username once at sign-in and cache in JWT (no per-request DB query)
+        // Look up username and role once at sign-in and cache in JWT (no per-request DB query)
         const profile = await prisma.profile.findUnique({
           where: { userId: user.id },
           select: { username: true },
         });
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true },
+        });
         token.username = profile?.username ?? null;
+        token.role = dbUser?.role ?? 'USER';
       }
       return token;
     },
     session({ session, token }) {
       if (token.userId && session.user) {
         session.user.id = token.userId as string;
-        if (token.username) session.user.username = token.username;
+        session.user.role = token.role as string;
+        if (token.username) session.user.username = token.username as string;
       }
       return session;
     },

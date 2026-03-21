@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot, Settings } from 'lucide-react';
+import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot, Settings, Shield } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import Avatar from './Avatar';
 import Button from './ui/Button';
@@ -15,12 +15,19 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <linearGradient id="logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop stopColor="#ef4444" offset="0%" />
+          <stop stopColor="#3b82f6" offset="50%" />
+          <stop stopColor="#f59e0b" offset="100%" />
+        </linearGradient>
+      </svg>
       <Link href="/" className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Grid3x3 size={22} style={{ color: 'var(--accent)' }} />
+        <Grid3x3 size={22} color="url(#logo-grad)" />
         <div>
-          <span style={{ color: 'var(--mark-x)' }}>TIC</span>
-          <span style={{ color: 'var(--text)' }}>TAC</span>
-          <span style={{ color: 'var(--accent)' }}>TOP</span>
+          <span style={{ color: '#ef4444' }}>TIC</span>
+          <span style={{ color: '#3b82f6' }}>TAC</span>
+          <span style={{ color: '#f59e0b' }}>TOP</span>
         </div>
       </Link>
 
@@ -53,6 +60,12 @@ export default function Sidebar() {
           <span className={styles.icon}><Settings size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Settings</span>
         </Link>
+        {session?.user?.role === 'ADMIN' && (
+          <Link href="/admin" className={`${styles.navItem} ${pathname === '/admin' ? styles.active : ''}`}>
+            <span className={styles.icon}><Shield size={18} strokeWidth={1.75} /></span>
+            <span className={styles.navLabel}>Admin</span>
+          </Link>
+        )}
       </nav>
 
       <div className={styles.spacer} />

@@ -108,11 +108,11 @@ export default function LobbyPage() {
         <div className={styles.leftColumn}>
           <div className={styles.hero}>
             <h1 className={styles.title} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'inherit' }}>
-              <Grid3x3 size={36} strokeWidth={2.5} style={{ color: 'var(--accent)' }} />
+              <Grid3x3 size={36} strokeWidth={2.5} color="url(#logo-grad)" />
               <div>
-                <span style={{ color: 'var(--mark-x)' }}>TIC</span>
-                <span style={{ color: 'var(--text)' }}>TAC</span>
-                <span style={{ color: 'var(--accent)' }}>TOP</span>
+                <span style={{ color: '#ef4444' }}>TIC</span>
+                <span style={{ color: '#3b82f6' }}>TAC</span>
+                <span style={{ color: '#f59e0b' }}>TOP</span>
               </div>
             </h1>
             <p className={styles.subtitle}>Competitive Tic-Tac-Toe and its deeper variants.</p>
