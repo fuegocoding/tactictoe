@@ -47,6 +47,8 @@ export interface MakeMovePayload {
   roomCode: string;
   boardIndex: number;
   cellIndex: number;
+  symbol?: string | number;
+  numberPlaced?: number;
 }
 
 // ─── Socket.io event payloads (server → client) ───────────────────────────────

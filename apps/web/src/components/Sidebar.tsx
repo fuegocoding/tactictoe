@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot } from 'lucide-react';
+import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot, Settings } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import Avatar from './Avatar';
 import Button from './ui/Button';
@@ -15,8 +15,13 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <Link href="/" className={styles.logo}>
-        Tactic<span>Toe</span>
+      <Link href="/" className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Grid3x3 size={22} style={{ color: 'var(--accent)' }} />
+        <div>
+          <span style={{ color: 'var(--mark-x)' }}>TIC</span>
+          <span style={{ color: 'var(--text)' }}>TAC</span>
+          <span style={{ color: 'var(--accent)' }}>TOP</span>
+        </div>
       </Link>
 
       <nav className={styles.navLinks}>
@@ -43,6 +48,10 @@ export default function Sidebar() {
         <Link href="/learn" className={`${styles.navItem} ${pathname === '/learn' ? styles.active : ''}`}>
           <span className={styles.icon}><BookOpen size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Learn</span>
+        </Link>
+        <Link href="/settings" className={`${styles.navItem} ${pathname === '/settings' ? styles.active : ''}`}>
+          <span className={styles.icon}><Settings size={18} strokeWidth={1.75} /></span>
+          <span className={styles.navLabel}>Settings</span>
         </Link>
       </nav>
 

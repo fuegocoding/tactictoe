@@ -6,7 +6,7 @@ import LeaderboardFilters from '@/components/LeaderboardFilters';
 import styles from './page.module.css';
 
 interface Props {
-  searchParams: { period?: string; variant?: string };
+  searchParams: { period?: string; variant?: string; season?: string };
 }
 
 const VALID_VARIANTS = ['ultimate_ttt', 'standard_3x3'];
@@ -15,7 +15,30 @@ const VARIANT_LABELS: Record<string, string> = {
   standard_3x3: 'Standard 3×3',
 };
 
-async function getLeaderboardRows(variantId: string, period: string) {
+async function getLeaderboardRows(variantId: string, period: string, seasonId?: string) {
+  if (seasonId) {
+    const season = await (prisma as any).season.findUnique({ where: { id: seasonId } });
+    if (season && !season.isActive) {
+      const snapshots = await (prisma as any).leaderboardSnapshot.findMany({
+        where: { seasonId, variantId },
+        orderBy: { finalRating: 'desc' },
+        take: 50,
+        include: { user: { include: { profile: { select: { username: true, displayName: true } } } } },
+      });
+      return snapshots.map((s: any) => ({
+        id: s.id,
+        userId: s.userId,
+        variantId: s.variantId,
+        rating: s.finalRating,
+        rd: 0,
+        wins: '-',
+        losses: '-',
+        draws: '-',
+        user: s.user
+      })).filter((r: any) => r.user.profile !== null);
+    }
+  }
+
   if (period === 'all') {
     const ratings = await prisma.rating.findMany({
       where: { variantId },
@@ -60,8 +83,17 @@ async function getLeaderboardRows(variantId: string, period: string) {
 export default async function LeaderboardPage({ searchParams }: Props) {
   const period = ['all', 'month', 'week'].includes(searchParams.period ?? '') ? (searchParams.period ?? 'all') : 'all';
   const variantId = VALID_VARIANTS.includes(searchParams.variant ?? '') ? (searchParams.variant ?? 'ultimate_ttt') : 'ultimate_ttt';
+  const seasonId = searchParams.season ?? undefined;
 
-  const rows = await getLeaderboardRows(variantId, period);
+  const rows = await Promise.all([
+    getLeaderboardRows(variantId, period, seasonId),
+    (prisma as any).season.findMany({ orderBy: { number: 'desc' } })
+  ]).then(([r, s]) => {
+    return { rows: r, seasons: s };
+  });
+  
+  const activeSeason = rows.seasons.find((s: any) => s.isActive);
+  const currentSeasonId = seasonId || activeSeason?.id;
 
   return (
     <div className={styles.page}>
@@ -71,10 +103,10 @@ export default async function LeaderboardPage({ searchParams }: Props) {
       </div>
 
       <Suspense>
-        <LeaderboardFilters period={period} variant={variantId} />
+        <LeaderboardFilters period={period} variant={variantId} currentSeasonId={currentSeasonId} seasons={rows.seasons} />
       </Suspense>
 
-      {rows.length === 0 ? (
+      {rows.rows.length === 0 ? (
         <p className={styles.empty}>No players found for this period.</p>
       ) : (
         <div className={styles.table}>
@@ -86,7 +118,7 @@ export default async function LeaderboardPage({ searchParams }: Props) {
             <span>L</span>
             <span>D</span>
           </div>
-          {rows.map((r, i) => {
+          {rows.rows.map((r: any, i: number) => {
             const profile = r.user.profile!;
             return (
               <Link key={r.id} href={`/profile/${profile.username}`} className={styles.row}>

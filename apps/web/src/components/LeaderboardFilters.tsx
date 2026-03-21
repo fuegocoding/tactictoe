@@ -17,9 +17,11 @@ const VARIANTS = [
 interface Props {
   period: string;
   variant: string;
+  currentSeasonId?: string;
+  seasons: { id: string; number: number; isActive: boolean }[];
 }
 
-export default function LeaderboardFilters({ period, variant }: Props) {
+export default function LeaderboardFilters({ period, variant, currentSeasonId, seasons }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -53,6 +55,21 @@ export default function LeaderboardFilters({ period, variant }: Props) {
           </button>
         ))}
       </div>
+      {seasons.length > 0 && (
+        <div className={styles.group}>
+          <select 
+            value={currentSeasonId || ''} 
+            onChange={(e) => update('season', e.target.value)}
+            className={styles.select}
+          >
+            {seasons.map(s => (
+              <option key={s.id} value={s.id}>
+                Season {s.number} {s.isActive ? '(Current)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }

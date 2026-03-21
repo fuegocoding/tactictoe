@@ -1,5 +1,5 @@
 import type { Server, Socket } from 'socket.io';
-import { UltimateTTT, StandardTTT, type GameRules, type GameState } from '@tactictoe/game-engine';
+import { UltimateTTT, StandardTTT, Gomoku, WildTTT, SOSTTT, MisereTTT, NotaktoTTT, NumericalTTT, type GameRules, type GameState } from '@tactictoe/game-engine';
 import { roomManager as defaultRoomManager, createRoomManager } from './room-manager.js';
 
 // Allow injecting a room manager for tests
@@ -53,6 +53,12 @@ async function reportResult(io: Server, room: RoomState, winner: 'X' | 'O' | nul
 const engines: Record<string, GameRules> = {
   ultimate_ttt: new UltimateTTT(),
   standard_3x3: new StandardTTT(),
+  gomoku: new Gomoku(),
+  wild_ttt: new WildTTT(),
+  sos_ttt: new SOSTTT(),
+  misere_ttt: new MisereTTT(),
+  notakto_ttt: new NotaktoTTT(),
+  numerical_ttt: new NumericalTTT(),
 };
 
 function getEngine(variantId: string): GameRules {
@@ -109,9 +115,16 @@ export function handleMove(
   }
 
   const engine = getEngine(room.variantId);
+
+  const moveData =
+    room.variantId === 'ultimate_ttt' ? { boardIndex: payload.boardIndex, cellIndex: payload.cellIndex } :
+    (room.variantId === 'wild_ttt' || room.variantId === 'sos_ttt') ? { cellIndex: payload.cellIndex, symbol: payload.symbol } :
+    room.variantId === 'numerical_ttt' ? { cellIndex: payload.cellIndex, numberPlaced: payload.numberPlaced } :
+    { cellIndex: payload.cellIndex };
+
   const result = engine.applyMove(
     gameState,
-    { data: { boardIndex: payload.boardIndex, cellIndex: payload.cellIndex } },
+    { data: moveData },
     playerSymbol
   );
 

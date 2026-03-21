@@ -18,19 +18,20 @@ import { GridBoard } from '@/components/board/GridBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle } from 'lucide-react';
 import styles from './page.module.css';
 
 type Variant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto' | 'gomoku' | 'sos_ttt' | 'numerical_ttt';
 
-const VARIANT_LABELS: Record<Variant, string> = {
-  standard_3x3: 'Standard 3×3',
-  ultimate_ttt: 'Ultimate TTT',
-  misere_ttt: 'Misère TTT',
-  wild_ttt: 'Wild TTT',
-  notakto: 'Notakto',
-  gomoku: 'Gomoku',
-  sos_ttt: 'SOS Tic-Tac-Toe',
-  numerical_ttt: 'Numerical TTT',
+const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
+  standard_3x3: { label: 'Standard', description: 'Classic. Quick casual games.', Icon: Grid3x3 },
+  ultimate_ttt: { label: 'Ultimate', description: '9 boards in one. The flagship.', Icon: Table2 },
+  misere_ttt: { label: 'Misère', description: 'Force your opponent to get 3-in-a-row to win.', Icon: Target },
+  wild_ttt: { label: 'Wild', description: 'Choose to place X or O on every turn.', Icon: Asterisk },
+  notakto: { label: 'Notakto', description: 'Both players place X. Avoid making 3-in-a-row!', Icon: Ban },
+  gomoku: { label: 'Gomoku', description: '15x15 board. First to 5 in a row wins. Deep strategy.', Icon: Grip },
+  sos_ttt: { label: 'SOS', description: 'Place S or O to spell S-O-S for points + extra turns.', Icon: Type },
+  numerical_ttt: { label: 'Numerical', description: 'Place numbers to sum precisely to 15.', Icon: Hash },
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -196,17 +197,32 @@ export default function LocalPage() {
           <Card style={{ width: '100%', maxWidth: 440 }}>
             <div className={styles.setup}>
               <div className={styles.variantRow}>
-                <p className={styles.variantLabel}>Game mode</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p className={styles.variantLabel}>Game mode</p>
+                  <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+                    <div className={styles.variantInfo} title={VARIANT_INFO[variant]?.description}>
+                      <HelpCircle size={14} style={{ marginRight: 4 }} />
+                      {VARIANT_INFO[variant]?.description}
+                    </div>
+                    <a href={`/learn#${variant}`} className={styles.learnMoreLink}>
+                      Learn more →
+                    </a>
+                  </div>
+                </div>
                 <div className={styles.variantButtons}>
-                  {(Object.keys(VARIANT_LABELS) as Variant[]).map((v) => (
-                    <button
-                      key={v}
-                      className={`${styles.variantBtn} ${variant === v ? styles.selected : ''}`}
-                      onClick={() => dispatch({ type: 'SET_VARIANT', variant: v })}
-                    >
-                      {VARIANT_LABELS[v]}
-                    </button>
-                  ))}
+                  {(Object.keys(VARIANT_INFO) as Variant[]).map((v) => {
+                    const { label, Icon } = VARIANT_INFO[v];
+                    return (
+                      <button
+                        key={v}
+                        className={`${styles.variantBtn} ${variant === v ? styles.selected : ''}`}
+                        onClick={() => dispatch({ type: 'SET_VARIANT', variant: v })}
+                      >
+                        <Icon size={16} strokeWidth={2.5} style={{ marginBottom: 4 }} />
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

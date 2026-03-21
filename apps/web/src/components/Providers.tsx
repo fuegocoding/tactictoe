@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { useEffect } from 'react';
 import { ThemeProvider } from '@/context/ThemeContext';
+import CosmeticsProvider from '@/components/CosmeticsProvider';
 
 function GuestSessionInitializer() {
   useEffect(() => {
@@ -15,8 +16,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <ThemeProvider>
-        <GuestSessionInitializer />
-        {children}
+        <CosmeticsProvider>
+          <GuestSessionInitializer />
+          {children}
+        </CosmeticsProvider>
       </ThemeProvider>
     </SessionProvider>
   );

@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
+import { evaluateAchievements } from './achievements';
 import { rateGame, DEFAULT_RATING, type Rating } from '@tactictoe/glicko2';
 
 export async function getOrCreateRating(userId: string, variantId: string): Promise<Rating & { id: string }> {
@@ -90,6 +91,8 @@ export async function processGameResult(payload: GameResultPayload) {
       moveHistory: moveHistory ?? Prisma.DbNull,
     },
   });
+
+  await evaluateAchievements(payload).catch(console.error);
 
   return { delta1, delta2, matchId: match.id };
 }

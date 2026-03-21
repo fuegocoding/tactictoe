@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { AIDifficulty, Player, GameState } from '@tactictoe/game-engine';
 
 export interface AIMove {
@@ -65,5 +65,5 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
     });
   }, [variant, difficulty]);
 
-  return { getMove };
+  return useMemo(() => ({ getMove }), [getMove]);
 }

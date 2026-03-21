@@ -208,3 +208,38 @@
   padding: var(--space-3) var(--space-4);
   text-align: center;
 }
+
+.wildPicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  background: var(--bg-hover);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.wildPickerLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.wildBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  background: var(--bg-raised);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.wildBtn:hover:not(.active) { transform: translateY(-2px); box-shadow: var(--shadow-md); background: var(--bg-hover); }
+.wildBtn.active { border-color: var(--accent); background: var(--accent-subtle); color: var(--accent); }
+.wildBtn.x { color: var(--mark-x); }
+.wildBtn.o { color: var(--mark-o); }

@@ -20,6 +20,10 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!profile) notFound();
 
+  const allAchievements = await (prisma as any).achievement.findMany({ orderBy: { id: 'asc' } });
+  const userAchievements = await (prisma as any).userAchievement.findMany({ where: { userId: profile.userId } });
+  const unlockedIds = new Set(userAchievements.map((ua: any) => ua.achievementId));
+
   const rawMatches = await prisma.match.findMany({
     where: { OR: [{ player1Id: profile.userId }, { player2Id: profile.userId }] },
     orderBy: { createdAt: 'desc' },
@@ -64,13 +68,31 @@ export default async function ProfilePage({ params }: Props) {
         <div className={styles.ratings}>
           {profile.user.ratings.map(r => (
             <div key={r.id} className={styles.ratingCard}>
-              <p className={styles.ratingVariant}>{VARIANT_LABELS[r.variantId] ?? r.variantId}</p>
-              <p className={styles.ratingValue}>{r.rd > 100 ? '~' : ''}{r.rating}</p>
-              <p className={styles.ratingStats}>{r.wins}W · {r.losses}L · {r.draws}D</p>
+               <p className={styles.ratingVariant}>{VARIANT_LABELS[r.variantId] ?? r.variantId}</p>
+               <p className={styles.ratingValue}>{r.rd > 100 ? '~' : ''}{Math.round(r.rating)}</p>
+               <p className={styles.ratingStats}>{r.wins}W · {r.losses}L · {r.draws}D</p>
             </div>
           ))}
         </div>
       )}
+
+      <section className={styles.achievementsSection}>
+        <h2 className={styles.sectionTitle}>Trophy Case</h2>
+        <div className={styles.achievementsGrid}>
+          {allAchievements.map((a: any) => {
+            const isUnlocked = unlockedIds.has(a.id);
+            return (
+              <div key={a.id} className={`${styles.achievementBadge} ${!isUnlocked ? styles.locked : ''}`}>
+                <div className={styles.achievementIcon}>{a.iconUrl}</div>
+                <div className={styles.achievementInfo}>
+                  <h4>{a.name}</h4>
+                  <p>{a.description}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <section className={styles.matchesSection}>
         <h2 className={styles.sectionTitle}>Recent Matches</h2>

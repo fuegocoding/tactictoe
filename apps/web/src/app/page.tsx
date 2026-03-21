@@ -12,14 +12,22 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import RatingBadge from '@/components/RatingBadge';
+import HeroBoard from '@/components/HeroBoard';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle } from 'lucide-react';
 import styles from './page.module.css';
 
 type TabId = 'quick' | 'private' | 'ranked';
-type VariantId = 'ultimate_ttt' | 'standard_3x3';
+type VariantId = 'ultimate_ttt' | 'standard_3x3' | 'gomoku' | 'misere_ttt' | 'notakto_ttt' | 'wild_ttt' | 'sos_ttt' | 'numerical_ttt';
 
-const VARIANTS: { id: VariantId; label: string; description: string }[] = [
-  { id: 'ultimate_ttt', label: 'Ultimate TTT', description: '9 boards in one. The flagship.' },
-  { id: 'standard_3x3', label: 'Standard 3×3', description: 'Classic. Quick casual games.' },
+const VARIANTS: { id: VariantId; label: string; description: string; Icon: any }[] = [
+  { id: 'ultimate_ttt', label: 'Ultimate', description: '9 boards in one. The flagship.', Icon: Table2 },
+  { id: 'gomoku', label: 'Gomoku', description: '15x15 board. First to 5 in a row wins. Deep strategy.', Icon: Grip },
+  { id: 'standard_3x3', label: 'Standard', description: 'Classic. Quick casual games.', Icon: Grid3x3 },
+  { id: 'misere_ttt', label: 'Misère', description: 'Force your opponent to get 3-in-a-row to win.', Icon: Target },
+  { id: 'notakto_ttt', label: 'Notakto', description: 'Both players place X. Avoid making 3-in-a-row!', Icon: Ban },
+  { id: 'wild_ttt', label: 'Wild', description: 'Choose to place X or O on every turn.', Icon: Asterisk },
+  { id: 'sos_ttt', label: 'SOS', description: 'Place S or O to spell S-O-S for points + extra turns.', Icon: Type },
+  { id: 'numerical_ttt', label: 'Numerical', description: 'Place numbers to sum precisely to 15.', Icon: Hash },
 ];
 
 export default function LobbyPage() {
@@ -96,30 +104,53 @@ export default function LobbyPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.hero}>
-        <h1 className={styles.title}>Tactic<span>Toe</span></h1>
-        <p className={styles.subtitle}>Competitive Tic-Tac-Toe and its deeper variants.</p>
-        {myRating && (
-          <div style={{ marginTop: 'var(--space-3)' }}>
-            <RatingBadge rating={myRating.rating} rd={myRating.rd} wins={myRating.wins} losses={myRating.losses} />
+      <div className={styles.twoColumn}>
+        <div className={styles.leftColumn}>
+          <div className={styles.hero}>
+            <h1 className={styles.title} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'inherit' }}>
+              <Grid3x3 size={36} strokeWidth={2.5} style={{ color: 'var(--accent)' }} />
+              <div>
+                <span style={{ color: 'var(--mark-x)' }}>TIC</span>
+                <span style={{ color: 'var(--text)' }}>TAC</span>
+                <span style={{ color: 'var(--accent)' }}>TOP</span>
+              </div>
+            </h1>
+            <p className={styles.subtitle}>Competitive Tic-Tac-Toe and its deeper variants.</p>
+            {myRating && (
+              <div style={{ marginTop: 'var(--space-3)' }}>
+                <RatingBadge rating={myRating.rating} rd={myRating.rd} wins={myRating.wins} losses={myRating.losses} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+          <HeroBoard />
+        </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+        <div className={styles.rightColumn}>
+          {error && <div className={styles.error}>{error}</div>}
 
-      <Card style={{ width: '100%' }}>
-        {/* Variant selector */}
+          <Card style={{ width: '100%' }}>
         <div className={styles.variantRow}>
-          <p className={styles.variantLabel}>Game mode</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p className={styles.variantLabel}>Game mode</p>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+              <div className={styles.variantInfo} title={VARIANTS.find(v => v.id === variant)?.description}>
+                <HelpCircle size={14} style={{ marginRight: 4 }} />
+                {VARIANTS.find(v => v.id === variant)?.description}
+              </div>
+              <a href={`/learn#${variant}`} className={styles.learnMoreLink}>
+                Learn more →
+              </a>
+            </div>
+          </div>
           <div className={styles.variantButtons}>
-            {VARIANTS.map(v => (
+            {VARIANTS.map(({ id, label, Icon }) => (
               <button
-                key={v.id}
-                className={`${styles.variantBtn} ${variant === v.id ? styles.selected : ''}`}
-                onClick={() => setVariant(v.id)}
+                key={id}
+                className={`${styles.variantBtn} ${variant === id ? styles.selected : ''}`}
+                onClick={() => setVariant(id)}
               >
-                {v.label}
+                <Icon size={16} strokeWidth={2.5} style={{ marginBottom: 4 }} />
+                <span>{label}</span>
               </button>
             ))}
           </div>
@@ -202,25 +233,27 @@ export default function LobbyPage() {
             )}
           </div>
         )}
-      </Card>
+          </Card>
 
-      <p className={styles.localLink}>
-        Playing with someone next to you?{' '}
-        <Link href="/local">Play locally on this screen →</Link>
-      </p>
+          <p className={styles.localLink}>
+            Playing with someone next to you?{' '}
+            <Link href="/local">Play locally on this screen →</Link>
+          </p>
 
-      <p className={styles.localLink}>
-        Want to practice?{' '}
-        <Link href="/vs-ai">Play vs AI →</Link>
-      </p>
+          <p className={styles.localLink}>
+            Want to practice?{' '}
+            <Link href="/vs-ai">Play vs AI →</Link>
+          </p>
 
-      {!session && (
-        <p className={styles.guestCta}>
-          Playing as guest.{' '}
-          <Link href="/register">Create an account</Link>{' '}
-          to track your rating and match history.
-        </p>
-      )}
+          {!session && (
+            <p className={styles.guestCta}>
+              Playing as guest.{' '}
+              <Link href="/register">Create an account</Link>{' '}
+              to track your rating and match history.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

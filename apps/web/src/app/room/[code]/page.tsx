@@ -9,7 +9,8 @@ import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { StandardBoard } from '@/components/board/StandardBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
-import type { GameState, UltimateTTTState, StandardTTTState } from '@tactictoe/game-engine';
+import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState } from '@tactictoe/game-engine';
+import { GridBoard } from '@/components/board/GridBoard';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './page.module.css';
 
@@ -95,6 +96,7 @@ export default function RoomPage() {
   const [finalRating, setFinalRating] = useState<number | null>(null);
 
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [placingAs, setPlacingAs] = useState<string | number>('X');
   const prevStateRef = useRef<GameState | null>(null);
   const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
@@ -116,6 +118,16 @@ export default function RoomPage() {
       movesRef.current.scrollTop = movesRef.current.scrollHeight;
     }
   }, [moveHistory]);
+
+  useEffect(() => {
+    if (roomState.gameState?.variantId === 'numerical_ttt') {
+      const state = roomState.gameState as NumericalTTTState;
+      const available = state.currentPlayer === 'X' ? state.availableOdds : state.availableEvens;
+      if (!available.includes(Number(placingAs)) && available.length > 0) {
+        setPlacingAs(available[0]!);
+      }
+    }
+  }, [roomState.gameState, placingAs]);
 
   useEffect(() => {
     const prevState = prevStateRef.current;
@@ -259,9 +271,16 @@ export default function RoomPage() {
 
   const handleMove = useCallback(
     (boardIndex: number, cellIndex: number) => {
-      socket.emit('game:move', { roomCode: code, boardIndex, cellIndex });
+      if (!roomState.gameState) return;
+      const moveData =
+        roomState.gameState.variantId === 'ultimate_ttt' ? { roomCode: code, boardIndex, cellIndex } :
+        (roomState.gameState.variantId === 'wild_ttt' || roomState.gameState.variantId === 'sos_ttt') ? { roomCode: code, boardIndex, cellIndex, symbol: placingAs } :
+        roomState.gameState.variantId === 'numerical_ttt' ? { roomCode: code, boardIndex, cellIndex, numberPlaced: typeof placingAs === 'number' ? placingAs : Number(placingAs) } :
+        { roomCode: code, boardIndex, cellIndex };
+
+      socket.emit('game:move', moveData);
     },
-    [socket, code]
+    [socket, code, roomState.gameState, placingAs]
   );
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
@@ -328,8 +347,44 @@ export default function RoomPage() {
           <div className={styles.mainBoard}>
             {roomState.phase === 'playing' && (
               <p className={styles.turnBanner}>
-                {isMyTurn ? 'Your turn' : "Opponent's turn"}
+                {roomState.gameState.variantId === 'notakto_ttt'
+                  ? (isMyTurn ? 'Your turn' : "Opponent's turn")
+                  : (isMyTurn ? 'Your turn' : "Opponent's turn")}
               </p>
+            )}
+
+            {roomState.phase === 'playing' && (roomState.gameState.variantId === 'wild_ttt' || roomState.gameState.variantId === 'sos_ttt') && (
+              <div className={styles.wildPicker}>
+                <span className={styles.wildPickerLabel}>Place as:</span>
+                <button
+                  className={`${styles.wildBtn} ${styles.x} ${placingAs === (roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X') ? styles.active : ''}`}
+                  onClick={() => setPlacingAs(roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X')}
+                >
+                  {roomState.gameState.variantId === 'sos_ttt' ? 'S' : 'X'}
+                </button>
+                <button
+                  className={`${styles.wildBtn} ${styles.o} ${placingAs === 'O' ? styles.active : ''}`}
+                  onClick={() => setPlacingAs('O')}
+                >
+                  O
+                </button>
+              </div>
+            )}
+            {roomState.phase === 'playing' && roomState.gameState.variantId === 'numerical_ttt' && roomState.gameState && (
+              <div className={styles.wildPicker}>
+                <span className={styles.wildPickerLabel}>
+                  {roomState.gameState.currentPlayer === 'X' ? 'Available Odds:' : 'Available Evens:'}
+                </span>
+                { ((roomState.gameState as NumericalTTTState)[roomState.gameState.currentPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
+                  <button
+                    key={num}
+                    className={`${styles.wildBtn} ${styles.x} ${placingAs === num ? styles.active : ''}`}
+                    onClick={() => setPlacingAs(num)}
+                  >
+                    {num}
+                  </button>
+                )) }
+              </div>
             )}
 
             {roomState.phase === 'over' && (
@@ -355,19 +410,37 @@ export default function RoomPage() {
             )}
 
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 'var(--space-2)' }}>
-              {roomState.gameState.variantId === 'ultimate_ttt' ? (
+              {roomState.gameState!.variantId === 'ultimate_ttt' ? (
                 <UltimateBoard
                   boards={(roomState.gameState as UltimateTTTState).boards}
                   boardResults={(roomState.gameState as UltimateTTTState).boardResults}
                   nextBoardConstraint={(roomState.gameState as UltimateTTTState).nextBoardConstraint}
-                  currentPlayer={roomState.gameState.currentPlayer}
+                  currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={handleMove}
+                />
+              ) : roomState.gameState!.variantId === 'gomoku' ? (
+                <GridBoard
+                  board={(roomState.gameState as GomokuState).board}
+                  cols={15}
+                  rows={15}
+                  currentPlayer={roomState.gameState!.currentPlayer as 'X' | 'O'}
+                  disabled={!isMyTurn}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                />
+              ) : roomState.gameState!.variantId === 'sos_ttt' ? (
+                <GridBoard
+                  board={(roomState.gameState as SOSTTTState).board}
+                  cols={8}
+                  rows={8}
+                  currentPlayer={roomState.gameState!.currentPlayer as 'X' | 'O'}
+                  disabled={!isMyTurn}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
                 />
               ) : (
                 <StandardBoard
                   board={(roomState.gameState as StandardTTTState).board}
-                  currentPlayer={roomState.gameState.currentPlayer}
+                  currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
                 />
@@ -387,10 +460,11 @@ export default function RoomPage() {
                     const sym = p.playerIndex === 0 ? 'X' : 'O';
                     const isMe = p.playerIndex === roomState.myPlayerIndex;
                     const isActive = roomState.gameState?.currentPlayer === sym && roomState.phase === 'playing';
+                    const isNotakto = roomState.gameState?.variantId === 'notakto_ttt';
                     return (
                       <div key={p.playerIndex} className={`${styles.playerCard} ${isActive ? styles.active : ''}`}>
                         <span className={styles.playerSymbol} style={{ color: sym === 'X' ? 'var(--mark-x)' : 'var(--mark-o)' }}>
-                          {sym}
+                          {isNotakto ? 'X' : sym}
                         </span>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span className={styles.playerName}>{p.displayName}</span>

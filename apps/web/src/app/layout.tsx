@@ -7,7 +7,7 @@ import Sidebar from '@/components/Sidebar';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'TacticToe',
+  title: 'TicTacTop',
   description: 'Competitive Tic-Tac-Toe and its deeper variants',
 };
 

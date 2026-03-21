@@ -60,9 +60,13 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  ratings   Rating[]
-  matches1  Match[] @relation("MatchPlayer1")
-  matches2  Match[] @relation("MatchPlayer2")
+  ratings      Rating[]
+  matches1     Match[] @relation("MatchPlayer1")
+  matches2     Match[] @relation("MatchPlayer2")
+
+  cosmetics    UserCosmetic[]
+  achievements UserAchievement[]
+  snapshots    LeaderboardSnapshot[]
 
   @@map("users")
 }
@@ -138,4 +142,80 @@ model Match {
   @@index([player1Id, createdAt(sort: Desc)])
   @@index([player2Id, createdAt(sort: Desc)])
   @@index([variantId, createdAt(sort: Desc)])
+}
+
+// ─── Progression & Meta ───────────────────────────────────────────────────────
+
+model Cosmetic {
+  id            String    @id @default(cuid())
+  name          String
+  type          String    // 'board' | 'piece'
+  cssValue      String    // the style payload
+  requiredScore Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  owners        UserCosmetic[]
+}
+
+model UserCosmetic {
+  userId     String
+  cosmeticId String
+  isEquipped Boolean   @default(false)
+  unlockedAt DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Cascade)
+
+  @@id([userId, cosmeticId])
+  @@index([userId, isEquipped])
+}
+
+model Achievement {
+  id            String    @id @default(cuid())
+  name          String
+  description   String
+  conditionCode String    @unique
+  iconUrl       String?
+
+  users         UserAchievement[]
+}
+
+model UserAchievement {
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+}
+
+model Season {
+  id        String   @id @default(cuid())
+  number    Int      @unique
+  name      String?
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  snapshots LeaderboardSnapshot[]
+}
+
+model LeaderboardSnapshot {
+  seasonId    String
+  userId      String
+  variantId   String
+  finalRating Int
+  wins        Int
+  losses      Int
+  draws       Int
+  archivedAt  DateTime @default(now())
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([seasonId, userId, variantId])
+  @@index([seasonId, variantId, finalRating(sort: Desc)])
 }
