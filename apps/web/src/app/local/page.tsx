@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
-  TTT3D, TTT4D, OrderChaos, TacticToe,
+  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
 } from '@tactictoe/game-engine';
 import type { GameState, TerminalResult } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
@@ -19,6 +19,7 @@ import type { TTT3DState } from '@tactictoe/game-engine';
 import type { TTT4DState } from '@tactictoe/game-engine';
 import type { OrderChaosState } from '@tactictoe/game-engine';
 import type { TacticToeState } from '@tactictoe/game-engine';
+import type { Ultimate3DState } from '@tactictoe/game-engine';
 
 type LocalGameState = GameState & { terminal?: TerminalResult | null };
 import { StandardBoard } from '@/components/board/StandardBoard';
@@ -27,16 +28,17 @@ import { GridBoard } from '@/components/board/GridBoard';
 import { ThreeDBoard } from '@/components/board/ThreeDBoard';
 import { FourDBoard } from '@/components/board/FourDBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
+import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
 import styles from './page.module.css';
 
 type Variant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
   standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
@@ -52,6 +54,7 @@ const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: 
   ttt_4d:        { label: '4D TTT',      description: '3×3×3×3 hypercube. 4-dimensional strategy.',           Icon: Box },
   order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
   tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
+  ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -68,6 +71,7 @@ const engines: Record<Variant, GameRules> = {
   ttt_4d:        new TTT4D(),
   order_chaos:   new OrderChaos(),
   tactic_toe:    new TacticToe(),
+  ultimate_3d:   new Ultimate3D(),
 };
 
 interface LocalState {
@@ -264,6 +268,23 @@ export default function LocalPage() {
       dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate });
     } else {
       dispatch({ type: 'MOVE', gameState: result.state, coordinate });
+    }
+  };
+
+  const handleUltimate3DMove = (macroCell: number, microCell: number) => {
+    if (!state.gameState || state.phase !== 'playing') return;
+    const engine = engines['ultimate_3d'];
+    const move = { data: { macroCell, microCell } };
+    const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
+    if (!result.ok) return;
+    const metaLayer = Math.floor(macroCell / 9) + 1;
+    const microLayer = Math.floor(microCell / 9) + 1;
+    const coord = `M${macroCell}[m${microLayer}(${Math.floor((microCell % 9) / 3) + 1},${(microCell % 3) + 1})]`;
+    const terminal = engine.checkTerminal(result.state);
+    if (terminal) {
+      dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate: coord });
+    } else {
+      dispatch({ type: 'MOVE', gameState: result.state, coordinate: coord });
     }
   };
 
@@ -546,6 +567,15 @@ export default function LocalPage() {
                   moveMode={state.tacticMoveMode}
                   selectedObstacle={state.tacticSelectedObstacle}
                   onCellClick={handleTacticCell}
+                />
+              ) : variant === 'ultimate_3d' ? (
+                <Ultimate3DBoard
+                  microBoards={(gameState as Ultimate3DState).microBoards}
+                  macroResults={(gameState as Ultimate3DState).macroResults}
+                  nextMacroConstraint={(gameState as Ultimate3DState).nextMacroConstraint}
+                  currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                  disabled={phase === 'over'}
+                  onMove={handleUltimate3DMove}
                 />
               ) : (
                 <StandardBoard

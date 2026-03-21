@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft, Eye, Box, Layers, Swords, Shuffle } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
 import styles from './page.module.css';
 
 const LEARN_DATA = [
@@ -167,6 +167,22 @@ const LEARN_DATA = [
       'Moving obstacles is a tactical tool — reshape the battlefield to create or block winning lines!',
       'Win by getting 3-in-a-row in any 3D direction (obstacles do not form winning lines).',
       'Each match has a unique random obstacle layout, making every game different.'
+    ]
+  },
+  {
+    id: 'ultimate_3d',
+    label: 'Ultimate 3D Tic-Tac-Toe',
+    Icon: Network,
+    description: 'Ultimate TTT expanded into three dimensions — a 729-cell strategic behemoth.',
+    rules: [
+      'Played on a 3×3×3 meta-grid (27 macro-cells), each containing its own 3×3×3 micro-board (27 cells) — 729 total cells.',
+      'Win a macro-cell by getting 3-in-a-row in that macro-cell\'s micro-board using 3D win lines.',
+      'Win the game by getting 3-in-a-row of won macro-cells in the meta-grid using 3D win lines.',
+      'CONSTRAINT RULE: The micro-cell you play in determines which macro-cell your opponent must play in next.',
+      'For example, playing micro-cell 13 forces your opponent into macro-cell 13 next turn.',
+      'If the forced macro-cell is already won or drawn, your opponent may play in any available macro-cell.',
+      'Use the Meta-Layer (L1/L2/L3) and Micro-Layer (m1/m2/m3) pickers to navigate the 3D structure.',
+      'There are 49 win lines in each 3D board. Mastering 3D spatial reasoning is the key to victory.'
     ]
   }
 ];

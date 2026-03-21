@@ -15,3 +15,5 @@ export { getOrderChaosAIMove } from './order-chaos-ai.js';
 export type { OrderChaosAIMove } from './order-chaos-ai.js';
 export { getTacticToeAIMove } from './tactic-toe-ai.js';
 export type { TacticToeAIMove } from './tactic-toe-ai.js';
+export { getUltimate3DAIMove } from './ultimate-3d-ai.js';
+export type { Ultimate3DAIMove } from './ultimate-3d-ai.js';

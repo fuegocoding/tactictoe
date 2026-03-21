@@ -17,7 +17,7 @@ export interface AIMove {
 export type AIVariant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
 
 /**
  * Hook that returns a `getMove` function for AI opponents.
@@ -43,6 +43,7 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             getTTT4DAIMove,
             getOrderChaosAIMove,
             getTacticToeAIMove,
+            getUltimate3DAIMove,
           } = await import('@tactictoe/game-engine');
 
           if (variant === 'standard_3x3') {
@@ -90,6 +91,10 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             } else {
               resolve({ boardIndex: 0, cellIndex: move.toCell!, tacticType: 'move_obstacle', fromCell: move.fromCell, toCell: move.toCell });
             }
+          } else if (variant === 'ultimate_3d') {
+            const move = getUltimate3DAIMove(state as Parameters<typeof getUltimate3DAIMove>[0], aiPlayer, difficulty);
+            // boardIndex = macroCell, cellIndex = microCell
+            resolve({ boardIndex: move.macroCell, cellIndex: move.microCell });
           }
         } catch (err) {
           reject(err instanceof Error ? err : new Error(String(err)));

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
-  TTT3D, TTT4D, OrderChaos, TacticToe,
+  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
 } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
@@ -19,25 +19,27 @@ import type { TTT3DState } from '@tactictoe/game-engine';
 import type { TTT4DState } from '@tactictoe/game-engine';
 import type { OrderChaosState } from '@tactictoe/game-engine';
 import type { TacticToeState } from '@tactictoe/game-engine';
+import type { Ultimate3DState } from '@tactictoe/game-engine';
 import { StandardBoard } from '@/components/board/StandardBoard';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
 import { ThreeDBoard } from '@/components/board/ThreeDBoard';
 import { FourDBoard } from '@/components/board/FourDBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
+import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import { useAI } from '@/hooks/useAI';
 import type { AIVariant } from '@/hooks/useAI';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
 import styles from './page.module.css';
 import localStyles from '../local/page.module.css';
 
 type Variant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
   standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
@@ -53,6 +55,7 @@ const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: 
   ttt_4d:        { label: '4D TTT',      description: '3×3×3×3 hypercube. 4-dimensional strategy.',           Icon: Box },
   order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
   tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
+  ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -69,6 +72,7 @@ const engines: Record<Variant, GameRules> = {
   ttt_4d:        new TTT4D(),
   order_chaos:   new OrderChaos(),
   tactic_toe:    new TacticToe(),
+  ultimate_3d:   new Ultimate3D(),
 };
 
 const DIFFICULTY_LABELS: Record<AIDifficulty, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -107,6 +111,7 @@ export default function VsAIPage() {
     if (variant === 'order_chaos') return `${String.fromCharCode(97 + (cellIndex % 6))}${Math.floor(cellIndex / 6) + 1}`;
     if (variant === 'ttt_3d') return `L${boardIndex + 1}${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
     if (variant === 'ttt_4d') return `[${Math.floor(boardIndex / 3) + 1},${(boardIndex % 3) + 1},${Math.floor(cellIndex / 3) + 1},${(cellIndex % 3) + 1}]`;
+    if (variant === 'ultimate_3d') return `M${boardIndex}[m${Math.floor(cellIndex / 9) + 1}(${Math.floor((cellIndex % 9) / 3) + 1},${(cellIndex % 3) + 1})]`;
     return `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
   }
 
@@ -174,6 +179,9 @@ export default function VsAIPage() {
             moveData = { type: 'move_obstacle', fromCell: move.fromCell, toCell: move.toCell };
             coordStr = `▪${move.fromCell}→${move.toCell}`;
           }
+        } else if (variant === 'ultimate_3d') {
+          moveData = { macroCell: move.boardIndex, microCell: move.cellIndex };
+          coordStr = `M${move.boardIndex}[m${Math.floor(move.cellIndex / 9) + 1}(${Math.floor((move.cellIndex % 9) / 3) + 1},${(move.cellIndex % 3) + 1})]`;
         } else {
           moveData = { cellIndex: move.cellIndex };
           coordStr = formatCoord(0, move.cellIndex);
@@ -213,7 +221,7 @@ export default function VsAIPage() {
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
-    if (variant === 'tactic_toe') return; // handled separately
+    if (variant === 'tactic_toe' || variant === 'ultimate_3d') return; // handled separately
     const engine = engines[variant];
 
     let moveData: unknown;
@@ -266,6 +274,28 @@ export default function VsAIPage() {
         const nextAvail = humanPlayer === 'X' ? nextState.availableOdds : nextState.availableEvens;
         if (nextAvail.length > 0) setPlacingAs(nextAvail[0]!);
       }
+    }
+  };
+
+  const handleUltimate3DMove = (macroCell: number, microCell: number) => {
+    if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    const engine = engines['ultimate_3d'];
+    const result = engine.applyMove(gameState, { data: { macroCell, microCell } }, humanPlayer);
+    if (!result.ok) return;
+    const coord = `M${macroCell}[m${Math.floor(microCell / 9) + 1}(${Math.floor((microCell % 9) / 3) + 1},${(microCell % 3) + 1})]`;
+    setMoveHistory(prev => [...prev, coord]);
+    const term = engine.checkTerminal(result.state);
+    if (term) {
+      setGameState(result.state); setPhase('over'); setWinner(term.winner);
+      setScores(prev => {
+        const next = { ...prev };
+        if (term.winner === humanPlayer) next.human++;
+        else if (term.winner === aiPlayer) next.ai++;
+        else next.draws++;
+        return next;
+      });
+    } else {
+      setGameState(result.state);
     }
   };
 
@@ -547,6 +577,15 @@ export default function VsAIPage() {
                 moveMode={isMyTurn ? tacticMoveMode : 'place'}
                 selectedObstacle={isMyTurn ? tacticSelectedObstacle : null}
                 onCellClick={handleTacticCell} />
+            ) : variant === 'ultimate_3d' ? (
+              <Ultimate3DBoard
+                microBoards={(gameState as Ultimate3DState).microBoards}
+                macroResults={(gameState as Ultimate3DState).macroResults}
+                nextMacroConstraint={(gameState as Ultimate3DState).nextMacroConstraint}
+                currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                disabled={!isMyTurn}
+                onMove={handleUltimate3DMove}
+              />
             ) : (
               <StandardBoard
                 board={(gameState as StandardTTTState).board}

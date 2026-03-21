@@ -61,11 +61,15 @@ export type { OrderChaosState, OrderChaosMove } from './rules/order-chaos.js';
 export { TacticToe } from './rules/tactic-toe.js';
 export type { TacticToeState, TacticToeMove } from './rules/tactic-toe.js';
 
+export { Ultimate3D } from './rules/ultimate-3d.js';
+export type { Ultimate3DState, Ultimate3DMove } from './rules/ultimate-3d.js';
+
 export {
   getVanishingAIMove,
   getTTT3DAIMove,
   getTTT4DAIMove,
   getOrderChaosAIMove,
   getTacticToeAIMove,
+  getUltimate3DAIMove,
 } from './ai/index.js';
-export type { OrderChaosAIMove, TacticToeAIMove } from './ai/index.js';
+export type { OrderChaosAIMove, TacticToeAIMove, Ultimate3DAIMove } from './ai/index.js';
