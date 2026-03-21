@@ -5,3 +5,6 @@ export { getNotaktoAIMove } from './notakto-ai.js';
 export { getWildAIMove } from './wild-ai.js';
 export type { AIDifficulty } from './standard-ai.js';
 export type { WildAIMove } from './wild-ai.js';
+export { getGomokuAIMove } from './gomoku-ai.js';
+export { getSOSAIMove } from './sos-ai.js';
+export { getNumericalAIMove } from './numerical-ai.js';

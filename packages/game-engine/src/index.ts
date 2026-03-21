@@ -34,3 +34,15 @@ export type { WildTTTState, WildTTTMove } from './rules/wild-ttt.js';
 
 export { getMisereAIMove, getNotaktoAIMove, getWildAIMove } from './ai/index.js';
 export type { WildAIMove } from './ai/index.js';
+
+export { Gomoku } from './rules/gomoku.js';
+export type { GomokuState } from './rules/gomoku.js';
+
+export { SOSTTT } from './rules/sos-ttt.js';
+export type { SOSTTTState, SOSTTTMove } from './rules/sos-ttt.js';
+
+export { NumericalTTT } from './rules/numerical-ttt.js';
+export type { NumericalTTTState, NumericalTTTMove } from './rules/numerical-ttt.js';
+
+export { getGomokuAIMove, getSOSAIMove, getNumericalAIMove } from './ai/index.js';
+

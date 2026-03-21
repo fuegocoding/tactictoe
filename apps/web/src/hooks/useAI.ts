@@ -6,10 +6,11 @@ import type { AIDifficulty, Player, GameState } from '@tactictoe/game-engine';
 export interface AIMove {
   boardIndex: number;
   cellIndex: number;
-  symbol?: 'X' | 'O'; // Wild TTT only
+  symbol?: 'X' | 'O' | 'S';
+  numberPlaced?: number;
 }
 
-export type AIVariant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt';
+export type AIVariant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt' | 'gomoku' | 'sos_ttt' | 'numerical_ttt';
 
 /**
  * Hook that returns a `getMove` function for AI opponents.
@@ -27,6 +28,9 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             getMisereAIMove,
             getNotaktoAIMove,
             getWildAIMove,
+            getGomokuAIMove,
+            getSOSAIMove,
+            getNumericalAIMove,
           } = await import('@tactictoe/game-engine');
 
           if (variant === 'standard_3x3') {
@@ -44,6 +48,15 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
           } else if (variant === 'wild_ttt') {
             const move = getWildAIMove(state as Parameters<typeof getWildAIMove>[0], aiPlayer, difficulty);
             resolve({ boardIndex: 0, cellIndex: move.cellIndex, symbol: move.symbol });
+          } else if (variant === 'gomoku') {
+            const cellIndex = getGomokuAIMove(state as Parameters<typeof getGomokuAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex });
+          } else if (variant === 'sos_ttt') {
+            const move = getSOSAIMove(state as Parameters<typeof getSOSAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex: move.cellIndex, symbol: move.symbol });
+          } else if (variant === 'numerical_ttt') {
+            const move = getNumericalAIMove(state as Parameters<typeof getNumericalAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex: move.cellIndex, numberPlaced: move.numberPlaced });
           }
         } catch (err) {
           reject(err instanceof Error ? err : new Error(String(err)));

@@ -5,8 +5,8 @@
 // ---------
 // 6 | 7 | 8
 export type Player = 'X' | 'O';
-export type Cell = Player | null;
-export type Board = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell];
+export type Cell = string | number | null;
+export type Board = Cell[];
 
 // Result of a single board (mini-board or meta-board)
 export type BoardResult = Player | 'draw' | null; // null = still in play

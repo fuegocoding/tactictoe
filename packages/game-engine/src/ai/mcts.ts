@@ -13,14 +13,17 @@ interface MCTSNode {
 
 const UCT_C = Math.SQRT2;
 
-function uctScore(node: MCTSNode, parentVisits: number): number {
-  if (node.visits === 0) return Infinity;
-  return node.wins / node.visits + UCT_C * Math.sqrt(Math.log(parentVisits) / node.visits);
+function uctScore(child: MCTSNode, parentVisits: number, isAITurn: boolean): number {
+  if (child.visits === 0) return Infinity;
+  const winRate = child.wins / child.visits;
+  const exploitation = isAITurn ? winRate : (1 - winRate);
+  return exploitation + UCT_C * Math.sqrt(Math.log(parentVisits) / child.visits);
 }
 
-function selectChild(node: MCTSNode): MCTSNode {
+function selectChild(node: MCTSNode, aiPlayer: Player): MCTSNode {
+  const isAITurn = node.state.currentPlayer === aiPlayer;
   return node.children.reduce((best, child) =>
-    uctScore(child, node.visits) > uctScore(best, node.visits) ? child : best
+    uctScore(child, node.visits, isAITurn) > uctScore(best, node.visits, isAITurn) ? child : best
   );
 }
 
@@ -87,7 +90,7 @@ export function mctsGetMove(state: GameState, rules: GameRules, aiPlayer: Player
     // Selection
     let node = root;
     while (node.untriedMoves.length === 0 && node.children.length > 0) {
-      node = selectChild(node);
+      node = selectChild(node, aiPlayer);
     }
 
     // Expansion
