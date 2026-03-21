@@ -8,9 +8,16 @@ export interface AIMove {
   cellIndex: number;
   symbol?: 'X' | 'O' | 'S';
   numberPlaced?: number;
+  // For tactic_toe
+  tacticType?: 'place' | 'move_obstacle';
+  fromCell?: number;
+  toCell?: number;
 }
 
-export type AIVariant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt' | 'gomoku' | 'sos_ttt' | 'numerical_ttt';
+export type AIVariant =
+  | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt'
+  | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe';
 
 /**
  * Hook that returns a `getMove` function for AI opponents.
@@ -31,6 +38,11 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             getGomokuAIMove,
             getSOSAIMove,
             getNumericalAIMove,
+            getVanishingAIMove,
+            getTTT3DAIMove,
+            getTTT4DAIMove,
+            getOrderChaosAIMove,
+            getTacticToeAIMove,
           } = await import('@tactictoe/game-engine');
 
           if (variant === 'standard_3x3') {
@@ -57,6 +69,27 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
           } else if (variant === 'numerical_ttt') {
             const move = getNumericalAIMove(state as Parameters<typeof getNumericalAIMove>[0], aiPlayer, difficulty);
             resolve({ boardIndex: 0, cellIndex: move.cellIndex, numberPlaced: move.numberPlaced });
+          } else if (variant === 'vanishing_ttt') {
+            const cellIndex = getVanishingAIMove(state as Parameters<typeof getVanishingAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex });
+          } else if (variant === 'ttt_3d') {
+            const cellIndex = getTTT3DAIMove(state as Parameters<typeof getTTT3DAIMove>[0], aiPlayer, difficulty);
+            // cellIndex is 0-26 (global). boardIndex = layer = Math.floor(cellIndex / 9)
+            resolve({ boardIndex: Math.floor(cellIndex / 9), cellIndex: cellIndex % 9 });
+          } else if (variant === 'ttt_4d') {
+            const cellIndex = getTTT4DAIMove(state as Parameters<typeof getTTT4DAIMove>[0], aiPlayer, difficulty);
+            // boardIndex = Math.floor(cellIndex / 9), cellIndex_within = cellIndex % 9
+            resolve({ boardIndex: Math.floor(cellIndex / 9), cellIndex: cellIndex % 9 });
+          } else if (variant === 'order_chaos') {
+            const move = getOrderChaosAIMove(state as Parameters<typeof getOrderChaosAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex: move.cellIndex, symbol: move.symbol });
+          } else if (variant === 'tactic_toe') {
+            const move = getTacticToeAIMove(state as Parameters<typeof getTacticToeAIMove>[0], aiPlayer, difficulty);
+            if (move.type === 'place') {
+              resolve({ boardIndex: 0, cellIndex: move.cellIndex!, tacticType: 'place' });
+            } else {
+              resolve({ boardIndex: 0, cellIndex: move.toCell!, tacticType: 'move_obstacle', fromCell: move.fromCell, toCell: move.toCell });
+            }
           }
         } catch (err) {
           reject(err instanceof Error ? err : new Error(String(err)));

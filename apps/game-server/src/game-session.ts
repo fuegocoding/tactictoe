@@ -1,5 +1,5 @@
 import type { Server, Socket } from 'socket.io';
-import { UltimateTTT, StandardTTT, Gomoku, WildTTT, SOSTTT, MisereTTT, NotaktoTTT, NumericalTTT, type GameRules, type GameState } from '@tactictoe/game-engine';
+import { UltimateTTT, StandardTTT, Gomoku, WildTTT, SOSTTT, MisereTTT, NotaktoTTT, NumericalTTT, VanishingTTT, TTT3D, TTT4D, OrderChaos, TacticToe, type GameRules, type GameState } from '@tactictoe/game-engine';
 import { roomManager as defaultRoomManager, createRoomManager } from './room-manager.js';
 
 // Allow injecting a room manager for tests
@@ -59,6 +59,11 @@ const engines: Record<string, GameRules> = {
   misere_ttt: new MisereTTT(),
   notakto_ttt: new NotaktoTTT(),
   numerical_ttt: new NumericalTTT(),
+  vanishing_ttt: new VanishingTTT(),
+  ttt_3d: new TTT3D(),
+  ttt_4d: new TTT4D(),
+  order_chaos: new OrderChaos(),
+  tactic_toe: new TacticToe(),
 };
 
 function getEngine(variantId: string): GameRules {

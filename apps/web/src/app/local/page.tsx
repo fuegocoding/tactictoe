@@ -2,7 +2,11 @@
 
 import { useState, useReducer, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT } from '@tactictoe/game-engine';
+import {
+  StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
+  VanishingTTT, VANISHING_FADE_AFTER,
+  TTT3D, TTT4D, OrderChaos, TacticToe,
+} from '@tactictoe/game-engine';
 import type { GameState, TerminalResult } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
@@ -10,39 +14,60 @@ import type { UltimateTTTState } from '@tactictoe/game-engine';
 import type { GomokuState } from '@tactictoe/game-engine';
 import type { SOSTTTState } from '@tactictoe/game-engine';
 import type { NumericalTTTState } from '@tactictoe/game-engine';
+import type { VanishingTTTState } from '@tactictoe/game-engine';
+import type { TTT3DState } from '@tactictoe/game-engine';
+import type { TTT4DState } from '@tactictoe/game-engine';
+import type { OrderChaosState } from '@tactictoe/game-engine';
+import type { TacticToeState } from '@tactictoe/game-engine';
 
 type LocalGameState = GameState & { terminal?: TerminalResult | null };
 import { StandardBoard } from '@/components/board/StandardBoard';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
+import { ThreeDBoard } from '@/components/board/ThreeDBoard';
+import { FourDBoard } from '@/components/board/FourDBoard';
+import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle } from 'lucide-react';
 import styles from './page.module.css';
 
-type Variant = 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto' | 'gomoku' | 'sos_ttt' | 'numerical_ttt';
+type Variant =
+  | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
+  | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
-  standard_3x3: { label: 'Standard', description: 'Classic. Quick casual games.', Icon: Grid3x3 },
-  ultimate_ttt: { label: 'Ultimate', description: '9 boards in one. The flagship.', Icon: Table2 },
-  misere_ttt: { label: 'Misère', description: 'Force your opponent to get 3-in-a-row to win.', Icon: Target },
-  wild_ttt: { label: 'Wild', description: 'Choose to place X or O on every turn.', Icon: Asterisk },
-  notakto: { label: 'Notakto', description: 'Both players place X. Avoid making 3-in-a-row!', Icon: Ban },
-  gomoku: { label: 'Gomoku', description: '15x15 board. First to 5 in a row wins. Deep strategy.', Icon: Grip },
-  sos_ttt: { label: 'SOS', description: 'Place S or O to spell S-O-S for points + extra turns.', Icon: Type },
-  numerical_ttt: { label: 'Numerical', description: 'Place numbers to sum precisely to 15.', Icon: Hash },
+  standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
+  ultimate_ttt:  { label: 'Ultimate',    description: '9 boards in one. The flagship.',                        Icon: Table2 },
+  misere_ttt:    { label: 'Misère',      description: 'Force your opponent to get 3-in-a-row to win.',         Icon: Target },
+  wild_ttt:      { label: 'Wild',        description: 'Choose to place X or O on every turn.',                 Icon: Asterisk },
+  notakto:       { label: 'Notakto',     description: 'Both players place X. Avoid making 3-in-a-row!',        Icon: Ban },
+  gomoku:        { label: 'Gomoku',      description: '15×15 board. First to 5-in-a-row wins.',                Icon: Grip },
+  sos_ttt:       { label: 'SOS',         description: 'Spell S-O-S for points + extra turns.',                 Icon: Type },
+  numerical_ttt: { label: 'Numerical',   description: 'Sum exactly 15 with three numbers.',                    Icon: Hash },
+  vanishing_ttt: { label: 'Vanishing',   description: 'Pieces disappear after 6 moves. Can you remember?',    Icon: Eye },
+  ttt_3d:        { label: '3D TTT',      description: '3×3×3 cube. Win in any dimension.',                     Icon: Layers },
+  ttt_4d:        { label: '4D TTT',      description: '3×3×3×3 hypercube. 4-dimensional strategy.',           Icon: Box },
+  order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
+  tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
 };
 
 const engines: Record<Variant, GameRules> = {
-  standard_3x3: new StandardTTT(),
-  ultimate_ttt: new UltimateTTT(),
-  misere_ttt: new MisereTTT(),
-  wild_ttt: new WildTTT(),
-  notakto: new NotaktoTTT(),
-  gomoku: new Gomoku(),
-  sos_ttt: new SOSTTT(),
+  standard_3x3:  new StandardTTT(),
+  ultimate_ttt:  new UltimateTTT(),
+  misere_ttt:    new MisereTTT(),
+  wild_ttt:      new WildTTT(),
+  notakto:       new NotaktoTTT(),
+  gomoku:        new Gomoku(),
+  sos_ttt:       new SOSTTT(),
   numerical_ttt: new NumericalTTT(),
+  vanishing_ttt: new VanishingTTT(),
+  ttt_3d:        new TTT3D(),
+  ttt_4d:        new TTT4D(),
+  order_chaos:   new OrderChaos(),
+  tactic_toe:    new TacticToe(),
 };
 
 interface LocalState {
@@ -54,6 +79,8 @@ interface LocalState {
   scores: { x: number; o: number; draws: number };
   moveHistory: string[];
   placingAs: string | number;
+  tacticMoveMode: 'place' | 'move_obstacle';
+  tacticSelectedObstacle: number | null;
 }
 
 type LocalAction =
@@ -64,7 +91,15 @@ type LocalAction =
   | { type: 'NEW_GAME' }
   | { type: 'SET_VARIANT'; variant: Variant }
   | { type: 'SET_NAME'; player: 1 | 2; name: string }
-  | { type: 'SET_PLACING_AS'; symbol: string | number };
+  | { type: 'SET_PLACING_AS'; symbol: string | number }
+  | { type: 'SET_TACTIC_MODE'; mode: 'place' | 'move_obstacle' }
+  | { type: 'SET_TACTIC_OBSTACLE'; cell: number | null };
+
+function getInitialPlacingAs(variant: Variant): string | number {
+  if (variant === 'sos_ttt') return 'S';
+  if (variant === 'numerical_ttt') return 1;
+  return 'X';
+}
 
 function reducer(state: LocalState, action: LocalAction): LocalState {
   switch (action.type) {
@@ -74,9 +109,17 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
         ? { ...state, player1Name: action.name }
         : { ...state, player2Name: action.name };
     case 'START_GAME': {
-      const engine = engines[state.variant];
-      const initialPlacingAs = state.variant === 'sos_ttt' ? 'S' : state.variant === 'numerical_ttt' ? 1 : 'X';
-      return { ...state, phase: 'playing', gameState: engine.initialize({ variantId: state.variant }), moveHistory: [], placingAs: initialPlacingAs };
+      const engine = engines[state.variant as Variant];
+      const seed = Date.now();
+      return {
+        ...state,
+        phase: 'playing',
+        gameState: engine.initialize({ variantId: state.variant, seed }),
+        moveHistory: [],
+        placingAs: getInitialPlacingAs(state.variant),
+        tacticMoveMode: 'place',
+        tacticSelectedObstacle: null,
+      };
     }
     case 'MOVE':
     case 'GAME_OVER': {
@@ -87,19 +130,39 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
         if (terminal.winner === 'X') scores.x++;
         else if (terminal.winner === 'O') scores.o++;
         else scores.draws++;
-        return { ...state, phase: 'over', gameState: action.gameState, moveHistory, scores };
+        return {
+          ...state,
+          phase: 'over',
+          gameState: action.gameState,
+          moveHistory,
+          scores,
+          tacticMoveMode: 'place',
+          tacticSelectedObstacle: null,
+        };
       }
-      return { ...state, gameState: action.gameState, moveHistory };
+      return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null };
     }
     case 'REMATCH': {
-      const engine = engines[state.variant];
-      const initialPlacingAs = state.variant === 'sos_ttt' ? 'S' : state.variant === 'numerical_ttt' ? 1 : 'X';
-      return { ...state, phase: 'playing', gameState: engine.initialize({ variantId: state.variant }), moveHistory: [], placingAs: initialPlacingAs };
+      const engine = engines[state.variant as Variant];
+      const seed = Date.now();
+      return {
+        ...state,
+        phase: 'playing',
+        gameState: engine.initialize({ variantId: state.variant, seed }),
+        moveHistory: [],
+        placingAs: getInitialPlacingAs(state.variant),
+        tacticMoveMode: 'place',
+        tacticSelectedObstacle: null,
+      };
     }
     case 'NEW_GAME':
       return { ...state, phase: 'setup', gameState: null, moveHistory: [] };
     case 'SET_PLACING_AS':
       return { ...state, placingAs: action.symbol };
+    case 'SET_TACTIC_MODE':
+      return { ...state, tacticMoveMode: action.mode, tacticSelectedObstacle: null };
+    case 'SET_TACTIC_OBSTACLE':
+      return { ...state, tacticSelectedObstacle: action.cell };
     default:
       return state;
   }
@@ -114,18 +177,25 @@ const initialState: LocalState = {
   scores: { x: 0, o: 0, draws: 0 },
   moveHistory: [],
   placingAs: 'X',
+  tacticMoveMode: 'place',
+  tacticSelectedObstacle: null,
 };
 
 function formatMoveRows(moves: string[]) {
   const rows = [];
   for (let i = 0; i < moves.length; i += 2) {
-    rows.push({
-      num: Math.floor(i / 2) + 1,
-      x: moves[i],
-      o: moves[i + 1] || '',
-    });
+    rows.push({ num: Math.floor(i / 2) + 1, x: moves[i], o: moves[i + 1] || '' });
   }
   return rows;
+}
+
+/** Build a "visible board" for Vanishing TTT: hide cells that have faded */
+function getVanishingVisibleBoard(s: VanishingTTTState): (string | number | null)[] {
+  return (s.board as (string | number | null)[]).map((cell: string | number | null, i: number) => {
+    if (cell === null) return null;
+    const age = s.moveCount - (s.moveDates[i] ?? 0);
+    return age > VANISHING_FADE_AFTER ? null : cell;
+  });
 }
 
 export default function LocalPage() {
@@ -133,39 +203,55 @@ export default function LocalPage() {
   const movesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (movesRef.current) {
-      movesRef.current.scrollTop = movesRef.current.scrollHeight;
-    }
+    if (movesRef.current) movesRef.current.scrollTop = movesRef.current.scrollHeight;
   }, [state.moveHistory]);
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!state.gameState) return;
-    const engine = engines[state.variant];
+    if (state.variant === 'tactic_toe') return; // handled by handleTacticCell
+    const engine = engines[state.variant as Variant];
 
     let coordinate = '';
+    let move: { data: unknown };
+
     if (state.variant === 'ultimate_ttt') {
       const overallCol = (boardIndex % 3) * 3 + (cellIndex % 3);
       const overallRow = Math.floor(boardIndex / 3) * 3 + Math.floor(cellIndex / 3);
       coordinate = `${String.fromCharCode(97 + overallCol)}${overallRow + 1}`;
+      move = { data: { boardIndex, cellIndex } };
     } else if (state.variant === 'gomoku') {
       coordinate = `${String.fromCharCode(97 + (cellIndex % 15))}${Math.floor(cellIndex / 15) + 1}`;
+      move = { data: { cellIndex } };
     } else if (state.variant === 'sos_ttt') {
-      coordinate = `${String.fromCharCode(97 + (cellIndex % 8))}${Math.floor(cellIndex / 8) + 1}`;
+      coordinate = `${String.fromCharCode(97 + (cellIndex % 8))}${Math.floor(cellIndex / 8) + 1} (${state.placingAs})`;
+      move = { data: { cellIndex, symbol: state.placingAs } };
+    } else if (state.variant === 'wild_ttt') {
+      coordinate = `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1} (${state.placingAs})`;
+      move = { data: { cellIndex, symbol: state.placingAs } };
+    } else if (state.variant === 'numerical_ttt') {
+      coordinate = `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1} (${state.placingAs})`;
+      move = { data: { cellIndex, numberPlaced: typeof state.placingAs === 'number' ? state.placingAs : Number(state.placingAs) } };
+    } else if (state.variant === 'order_chaos') {
+      coordinate = `${String.fromCharCode(97 + (cellIndex % 6))}${Math.floor(cellIndex / 6) + 1} (${state.placingAs})`;
+      move = { data: { cellIndex, symbol: state.placingAs } };
+    } else if (state.variant === 'ttt_3d') {
+      // boardIndex = layer, cellIndex = row*3+col within layer
+      const globalIndex = boardIndex * 9 + cellIndex;
+      const layer = boardIndex + 1;
+      coordinate = `L${layer}${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
+      move = { data: { cellIndex: globalIndex } };
+    } else if (state.variant === 'ttt_4d') {
+      // boardIndex = metaRow*3+metaCol, cellIndex = row*3+col within board
+      const globalIndex = boardIndex * 9 + cellIndex;
+      coordinate = `[${Math.floor(boardIndex / 3) + 1},${(boardIndex % 3) + 1},${Math.floor(cellIndex / 3) + 1},${(cellIndex % 3) + 1}]`;
+      move = { data: { cellIndex: globalIndex } };
     } else {
       coordinate = `${String.fromCharCode(97 + (cellIndex % 3))}${Math.floor(cellIndex / 3) + 1}`;
+      move = { data: { cellIndex } };
     }
 
-    const move = state.variant === 'ultimate_ttt'
-      ? { data: { boardIndex, cellIndex } }
-      : (state.variant === 'wild_ttt' || state.variant === 'sos_ttt')
-      ? { data: { cellIndex, symbol: state.placingAs } }
-      : state.variant === 'numerical_ttt'
-      ? { data: { cellIndex, numberPlaced: typeof state.placingAs === 'number' ? state.placingAs : Number(state.placingAs) } }
-      : { data: { cellIndex } };
-    
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
     if (!result.ok) return;
-    if (state.variant === 'wild_ttt' || state.variant === 'sos_ttt' || state.variant === 'numerical_ttt') coordinate += ` (${state.placingAs})`;
 
     if (state.variant === 'numerical_ttt') {
       const nextState = result.state as NumericalTTTState;
@@ -181,9 +267,55 @@ export default function LocalPage() {
     }
   };
 
+  const handleTacticCell = (globalIndex: number) => {
+    if (!state.gameState || state.phase !== 'playing') return;
+    const engine = engines['tactic_toe'];
+    const s = state.gameState as TacticToeState;
+
+    if (state.tacticMoveMode === 'place') {
+      const move = { data: { type: 'place', cellIndex: globalIndex } };
+      const result = engine.applyMove(s, move, s.currentPlayer);
+      if (!result.ok) return;
+      const coord = `L${Math.floor(globalIndex / 9) + 1}(${Math.floor((globalIndex % 9) / 3) + 1},${(globalIndex % 3) + 1})`;
+      const terminal = engine.checkTerminal(result.state);
+      if (terminal) {
+        dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate: coord });
+      } else {
+        dispatch({ type: 'MOVE', gameState: result.state, coordinate: coord });
+      }
+    } else {
+      // move_obstacle mode
+      const cell = s.board[globalIndex];
+      if (state.tacticSelectedObstacle === null) {
+        if (cell === 'B') dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: globalIndex });
+      } else {
+        if (cell === null) {
+          const move = { data: { type: 'move_obstacle', fromCell: state.tacticSelectedObstacle, toCell: globalIndex } };
+          const result = engine.applyMove(s, move, s.currentPlayer);
+          if (!result.ok) { dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: null }); return; }
+          const coord = `▪${state.tacticSelectedObstacle}→${globalIndex}`;
+          dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: null });
+          const terminal = engine.checkTerminal(result.state);
+          if (terminal) {
+            dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate: coord });
+          } else {
+            dispatch({ type: 'MOVE', gameState: result.state, coordinate: coord });
+          }
+        } else if (cell === 'B') {
+          // Re-select different obstacle
+          dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: globalIndex });
+        } else {
+          dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: null });
+        }
+      }
+    }
+  };
+
   const { phase, variant, player1Name, player2Name, gameState, scores, moveHistory, placingAs } = state;
   const currentName = gameState?.currentPlayer === 'X' ? player1Name : player2Name;
   const moveRows = formatMoveRows(moveHistory);
+
+  const isSymbolPickerVariant = variant === 'wild_ttt' || variant === 'sos_ttt' || variant === 'order_chaos';
 
   return (
     <div className={styles.page}>
@@ -194,7 +326,7 @@ export default function LocalPage() {
 
       {phase === 'setup' && (
         <div className={styles.setupWrap}>
-          <Card style={{ width: '100%', maxWidth: 440 }}>
+          <Card style={{ width: '100%', maxWidth: 520 }}>
             <div className={styles.setup}>
               <div className={styles.variantRow}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -204,14 +336,12 @@ export default function LocalPage() {
                       <HelpCircle size={14} style={{ marginRight: 4 }} />
                       {VARIANT_INFO[variant]?.description}
                     </div>
-                    <a href={`/learn#${variant}`} className={styles.learnMoreLink}>
-                      Learn more →
-                    </a>
+                    <a href={`/learn#${variant}`} className={styles.learnMoreLink}>Learn more →</a>
                   </div>
                 </div>
-                <div className={styles.variantButtons}>
+                <div className={styles.variantButtons} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                   {(Object.keys(VARIANT_INFO) as Variant[]).map((v) => {
-                    const { label, Icon } = VARIANT_INFO[v];
+                    const { label, Icon } = VARIANT_INFO[v]!;
                     return (
                       <button
                         key={v}
@@ -228,22 +358,20 @@ export default function LocalPage() {
 
               <div className={styles.playerRow}>
                 <Input
-                  label="Player X"
+                  label={variant === 'order_chaos' ? 'Order (X)' : 'Player X'}
                   value={player1Name}
                   onChange={e => dispatch({ type: 'SET_NAME', player: 1, name: e.target.value })}
                   placeholder="Player 1"
                 />
                 <Input
-                  label="Player O"
+                  label={variant === 'order_chaos' ? 'Chaos (O)' : 'Player O'}
                   value={player2Name}
                   onChange={e => dispatch({ type: 'SET_NAME', player: 2, name: e.target.value })}
                   placeholder="Player 2"
                 />
               </div>
 
-              <Button onClick={() => dispatch({ type: 'START_GAME' })} full>
-                Start Game
-              </Button>
+              <Button onClick={() => dispatch({ type: 'START_GAME' })} full>Start Game</Button>
             </div>
           </Card>
         </div>
@@ -251,7 +379,7 @@ export default function LocalPage() {
 
       {(phase === 'playing' || phase === 'over') && gameState && (
         <div className={styles.gameLayout}>
-          
+
           <div className={styles.sidePanel}>
             <div className={styles.panel}>
               <div className={styles.panelHeader}>Move History</div>
@@ -276,33 +404,36 @@ export default function LocalPage() {
               <p className={styles.turnBanner}>
                 {variant === 'notakto'
                   ? `${currentName}'s turn`
+                  : variant === 'order_chaos'
+                  ? `${currentName}'s turn (${gameState.currentPlayer === 'X' ? 'Order' : 'Chaos'})`
                   : `${currentName}'s turn (${gameState.currentPlayer})`}
               </p>
             )}
 
-            {phase === 'playing' && (variant === 'wild_ttt' || variant === 'sos_ttt') && (
+            {/* Symbol / number pickers */}
+            {phase === 'playing' && isSymbolPickerVariant && (
               <div className={styles.wildPicker}>
-                <span className={styles.wildPickerLabel}>Place as:</span>
-                <button
-                  className={`${styles.wildBtn} ${styles.x} ${placingAs === (variant === 'sos_ttt' ? 'S' : 'X') ? styles.active : ''}`}
-                  onClick={() => dispatch({ type: 'SET_PLACING_AS', symbol: variant === 'sos_ttt' ? 'S' : 'X' })}
-                >
-                  {variant === 'sos_ttt' ? 'S' : 'X'}
-                </button>
-                <button
-                  className={`${styles.wildBtn} ${styles.o} ${placingAs === 'O' ? styles.active : ''}`}
-                  onClick={() => dispatch({ type: 'SET_PLACING_AS', symbol: 'O' })}
-                >
-                  O
-                </button>
+                <span className={styles.wildPickerLabel}>
+                  {variant === 'order_chaos' ? 'Place symbol:' : 'Place as:'}
+                </span>
+                {(variant === 'sos_ttt' ? ['S', 'O'] : ['X', 'O']).map(sym => (
+                  <button
+                    key={sym}
+                    className={`${styles.wildBtn} ${sym === 'X' || sym === 'S' ? styles.x : styles.o} ${placingAs === sym ? styles.active : ''}`}
+                    onClick={() => dispatch({ type: 'SET_PLACING_AS', symbol: sym })}
+                  >
+                    {sym}
+                  </button>
+                ))}
               </div>
             )}
+
             {phase === 'playing' && variant === 'numerical_ttt' && gameState && (
               <div className={styles.wildPicker}>
                 <span className={styles.wildPickerLabel}>
                   {gameState.currentPlayer === 'X' ? 'Available Odds:' : 'Available Evens:'}
                 </span>
-                { ((gameState as NumericalTTTState)[gameState.currentPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
+                {((gameState as NumericalTTTState)[gameState.currentPlayer === 'X' ? 'availableOdds' : 'availableEvens']).map(num => (
                   <button
                     key={num}
                     className={`${styles.wildBtn} ${styles.x} ${placingAs === num ? styles.active : ''}`}
@@ -310,7 +441,33 @@ export default function LocalPage() {
                   >
                     {num}
                   </button>
-                )) }
+                ))}
+              </div>
+            )}
+
+            {/* Tactic Toe move mode toggle */}
+            {phase === 'playing' && variant === 'tactic_toe' && (
+              <div className={styles.wildPicker}>
+                <span className={styles.wildPickerLabel}>Action:</span>
+                <button
+                  className={`${styles.wildBtn} ${styles.x} ${state.tacticMoveMode === 'place' ? styles.active : ''}`}
+                  onClick={() => dispatch({ type: 'SET_TACTIC_MODE', mode: 'place' })}
+                >
+                  Place
+                </button>
+                <button
+                  className={`${styles.wildBtn} ${styles.o} ${state.tacticMoveMode === 'move_obstacle' ? styles.active : ''}`}
+                  onClick={() => dispatch({ type: 'SET_TACTIC_MODE', mode: 'move_obstacle' })}
+                >
+                  Move Obstacle
+                </button>
+              </div>
+            )}
+
+            {/* Vanishing hint */}
+            {phase === 'playing' && variant === 'vanishing_ttt' && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                Pieces fade from view after {VANISHING_FADE_AFTER} moves — but stay on the board!
               </div>
             )}
 
@@ -318,7 +475,9 @@ export default function LocalPage() {
               <div className={styles.turnBanner}>
                 <p className={`${styles.gameOverTitle} ${!gameState.terminal.winner ? styles.draw : ''}`}>
                   {gameState.terminal.winner
-                    ? `${gameState.terminal.winner === 'X' ? player1Name : player2Name} wins!`
+                    ? variant === 'order_chaos'
+                      ? `${gameState.terminal.winner === 'X' ? player1Name + ' (Order)' : player2Name + ' (Chaos)'} wins!`
+                      : `${gameState.terminal.winner === 'X' ? player1Name : player2Name} wins!`
                     : "It's a draw!"}
                 </p>
               </div>
@@ -337,8 +496,7 @@ export default function LocalPage() {
               ) : variant === 'gomoku' ? (
                 <GridBoard
                   board={(gameState as GomokuState).board}
-                  cols={15}
-                  rows={15}
+                  cols={15} rows={15}
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
@@ -346,11 +504,48 @@ export default function LocalPage() {
               ) : variant === 'sos_ttt' ? (
                 <GridBoard
                   board={(gameState as SOSTTTState).board}
-                  cols={8}
-                  rows={8}
+                  cols={8} rows={8}
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                />
+              ) : variant === 'order_chaos' ? (
+                <GridBoard
+                  board={(gameState as OrderChaosState).board}
+                  cols={6} rows={6}
+                  currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                  disabled={phase === 'over'}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                />
+              ) : variant === 'vanishing_ttt' ? (
+                <StandardBoard
+                  board={getVanishingVisibleBoard(gameState as VanishingTTTState) as any}
+                  currentPlayer={gameState.currentPlayer}
+                  disabled={phase === 'over'}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                />
+              ) : variant === 'ttt_3d' ? (
+                <ThreeDBoard
+                  board={(gameState as TTT3DState).board}
+                  currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                  disabled={phase === 'over'}
+                  onMove={handleMove}
+                />
+              ) : variant === 'ttt_4d' ? (
+                <FourDBoard
+                  board={(gameState as TTT4DState).board}
+                  currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                  disabled={phase === 'over'}
+                  onMove={handleMove}
+                />
+              ) : variant === 'tactic_toe' ? (
+                <TacticToeBoard
+                  board={(gameState as TacticToeState).board}
+                  currentPlayer={gameState.currentPlayer as 'X' | 'O'}
+                  disabled={phase === 'over'}
+                  moveMode={state.tacticMoveMode}
+                  selectedObstacle={state.tacticSelectedObstacle}
+                  onCellClick={handleTacticCell}
                 />
               ) : (
                 <StandardBoard
@@ -369,15 +564,25 @@ export default function LocalPage() {
               <div className={styles.panelContent}>
                 <div className={styles.scoreboard}>
                   <div className={`${styles.scoreCard} ${gameState.currentPlayer === 'X' && phase === 'playing' ? styles.active : ''}`}>
-                    <span className={styles.scoreName}>{player1Name}{variant !== 'notakto' ? ' (X)' : ''}</span>
+                    <span className={styles.scoreName}>
+                      {player1Name}
+                      {variant === 'order_chaos' ? ' (Order)' : variant !== 'notakto' ? ' (X)' : ''}
+                    </span>
                     <span className={styles.scoreValue} style={{ color: 'var(--mark-x)' }}>
-                      {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt' ? (gameState as SOSTTTState).scores.X : scores.x}
+                      {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt'
+                        ? (gameState as SOSTTTState).scores.X
+                        : scores.x}
                     </span>
                   </div>
                   <div className={`${styles.scoreCard} ${gameState.currentPlayer === 'O' && phase === 'playing' ? styles.active : ''}`}>
-                    <span className={styles.scoreName}>{player2Name}{variant !== 'notakto' ? ' (O)' : ''}</span>
+                    <span className={styles.scoreName}>
+                      {player2Name}
+                      {variant === 'order_chaos' ? ' (Chaos)' : variant !== 'notakto' ? ' (O)' : ''}
+                    </span>
                     <span className={styles.scoreValue} style={{ color: 'var(--mark-o)' }}>
-                      {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt' ? (gameState as SOSTTTState).scores.O : scores.o}
+                      {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt'
+                        ? (gameState as SOSTTTState).scores.O
+                        : scores.o}
                     </span>
                   </div>
                   <div className={styles.scoreCard} style={{ background: 'transparent' }}>

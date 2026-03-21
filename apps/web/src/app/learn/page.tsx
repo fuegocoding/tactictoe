@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft, Eye, Box, Layers, Swords, Shuffle } from 'lucide-react';
 import styles from './page.module.css';
 
 const LEARN_DATA = [
@@ -100,6 +100,73 @@ const LEARN_DATA = [
       'Numbers can only be used once per game.',
       'The first player to make a line (horizontal, vertical, diagonal) of 3 numbers that sum EXACTLY to 15 wins.',
       'For example, 2 + 9 + 4 = 15 is a winning line.'
+    ]
+  },
+  {
+    id: 'vanishing_ttt',
+    label: 'Vanishing Tic-Tac-Toe',
+    Icon: Eye,
+    description: 'A memory-test twist where pieces disappear before your eyes.',
+    rules: [
+      'Played on a standard 3×3 grid with normal win rules.',
+      'After a piece has been on the board for 6 moves, it vanishes from view — but is still there!',
+      'Vanished pieces still block cell placement and still count toward win detection.',
+      'You must remember where all the hidden pieces are to plan your strategy.',
+      'First player to get 3-in-a-row (including hidden pieces) wins.'
+    ]
+  },
+  {
+    id: 'ttt_3d',
+    label: '3D Tic-Tac-Toe',
+    Icon: Layers,
+    description: 'Classic Tic-Tac-Toe extended into three dimensions.',
+    rules: [
+      'Played on a 3×3×3 cube displayed as three separate 3×3 layers.',
+      'Win by getting 3-in-a-row along any axis: within a single layer, through all three layers vertically, or diagonally through space.',
+      'There are 49 possible winning lines in the 3D cube.',
+      'Think beyond flat rows — diagonals through all three layers are the key to victory.',
+      'Use layer coordinates (e.g. L1, L2, L3) to track your position.'
+    ]
+  },
+  {
+    id: 'ttt_4d',
+    label: '4D Tic-Tac-Toe',
+    Icon: Box,
+    description: 'The ultimate mind-bender: Tic-Tac-Toe in four dimensions.',
+    rules: [
+      'Played on a 3×3×3×3 grid (81 cells), displayed as a 3×3 meta-grid of 3×3 mini-grids.',
+      'Each outer panel corresponds to a position in two dimensions; each cell inside it spans the other two.',
+      'Win by getting 3-in-a-row along any of the 4D directions — lines can span any combination of the four axes.',
+      'There are hundreds of possible winning lines. Visualising 4D space is the ultimate challenge.',
+      'Coordinate notation: [d1, d2, d3, d4] — each value 1, 2, or 3.'
+    ]
+  },
+  {
+    id: 'order_chaos',
+    label: 'Order and Chaos',
+    Icon: Shuffle,
+    description: 'An asymmetric game of creation versus prevention, invented by Stephen Sniderman.',
+    rules: [
+      'Played on a 6×6 grid. Player roles are Order (X) and Chaos (O).',
+      'On EACH turn, the active player may place EITHER an X or an O on any empty cell.',
+      'Order wins if any 5-in-a-row of the same symbol (X or O) appears anywhere on the board.',
+      'Chaos wins if the board fills up without any 5-in-a-row of a single symbol.',
+      'Both players can place either symbol — choosing which symbol is a key part of strategy.',
+      'Order plays first.'
+    ]
+  },
+  {
+    id: 'tactic_toe',
+    label: 'Tactic Toe',
+    Icon: Swords,
+    description: '3D Tic-Tac-Toe with randomly placed obstacles that can be moved.',
+    rules: [
+      'Played on a 3×3×3 grid (same as 3D TTT) with 8 randomly placed obstacles at the start.',
+      'Obstacles block placement — you cannot place your mark on an obstacle cell.',
+      'On your turn, you may either: (1) place your mark on any empty, non-obstacle cell, OR (2) move any obstacle to any other empty cell.',
+      'Moving obstacles is a tactical tool — reshape the battlefield to create or block winning lines!',
+      'Win by getting 3-in-a-row in any 3D direction (obstacles do not form winning lines).',
+      'Each match has a unique random obstacle layout, making every game different.'
     ]
   }
 ];
