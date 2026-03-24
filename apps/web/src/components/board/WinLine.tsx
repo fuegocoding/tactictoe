@@ -45,9 +45,8 @@ export function WinLine({ winCells, cols, rows }: WinLineProps) {
         x2={x2 + ux}
         y2={y2 + uy}
         stroke="var(--winline-color, #3b82f6)"
-        strokeWidth="var(--winline-width, 0.12)"
         strokeLinecap="round"
-        style={{ filter: 'var(--winline-filter, none)' }}
+        style={{ filter: 'var(--winline-filter, none)', strokeWidth: 'var(--winline-width, 0.12)' }}
       />
     </svg>
   );
