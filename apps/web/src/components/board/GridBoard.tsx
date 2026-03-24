@@ -1,5 +1,8 @@
 import React from 'react';
 import type { Board } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { WinLine } from './WinLine';
+import { PieceSymbol } from './PieceSymbol';
 
 interface GridBoardProps {
   board: Board;
@@ -8,45 +11,56 @@ interface GridBoardProps {
   currentPlayer: 'X' | 'O';
   disabled: boolean;
   onMove: (boardIndex: number, cellIndex: number) => void;
+  winCells?: number[];
 }
 
-export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove }: GridBoardProps) {
+export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, winCells = [] }: GridBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
+  const colLabels = Array.from({ length: cols }, (_, i) => String.fromCharCode(97 + i));
+  const maxWidth = cols >= 15 ? '600px' : '400px';
+  const gap = cols > 10 ? '2px' : '4px';
+
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `20px repeat(${cols}, minmax(0, 1fr))`,
-        gridTemplateRows: `20px repeat(${rows}, minmax(0, 1fr))`,
-        gap: cols > 10 ? '2px' : '4px',
+        gridTemplateColumns: '20px 1fr',
+        gridTemplateRows: '20px 1fr',
+        gap,
         width: '100%',
-        maxWidth: cols >= 15 ? '600px' : '400px',
+        maxWidth,
         margin: '0 auto',
       }}
     >
-      {/* Top Left Empty */}
+      {/* Corner */}
       <div />
-      {/* Col Labels */}
-      {Array.from({ length: cols }).map((_, col) => (
-        <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
-          {String.fromCharCode(97 + col)}
-        </div>
-      ))}
-      
-      {/* Rows */}
-      {Array.from({ length: rows }).map((_, row) => (
-        <React.Fragment key={row}>
-          {/* Row Label */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
-            {row + 1}
+      {/* Col labels */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap }}>
+        {colLabels.map((c) => (
+          <div key={c} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
+            {c}
           </div>
-          
-          {/* Cells */}
-          {Array.from({ length: cols }).map((_, col) => {
+        ))}
+      </div>
+
+      {/* Row labels */}
+      <div style={{ display: 'grid', gridTemplateRows: `repeat(${rows}, 1fr)`, gap }}>
+        {Array.from({ length: rows }, (_, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
+            {i + 1}
+          </div>
+        ))}
+      </div>
+
+      {/* Cells with WinLine */}
+      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap }}>
+        {Array.from({ length: rows }, (_, row) =>
+          Array.from({ length: cols }, (_, col) => {
             const index = row * cols + col;
             const cell = board[index];
             return (
               <button
-                key={col}
+                key={index}
                 disabled={disabled || cell !== null}
                 onClick={() => {
                   if (!disabled && cell === null) onMove(0, index);
@@ -59,15 +73,22 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove }
                   background: 'var(--board-cell-bg)',
                   border: '1px solid var(--board-cell-border)',
                   borderRadius: 'var(--radius-sm)',
-                  color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                {cell ?? ''}
+                {cell === 'X' ? (
+                  <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={cols > 5 ? 16 : 24} />
+                ) : cell === 'O' ? (
+                  <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={cols > 5 ? 16 : 24} />
+                ) : null}
               </button>
             );
-          })}
-        </React.Fragment>
-      ))}
+          })
+        )}
+        {winCells.length > 0 && <WinLine winCells={winCells} cols={cols} rows={rows} />}
+      </div>
     </div>
   );
 }
