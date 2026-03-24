@@ -9,8 +9,8 @@ interface WinLineProps {
 export function WinLine({ winCells, cols, rows }: WinLineProps) {
   if (winCells.length < 2) return null;
 
-  const first = winCells[0];
-  const last = winCells[winCells.length - 1];
+  const first = winCells[0]!;
+  const last = winCells[winCells.length - 1]!;
 
   const x1 = (first % cols) + 0.5;
   const y1 = Math.floor(first / cols) + 0.5;
