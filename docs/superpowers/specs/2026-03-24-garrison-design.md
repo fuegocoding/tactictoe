@@ -16,7 +16,7 @@ Garrison is a hybrid chess/Gomoku variant played on a standard 8×8 board. Each 
 ### Setup
 
 - Board: 8×8 (standard chess grid), squares indexed 0–63 (row-major, row 0 = rank 1).
-- Before the game starts, two kings are placed at random symmetrically opposite squares. Symmetry is point-symmetric around the board centre: if Player X's king is at `(r, c)`, Player O's king is at `(7-r, 7-c)`. The pair is chosen such that the two squares are distinct.
+- Before the game starts, two kings are placed at random symmetrically opposite squares. Symmetry is point-symmetric around the board centre: if Player X's king is at `(r, c)`, Player O's king is at `(7-r, 7-c)`. On an 8×8 board this constraint is always satisfied (no square maps to itself). The random selection must be retried if the chosen placement puts either king in check (i.e. one king is immediately adjacent to or attacked by a position where the other king would attack it — in practice, kings must not start on adjacent squares).
 - Each player has 6 pieces in hand (not yet placed): 1 Queen, 2 Rooks, 2 Bishops, 2 Knights. No Pawns.
 
 ### Turn Structure
@@ -73,11 +73,14 @@ interface GarrisonState extends GameState {
   variantId: 'garrison'
   pieces: GarrisonPiece[]
   currentPlayer: Player
+  moveCount: number       // required by GameState base
   terminal: TerminalResult | null
 }
 ```
 
 #### Move Types
+
+`GarrisonMove` is the variant-specific payload, passed as the `data` field of the engine's generic `Move` envelope (consistent with all other variants):
 
 ```typescript
 type GarrisonMove =
@@ -85,14 +88,16 @@ type GarrisonMove =
   | { type: 'move';  pieceId: string; from: number; to: number }
 ```
 
+In `applyMove`, cast with `const m = move.data as GarrisonMove`.
+
 #### Rules Class (`GarrisonRules implements GameRules`)
 
 Key methods:
 
-- **`initialize(config)`** — generates random symmetrical king positions, creates full piece list with kings on board and remaining pieces in hand.
-- **`getLegalMoves(state)`** — returns all moves (placements + movements) that do not leave the current player's king in check.
-- **`applyMove(state, move, player)`** — validates move, applies it (update square / set captured), checks terminal.
-- **`checkTerminal(state)`** — checks 5-in-a-row for last mover and checkmate for current player.
+- **`initialize(config)`** — generates random symmetrical king positions (retrying if kings would be adjacent), creates full piece list with kings on board and remaining pieces in hand, sets `moveCount: 0`.
+- **`getLegalMoves(state)`** — returns all `Move` envelopes (placements + movements) whose `GarrisonMove` payloads do not leave the current player's king in check.
+- **`applyMove(state, move, player)`** — casts `move.data as GarrisonMove`, validates, applies (update square / set captured / increment moveCount), checks terminal.
+- **`checkTerminal(state)`** — checks 5-in-a-row for last mover and checkmate/stalemate for current player.
 - **`serialize` / `deserialize`** — standard JSON.
 
 #### Check Detection (`garrison-check.ts`)
@@ -119,21 +124,29 @@ function checkFiveInARow(player: Player, pieces: GarrisonPiece[]): number[] | nu
 // Returns the 5 winning square indices, or null if no win.
 ```
 
-Scans all 8 directions for each occupied square. A run of exactly 5 wins: requires `board[runStart-1] !== player` and `board[runEnd+1] !== player`.
+Scans 4 canonical directions only (right, down, down-right, down-left) starting from each occupied square, treating each square as the minimum-index end of a potential run. This avoids double-counting. A run of exactly 5 wins: the square immediately before the run start and immediately after the run end must not contain a piece of the same player.
 
 #### AI (`garrison-ai.ts`)
 
-Heuristic (no minimax):
+Heuristic (no minimax). Signature matches existing AI conventions:
+
+```typescript
+export function getGarrisonAIMove(
+  state: GarrisonState,
+  player: Player,
+  difficulty: AIDifficulty
+): GarrisonMove
+```
+
+Logic:
 1. If in check, pick any legal move that resolves it.
 2. Among legal moves, score by:
-   - +10 if it extends own run to length 4 or creates own run of 5 (win immediately)
+   - +10 if it creates own run of 5 (win immediately)
    - +8 if it blocks opponent run of 4
    - +5 if it gives check
-   - +3 if it extends own run to length 3
+   - +3 if it extends own run to length 3 or 4
    - +1 if it blocks opponent run of 3
 3. Pick highest-scoring move; break ties randomly.
-
-Exported as `getGarrisonAIMove(state: GameState, player: Player, difficulty?: string): Move`.
 
 ---
 
@@ -165,10 +178,11 @@ Visual details:
 - King in check: square background pulses red.
 - Winning 5-in-a-row: squares highlighted with accent colour (consistent with other variants).
 - Hand panels above/below board: pieces dim when placed, disappear when captured.
+- Board component is imported directly by path in page files (no barrel index needed).
 
 #### Variant Registration
 
-In `apps/web/src/app/local/page.tsx`:
+In `apps/web/src/app/local/page.tsx` and `apps/web/src/app/vs-ai/page.tsx`, the `Variant` string literal union type must be extended to include `'garrison'`. Then add to `VARIANT_INFO`:
 ```typescript
 garrison: {
   label: 'Garrison',
@@ -177,7 +191,18 @@ garrison: {
 }
 ```
 
-Same registration pattern in the vs-AI page and any game server variant registry.
+In `useAI.ts`:
+1. Add `GarrisonMove` to the static import at the top of the file: `import type { AIDifficulty, Player, GameState, GarrisonMove } from '@tactictoe/game-engine'` — required because `AIMove` is a top-level interface and its `garrisonMove` field must resolve at compile time, not inside the async dynamic import.
+2. Add `'garrison'` to the `AIVariant` union.
+3. Extend the `AIMove` interface with `garrisonMove?: GarrisonMove` — this carries the full typed payload so the page can pass it directly to `applyMove` without loss of `pieceId`.
+4. Add a dispatch branch:
+```typescript
+} else if (variant === 'garrison') {
+  const move = getGarrisonAIMove(state as GarrisonState, aiPlayer, difficulty);
+  resolve({ boardIndex: 0, cellIndex: move.to, garrisonMove: move });
+}
+```
+4. In the vs-ai page's `handleAIMove`, for garrison wrap the payload and call `engine.applyMove(state, { data: aiMove.garrisonMove }, aiPlayer)`.
 
 ---
 
@@ -195,11 +220,11 @@ Same registration pattern in the vs-AI page and any game server variant registry
 
 | File | Change |
 |------|--------|
-| `packages/game-engine/src/rules/index.ts` | Export GarrisonRules + types |
-| `packages/game-engine/src/ai/index.ts` | Export getGarrisonAIMove |
-| `apps/web/src/components/board/index.ts` | Export GarrisonBoard |
-| `apps/web/src/app/local/page.tsx` | Register garrison variant + board component |
-| `apps/web/src/app/vs-ai/page.tsx` | Register garrison for AI play |
+| `packages/game-engine/src/index.ts` | Export GarrisonRules, GarrisonState, GarrisonMove, getGarrisonAIMove |
+| `packages/game-engine/src/ai/index.ts` | Export `getGarrisonAIMove` and re-export `GarrisonMove` type from `garrison-ai.ts` (maintains barrel chain for `useAI.ts` consumers) |
+| `apps/web/src/app/local/page.tsx` | Add `'garrison'` to Variant union; register in VARIANT_INFO and engines map; import GarrisonBoard |
+| `apps/web/src/app/vs-ai/page.tsx` | Add `'garrison'` to Variant union; register garrison for AI play; import GarrisonBoard |
+| `apps/web/src/hooks/useAI.ts` | Add `'garrison'` to AIVariant union; add garrison dispatch branch calling getGarrisonAIMove |
 
 ---
 
