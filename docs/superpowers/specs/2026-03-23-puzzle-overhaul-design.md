@@ -27,7 +27,7 @@ type Move =
 
 type SolutionStep = {
   moves: Move[]       // one or more equally valid player moves for this step
-  response?: Move     // scripted opponent reply; omitted on the final step
+  response?: Move     // scripted opponent reply; MUST be absent on the final step
 }
 
 type Puzzle = {
@@ -47,6 +47,7 @@ type Puzzle = {
 - `solution` is always an array of steps (even for single-move puzzles — one step, one or more moves).
 - When `moves` has multiple entries, the solver accepts any of them as correct for that step.
 - `response` applies the same scripted opponent move regardless of which valid player move was chosen.
+- **`response` MUST NOT appear on the last step** — it is a data authoring error. The solver asserts this at puzzle load time and logs a warning if violated (skips the response rather than crashing).
 - Single-move puzzle example:
   ```json
   "solution": [{ "moves": [{ "cellIndex": 8 }] }]
@@ -59,6 +60,10 @@ type Puzzle = {
   ]
   ```
 
+### `ttt_3d` / `ttt_4d` coordinate system
+
+For `ttt_3d`, `ThreeDBoard` emits `onMove(layer, withinLayerIndex)` where `layer` ∈ {0,1,2} and `withinLayerIndex` ∈ {0…8}. In puzzle JSON this maps to `{ "boardIndex": layer, "cellIndex": withinLayerIndex }`. This is NOT the flat global index (layer×9 + withinLayerIndex). Before encoding puzzle moves, verify that the game engine's `applyMove` for `ttt_3d` consumes the same `{ boardIndex, cellIndex }` coordinate pair as `ThreeDBoard` emits (check `TTT3D.applyMove` in the engine). The same applies to `ttt_4d` where `FourDBoard` emits `(metaGridPos, withinCellIndex)`.
+
 ### Migration
 
 All 19 existing puzzles are replaced by the new 100-puzzle set. The old format (`"solution": { "boardIndex": ..., "cellIndex": ... }`) is removed entirely.
@@ -68,46 +73,59 @@ All 19 existing puzzles are replaced by the new 100-puzzle set. The old format (
 ### State additions
 
 ```
-currentStep: number        // which step of the solution we're on (0-indexed)
-boardState: VariantState   // mutable working copy of the puzzle state
+currentStep: number               // which step of the solution we're on (0-indexed)
+boardState: VariantState          // mutable working copy of the puzzle state
 feedback: 'correct' | 'wrong' | 'solved' | null
+// tactic_toe only:
+tacticMoveMode: 'place' | 'move_obstacle'
+selectedObstacle: number | null
+// order_chaos only:
+selectedSymbol: 'X' | 'O'        // default 'X'
 ```
 
 ### Move flow
 
-1. Player makes a move on the board.
-2. Normalize the move into the canonical Move object for the variant.
+1. Player makes a move on the board. All board interactions are locked while `feedback !== null` — the board's `disabled` prop is set to `true` until feedback clears.
+2. Normalize the move into the canonical Move object for the variant (see normalization notes below).
 3. Compare against `solution[currentStep].moves` — if any entry matches, it's correct.
-4. **If wrong:** set `feedback = 'wrong'`, do not update board state.
+4. **If wrong:**
+   - Set `feedback = 'wrong'`.
+   - Do not update board state.
+   - For `tactic_toe`: if `tacticMoveMode === 'move_obstacle'`, reset `selectedObstacle` to `null` so the player starts the obstacle-move sequence over.
+   - Clear feedback after 1200ms.
 5. **If correct:**
    - Apply player move to `boardState`.
-   - If `solution[currentStep].response` exists: wait 400ms, apply response move to `boardState`.
+   - If `solution[currentStep].response` exists AND `currentStep + 1 < solution.length` (guard: skip response on terminal board): wait 400ms, apply response move to `boardState`.
    - Advance `currentStep`.
-   - If `currentStep >= solution.length`: set `feedback = 'solved'`, persist to localStorage.
-   - Else: set `feedback = 'correct'` briefly, then clear.
+   - If `currentStep >= solution.length`: set `feedback = 'solved'`, persist to localStorage. Do not clear — board stays disabled.
+   - Else: set `feedback = 'correct'`, clear after 800ms.
+
+### Move normalization per variant
+
+- **Most variants:** `onMove(boardIndex, cellIndex)` → `{ boardIndex, cellIndex }` or `{ cellIndex }` depending on variant.
+- **`order_chaos`:** `GridBoard` emits `onMove(0, cellIndex)`. Normalization reads `selectedSymbol` from solver state and produces `{ cellIndex, symbol: selectedSymbol }`.
+- **`tactic_toe`:** `TacticToeBoard` emits `onCellClick(globalIndex)`. Solver manages click interpretation based on `tacticMoveMode` and `selectedObstacle` state (same logic as `local/page.tsx`). Produces `{ type: 'place', cellIndex }` or `{ type: 'move_obstacle', fromCell, toCell }`.
+- **`ultimate_3d`:** `Ultimate3DBoard` emits `onMove(macroCell, microCell)` → `{ macroCell, microCell }`.
 
 ### UI elements
 
 - **Step indicator:** shown only when `solution.length > 1`. Text: `"Step N of M"`. Positioned above the board.
 - **Feedback banner:** same as current ("Correct!", "Not quite — try again.", "Solved ✓").
-- **Board disabled:** after `feedback === 'solved'` (same as now).
+- **Board disabled:** whenever `feedback !== null` (prevents input during transitions and after solve).
 - **"Next puzzle →"** button: shown after solved (same as now).
+- **`VARIANT_LABEL` map:** add `ultimate_3d: 'Ultimate 3D'` (currently missing from the solver's label map).
 
 ### Order & Chaos symbol picker
 
-Order & Chaos moves require a symbol choice. Before a cell click is registered as a move, the player must pick X or O via a two-button toggle shown below the board description. The selected symbol is included in the move. Default selection is X.
+Order & Chaos moves require a symbol choice. Before a cell click is registered as a move, the player must pick X or O via a two-button toggle shown below the board description. The selected symbol is stored in `selectedSymbol` and included in the normalized move. Default selection is X.
 
 ### Tactic Toe state
 
-TacticToeBoard uses `onCellClick` with external mode state. The solver manages:
-- `tacticMoveMode: 'place' | 'move_obstacle'` (toggle button)
-- `selectedObstacle: number | null`
-
-This mirrors the pattern in `/app/local/page.tsx`.
+TacticToeBoard uses `onCellClick` with external mode state. The solver manages `tacticMoveMode` and `selectedObstacle`. This mirrors the pattern in `local/page.tsx`. On a wrong move, reset `selectedObstacle` to `null`.
 
 ### Vanishing TTT rendering
 
-The `VanishingTTTState` includes `moveDates`. Before passing to `StandardBoard`, faded pieces (those placed more than 5 moves ago relative to total move count) are rendered as `null`, same as in `local/page.tsx`.
+The `VanishingTTTState` includes `moveDates`. Before passing to `StandardBoard`, faded pieces are rendered as `null`. A piece at index `i` is faded when `moveCount - moveDates[i] > VANISHING_FADE_AFTER` (using the exported engine constant). Import `VANISHING_FADE_AFTER` from the game engine — do not hardcode a number.
 
 ## 3. Board Renderer Integration
 
@@ -117,16 +135,14 @@ The solver's variant switch expands from 2 to 10 cases:
 |---|---|---|
 | `standard_3x3` | `StandardBoard` | unchanged |
 | `ultimate_ttt` | `UltimateBoard` | unchanged |
-| `misere_ttt` | `StandardBoard` | same board shape |
-| `gomoku` | `GomokuBoard` | existing component |
-| `vanishing_ttt` | `StandardBoard` | faded pieces → null before render |
-| `ttt_3d` | `ThreeDBoard` | `boardIndex` = layer |
-| `ttt_4d` | `FourDBoard` | `boardIndex` = meta-grid pos |
-| `order_chaos` | `GridBoard` (6×6) | + symbol picker UI |
-| `tactic_toe` | `TacticToeBoard` | + mode/obstacle state |
-| `ultimate_3d` | `Ultimate3DBoard` | `macroCell`/`microCell` move signature |
-
-Move normalization per variant handles the different `onMove` signatures so the solver logic stays uniform.
+| `misere_ttt` | `StandardBoard` | same board shape as standard |
+| `gomoku` | `GridBoard` (15×15) | existing component, `cols={15} rows={15}` |
+| `vanishing_ttt` | `StandardBoard` | faded pieces → `null` before render (use `VANISHING_FADE_AFTER`) |
+| `ttt_3d` | `ThreeDBoard` | `boardIndex` = layer (0–2), `cellIndex` = within-layer (0–8) |
+| `ttt_4d` | `FourDBoard` | `boardIndex` = meta-grid pos (0–8), `cellIndex` = within-cell (0–8) |
+| `order_chaos` | `GridBoard` (6×6) | + symbol picker UI; `cols={6} rows={6}` |
+| `tactic_toe` | `TacticToeBoard` | + `tacticMoveMode` / `selectedObstacle` state |
+| `ultimate_3d` | `Ultimate3DBoard` | `onMove(macroCell, microCell)`; state fields: `microBoards` (27 boards), `macroResults` (27 entries), `nextMacroConstraint` |
 
 ## 4. Puzzle Content
 
@@ -136,7 +152,17 @@ Move normalization per variant handles the different `onMove` signatures so the 
 
 Difficulty per variant: **2 beginner, 4 intermediate, 3 advanced, 1 expert**.
 
-Expert puzzles are multi-step (2–3 moves). Advanced puzzles may be single or multi-step. Beginner/intermediate are single-step.
+Expert puzzles are typically multi-step (2–3 moves) but may be single-step if the position is sufficiently complex. Advanced puzzles may be single or multi-step. Beginner/intermediate are single-step.
+
+### Verification
+
+A `scripts/verify-puzzles.ts` script is required before the puzzle JSON is merged. For each puzzle it:
+1. Loads the puzzle state.
+2. Applies each step's valid player move(s) through the engine's `applyMove`.
+3. Applies each `response` move and confirms it is legal in the post-player-move state.
+4. Confirms the final player move does not leave an illegal board state.
+
+This is essential for `gomoku` (15×15), `ttt_4d` (81 cells), and `ultimate_3d` (729 cells) where manual verification is unreliable.
 
 ### Content guidelines per variant
 
@@ -177,5 +203,6 @@ Focus on macro-board constraint exploitation (same meta-strategy as ultimate_ttt
 | `apps/web/src/data/puzzles.json` | Complete rewrite — 100 puzzles in new schema |
 | `apps/web/src/app/puzzles/[id]/page.tsx` | Solver logic rewrite + 8 new board cases |
 | `apps/web/src/app/puzzles/[id]/page.module.css` | Add step indicator styles + symbol picker styles |
+| `scripts/verify-puzzles.ts` | New — validates all puzzles through the game engine before merge |
 
-No new files. No new board components (all exist). No schema type file needed — `puzzles.json` is consumed directly.
+No new board components (all exist). No schema type file needed — `puzzles.json` is consumed directly.
