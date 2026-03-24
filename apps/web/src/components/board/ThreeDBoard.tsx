@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useRef } from 'react';
 import type { Board } from '@tactictoe/game-engine';
 import { WIN_LINES_3D } from '@tactictoe/game-engine';
 
@@ -11,12 +13,11 @@ interface ThreeDBoardProps {
   winCells?: number[];
 }
 
-const CELL = 40;                  // cell size in px
-const GAP = 4;                    // gap between cells in px
-const GRID = CELL * 3 + GAP * 2; // 128px – total layer grid size
-const Z_GAP = 135;                // Z distance between layers in px
+const LAYER_LABELS = ['Layer 1 (Bottom)', 'Layer 2 (Middle)', 'Layer 3 (Top)'];
 
-const LAYER_LABELS = ['Bottom', 'Middle', 'Top'];
+// 3D visualization constants
+const VIZ_CELL = 26;  // cell square size in px
+const VIZ_GAP  = 40;  // center-to-center spacing in px
 
 function getWinCells(board: Board): number[] {
   for (const line of WIN_LINES_3D) {
@@ -28,9 +29,120 @@ function getWinCells(board: Board): number[] {
   return [];
 }
 
+/** Draggable 3D cube — view only, not for playing */
+function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
+  const [rotation, setRotation] = useState({ x: -25, y: 35 });
+  const [isDragging, setIsDragging] = useState(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+
+  const onDragStart = (x: number, y: number) => {
+    setIsDragging(true);
+    lastPos.current = { x, y };
+  };
+
+  const onDragMove = (x: number, y: number) => {
+    if (!isDragging) return;
+    const dx = x - lastPos.current.x;
+    const dy = y - lastPos.current.y;
+    lastPos.current = { x, y };
+    setRotation(prev => ({
+      x: Math.max(-80, Math.min(80, prev.x - dy * 0.5)),
+      y: prev.y + dx * 0.5,
+    }));
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+      <div style={{
+        fontSize: 9,
+        fontWeight: 600,
+        color: 'var(--text-faint)',
+        letterSpacing: '0.07em',
+        textTransform: 'uppercase',
+      }}>
+        3D View — drag to rotate
+      </div>
+
+      <div
+        style={{
+          perspective: '500px',
+          perspectiveOrigin: '50% 50%',
+          width: '210px',
+          height: '210px',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          flexShrink: 0,
+        }}
+        onMouseDown={e => onDragStart(e.clientX, e.clientY)}
+        onMouseMove={e => onDragMove(e.clientX, e.clientY)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+        onTouchStart={e => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }}
+        onTouchMove={e => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
+        onTouchEnd={() => setIsDragging(false)}
+      >
+        <div
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+          }}
+        >
+          {[0, 1, 2].flatMap(layer =>
+            [0, 1, 2].flatMap(row =>
+              [0, 1, 2].map(col => {
+                const globalIndex = layer * 9 + row * 3 + col;
+                const cell = board[globalIndex];
+                const isWin = winCells.includes(globalIndex);
+                const x = (col - 1) * VIZ_GAP;
+                const y = (row - 1) * VIZ_GAP;
+                const z = (layer - 1) * VIZ_GAP;
+                return (
+                  <div
+                    key={globalIndex}
+                    style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '50%',
+                      width: VIZ_CELL,
+                      height: VIZ_CELL,
+                      transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px)`,
+                      background: isWin
+                        ? 'var(--accent-subtle)'
+                        : cell
+                        ? 'var(--board-cell-bg)'
+                        : 'var(--bg-subtle)',
+                      border: isWin
+                        ? '1.5px solid var(--accent)'
+                        : '1px solid var(--board-cell-border)',
+                      borderRadius: 3,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 13,
+                      fontWeight: 'bold',
+                      color: cell === 'X' ? 'var(--mark-x)' : 'var(--mark-o)',
+                      pointerEvents: 'none',
+                      opacity: cell ? 1 : 0.3,
+                    }}
+                  >
+                    {cell != null ? String(cell) : ''}
+                  </div>
+                );
+              })
+            )
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
- * Renders a 3×3×3 board as a CSS 3D perspective cube.
- * Three layers float at different Z positions, viewed from an elevated angle.
+ * Renders a 3×3×3 board as three flat 3×3 grids for play, plus a draggable
+ * 3D cube visualization to the right for spatial reference.
  *
  * onMove(boardIndex, cellIndex): boardIndex = layer (0–2), cellIndex = row*3+col (0–8)
  */
@@ -38,109 +150,108 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
   const effectiveWinCells = winCells.length > 0 ? winCells : getWinCells(board);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', width: '100%' }}>
+    <div style={{
+      display: 'flex',
+      gap: 'var(--space-8)',
+      alignItems: 'flex-start',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      width: '100%',
+    }}>
 
-      {/* 3D perspective wrapper */}
-      <div style={{
-        perspective: '700px',
-        perspectiveOrigin: '50% -5%',
-        overflow: 'visible',
-        display: 'flex',
-        justifyContent: 'center',
-        paddingTop: '110px',
-        paddingBottom: '55px',
-      }}>
-        {/* Rotating 3D cube */}
+      {/* ── Playing grids ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', alignItems: 'center' }}>
         <div style={{
-          transformStyle: 'preserve-3d',
-          transform: 'rotateX(45deg) rotateY(-12deg)',
-          position: 'relative',
-          width: GRID,
-          height: GRID,
+          display: 'flex',
+          gap: 'var(--space-5)',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
         }}>
           {[0, 1, 2].map(layer => (
-            <div
-              key={layer}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                transform: `translateZ(${layer * Z_GAP}px)`,
-                display: 'grid',
-                gridTemplateColumns: `repeat(3, ${CELL}px)`,
-                gridTemplateRows: `repeat(3, ${CELL}px)`,
-                gap: GAP,
-                pointerEvents: 'none',
-              }}
-            >
-              {[0, 1, 2].flatMap(row =>
-                [0, 1, 2].map(col => {
-                  const globalIndex = layer * 9 + row * 3 + col;
-                  const cell = board[globalIndex];
-                  const isWin = effectiveWinCells.includes(globalIndex);
-                  return (
-                    <button
-                      key={`${row}-${col}`}
-                      disabled={disabled || cell !== null}
-                      onClick={() => {
-                        if (!disabled && cell === null) onMove(layer, row * 3 + col);
-                      }}
-                      style={{
-                        width: CELL,
-                        height: CELL,
-                        fontSize: 18,
-                        lineHeight: 1,
-                        fontWeight: 'bold',
-                        cursor: disabled || cell !== null ? 'default' : 'pointer',
-                        background: isWin
-                          ? 'var(--accent-subtle)'
-                          : 'var(--board-cell-bg)',
-                        border: isWin
-                          ? '2px solid var(--accent)'
-                          : '1px solid var(--board-cell-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        color: cell === 'X' ? 'var(--mark-x)' : 'var(--mark-o)',
-                        transition: 'background 0.15s',
-                        pointerEvents: 'auto',
-                      }}
-                    >
-                      {cell != null ? String(cell) : ''}
-                    </button>
-                  );
-                })
-              )}
-
-              {/* Layer label – floats to the right of each plane in 3D space */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: GRID + 10,
-                  transform: 'translateY(-50%)',
-                  fontSize: 9,
-                  fontWeight: 700,
-                  color: 'var(--text-muted)',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+            <div key={layer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <div style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+              }}>
                 {LAYER_LABELS[layer]}
+              </div>
+
+              {/* Mini 3×3 grid with row/col labels */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '18px repeat(3, minmax(0, 1fr))',
+                gridTemplateRows: '18px repeat(3, minmax(0, 1fr))',
+                gap: '3px',
+                width: '180px',
+              }}>
+                {/* Top-left corner */}
+                <div />
+                {/* Col labels */}
+                {['a', 'b', 'c'].map(col => (
+                  <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
+                    {col}
+                  </div>
+                ))}
+                {/* Rows */}
+                {[0, 1, 2].map(row => (
+                  <React.Fragment key={row}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
+                      {row + 1}
+                    </div>
+                    {[0, 1, 2].map(col => {
+                      const globalIndex = layer * 9 + row * 3 + col;
+                      const cell = board[globalIndex];
+                      const isWin = effectiveWinCells.includes(globalIndex);
+                      return (
+                        <button
+                          key={col}
+                          disabled={disabled || cell !== null}
+                          onClick={() => {
+                            if (!disabled && cell === null) onMove(layer, row * 3 + col);
+                          }}
+                          style={{
+                            aspectRatio: '1',
+                            fontSize: 'clamp(16px, 4vw, 26px)',
+                            fontWeight: 'bold',
+                            cursor: disabled || cell !== null ? 'default' : 'pointer',
+                            background: isWin
+                              ? 'var(--accent-subtle, rgba(59,130,246,0.2))'
+                              : 'var(--board-cell-bg)',
+                            border: isWin
+                              ? '2px solid var(--accent, #3b82f6)'
+                              : '1px solid var(--board-cell-border)',
+                            borderRadius: 'var(--radius-sm)',
+                            color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
+                            transition: 'background 0.15s',
+                          }}
+                        >
+                          {cell !== null ? String(cell) : ''}
+                        </button>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
               </div>
             </div>
           ))}
         </div>
+
+        <div style={{
+          fontSize: '11px',
+          color: 'var(--text-muted)',
+          textAlign: 'center',
+          maxWidth: 400,
+          lineHeight: 1.5,
+        }}>
+          Win by getting 3-in-a-row across any layer, column, row, or diagonal through all three layers.
+        </div>
       </div>
 
-      <div style={{
-        fontSize: '11px',
-        color: 'var(--text-muted)',
-        textAlign: 'center',
-        maxWidth: 400,
-        lineHeight: 1.5,
-      }}>
-        Win by getting 3-in-a-row across any layer, column, row, or diagonal through all three layers.
-      </div>
+      {/* ── 3D Visualization ── */}
+      <ThreeDViz board={board} winCells={effectiveWinCells} />
     </div>
   );
 }
