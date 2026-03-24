@@ -15,7 +15,7 @@ export type {
 
 export type { GameRules } from './rules/interface.js';
 
-export { checkBoardWinner, isBoardFull } from './rules/win-checker.js';
+export { checkBoardWinner, isBoardFull, getWinCells } from './rules/win-checker.js';
 
 export { StandardTTT } from './rules/standard-ttt.js';
 export type { StandardTTTState } from './rules/standard-ttt.js';
@@ -38,7 +38,7 @@ export type { WildTTTState, WildTTTMove } from './rules/wild-ttt.js';
 export { getMisereAIMove, getNotaktoAIMove, getWildAIMove } from './ai/index.js';
 export type { WildAIMove } from './ai/index.js';
 
-export { Gomoku } from './rules/gomoku.js';
+export { Gomoku, getGomokuWinCells } from './rules/gomoku.js';
 export type { GomokuState } from './rules/gomoku.js';
 
 export { SOSTTT } from './rules/sos-ttt.js';

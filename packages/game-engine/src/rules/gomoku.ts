@@ -66,6 +66,35 @@ function computeTerminal(board: Board, lastMoveIdx: number, lastPlayer: string):
   return null;
 }
 
+/**
+ * Exported helper: given the 15x15 Gomoku board, returns the 5 winning cell
+ * indices or null if no winner exists.
+ */
+export function getGomokuWinCells(board: Board): number[] | null {
+  const COLS = 15;
+  const WIN = 5;
+  const directions = [[1, 0], [0, 1], [1, 1], [1, -1]] as const;
+
+  for (let y = 0; y < COLS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const cell = board[y * COLS + x];
+      if (!cell) continue;
+      for (const [dx, dy] of directions) {
+        const cells: number[] = [];
+        for (let k = 0; k < WIN; k++) {
+          const nx = x + dx * k;
+          const ny = y + dy * k;
+          if (nx < 0 || nx >= COLS || ny < 0 || ny >= COLS) break;
+          if (board[ny * COLS + nx] !== cell) break;
+          cells.push(ny * COLS + nx);
+        }
+        if (cells.length === WIN) return cells;
+      }
+    }
+  }
+  return null;
+}
+
 export class Gomoku implements GameRules {
   initialize(_config: VariantConfig): GameState {
     return {

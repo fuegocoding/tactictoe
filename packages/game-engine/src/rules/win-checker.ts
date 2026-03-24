@@ -31,3 +31,17 @@ export function checkBoardWinner(board: Board): Player | null {
 export function isBoardFull(board: Board): boolean {
   return board.every((cell) => cell !== null);
 }
+
+/**
+ * Returns the [a, b, c] indices of the first winning line found, or null.
+ */
+export function getWinCells(board: Board): number[] | null {
+  for (const line of WIN_LINES) {
+    const [a, b, c] = line;
+    const cell = board[a];
+    if (cell !== null && cell !== undefined && cell === board[b] && cell === board[c]) {
+      return [a, b, c];
+    }
+  }
+  return null;
+}
