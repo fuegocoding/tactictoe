@@ -78,7 +78,7 @@ export function getGomokuWinCells(board: Board): number[] | null {
   for (let y = 0; y < COLS; y++) {
     for (let x = 0; x < COLS; x++) {
       const cell = board[y * COLS + x];
-      if (!cell) continue;
+      if (cell === null || cell === undefined) continue;
       for (const [dx, dy] of directions) {
         const cells: number[] = [];
         for (let k = 0; k < WIN; k++) {
