@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
+import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import Avatar from '@/components/Avatar';
 import LeaderboardFilters from '@/components/LeaderboardFilters';
 import styles from './page.module.css';
@@ -9,11 +10,8 @@ interface Props {
   searchParams: { period?: string; variant?: string; season?: string };
 }
 
-const VALID_VARIANTS = ['ultimate_ttt', 'standard_3x3'];
-const VARIANT_LABELS: Record<string, string> = {
-  ultimate_ttt: 'Ultimate TTT',
-  standard_3x3: 'Standard 3×3',
-};
+const VALID_VARIANTS = GAME_VARIANTS.map(v => v.id);
+const VARIANT_LABELS: Record<string, string> = Object.fromEntries(GAME_VARIANTS.map(v => [v.id, v.name]));
 
 async function getLeaderboardRows(variantId: string, period: string, seasonId?: string) {
   if (seasonId) {

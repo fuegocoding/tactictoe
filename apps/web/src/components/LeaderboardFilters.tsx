@@ -1,17 +1,13 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import styles from './LeaderboardFilters.module.css';
 
 const PERIODS = [
   { value: 'all', label: 'All time' },
   { value: 'month', label: 'This month' },
   { value: 'week', label: 'This week' },
-];
-
-const VARIANTS = [
-  { value: 'ultimate_ttt', label: 'Ultimate TTT' },
-  { value: 'standard_3x3', label: 'Standard 3×3' },
 ];
 
 interface Props {
@@ -45,15 +41,15 @@ export default function LeaderboardFilters({ period, variant, currentSeasonId, s
         ))}
       </div>
       <div className={styles.group}>
-        {VARIANTS.map(v => (
-          <button
-            key={v.value}
-            className={`${styles.pill} ${variant === v.value ? styles.active : ''}`}
-            onClick={() => update('variant', v.value)}
-          >
-            {v.label}
-          </button>
-        ))}
+        <select
+          value={variant}
+          onChange={(e) => update('variant', e.target.value)}
+          className={styles.select}
+        >
+          {GAME_VARIANTS.map(v => (
+            <option key={v.id} value={v.id}>{v.name}</option>
+          ))}
+        </select>
       </div>
       {seasons.length > 0 && (
         <div className={styles.group}>

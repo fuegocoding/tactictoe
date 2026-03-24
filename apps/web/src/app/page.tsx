@@ -13,22 +13,28 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import RatingBadge from '@/components/RatingBadge';
 import HeroBoard from '@/components/HeroBoard';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle } from 'lucide-react';
+import { GAME_VARIANTS } from '@tactictoe/game-engine';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, EyeOff, Box, Layers, Shuffle, Move, Globe, HelpCircle } from 'lucide-react';
 import styles from './page.module.css';
 
 type TabId = 'quick' | 'private' | 'ranked';
-type VariantId = 'ultimate_ttt' | 'standard_3x3' | 'gomoku' | 'misere_ttt' | 'notakto_ttt' | 'wild_ttt' | 'sos_ttt' | 'numerical_ttt';
 
-const VARIANTS: { id: VariantId; label: string; description: string; Icon: any }[] = [
-  { id: 'ultimate_ttt', label: 'Ultimate', description: '9 boards in one. The flagship.', Icon: Table2 },
-  { id: 'gomoku', label: 'Gomoku', description: '15x15 board. First to 5 in a row wins. Deep strategy.', Icon: Grip },
-  { id: 'standard_3x3', label: 'Standard', description: 'Classic. Quick casual games.', Icon: Grid3x3 },
-  { id: 'misere_ttt', label: 'Misère', description: 'Force your opponent to get 3-in-a-row to win.', Icon: Target },
-  { id: 'notakto_ttt', label: 'Notakto', description: 'Both players place X. Avoid making 3-in-a-row!', Icon: Ban },
-  { id: 'wild_ttt', label: 'Wild', description: 'Choose to place X or O on every turn.', Icon: Asterisk },
-  { id: 'sos_ttt', label: 'SOS', description: 'Place S or O to spell S-O-S for points + extra turns.', Icon: Type },
-  { id: 'numerical_ttt', label: 'Numerical', description: 'Place numbers to sum precisely to 15.', Icon: Hash },
-];
+const VARIANT_ICONS: Record<string, any> = {
+  ultimate_ttt:  Table2,
+  standard_3x3:  Grid3x3,
+  gomoku:        Grip,
+  misere_ttt:    Target,
+  notakto_ttt:   Ban,
+  wild_ttt:      Asterisk,
+  sos_ttt:       Type,
+  numerical_ttt: Hash,
+  vanishing_ttt: EyeOff,
+  ttt_3d:        Box,
+  ttt_4d:        Layers,
+  order_chaos:   Shuffle,
+  tactic_toe:    Move,
+  ultimate_3d:   Globe,
+};
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -38,7 +44,7 @@ export default function LobbyPage() {
   useSocket(); // Explicitly connect the socket on the lobby page
 
   const [tab, setTab] = useState<TabId>('quick');
-  const [variant, setVariant] = useState<VariantId>('ultimate_ttt');
+  const [variant, setVariant] = useState('ultimate_ttt');
   const [joinCode, setJoinCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +74,7 @@ export default function LobbyPage() {
 
   const handleRankedMatch = () => {
     if (!guestSession || !session?.user?.id) return;
-    queue.joinRated('ultimate_ttt', guestSession.guestId, session.user.id, session.user.name ?? guestSession.displayName);
+    queue.joinRated(variant, guestSession.guestId, session.user.id, session.user.name ?? guestSession.displayName);
   };
 
   const handleCancelQueue = () => {
@@ -133,9 +139,9 @@ export default function LobbyPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <p className={styles.variantLabel}>Game mode</p>
             <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-              <div className={styles.variantInfo} title={VARIANTS.find(v => v.id === variant)?.description}>
+              <div className={styles.variantInfo} title={GAME_VARIANTS.find(v => v.id === variant)?.description}>
                 <HelpCircle size={14} style={{ marginRight: 4 }} />
-                {VARIANTS.find(v => v.id === variant)?.description}
+                {GAME_VARIANTS.find(v => v.id === variant)?.description}
               </div>
               <a href={`/learn#${variant}`} className={styles.learnMoreLink}>
                 Learn more →
@@ -143,16 +149,19 @@ export default function LobbyPage() {
             </div>
           </div>
           <div className={styles.variantButtons}>
-            {VARIANTS.map(({ id, label, Icon }) => (
-              <button
-                key={id}
-                className={`${styles.variantBtn} ${variant === id ? styles.selected : ''}`}
-                onClick={() => setVariant(id)}
-              >
-                <Icon size={16} strokeWidth={2.5} style={{ marginBottom: 4 }} />
-                <span>{label}</span>
-              </button>
-            ))}
+            {GAME_VARIANTS.map(({ id, name }) => {
+              const Icon = VARIANT_ICONS[id];
+              return (
+                <button
+                  key={id}
+                  className={`${styles.variantBtn} ${variant === id ? styles.selected : ''}`}
+                  onClick={() => setVariant(id)}
+                >
+                  <Icon size={16} strokeWidth={2.5} style={{ marginBottom: 4 }} />
+                  <span>{name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -161,7 +170,7 @@ export default function LobbyPage() {
           <button className={`${styles.tab} ${tab === 'quick' ? styles.activeTab : ''}`} onClick={() => setTab('quick')}>
             Quick Match
           </button>
-          <button className={`${styles.tab} ${tab === 'ranked' ? styles.activeTab : ''}`} onClick={() => { setTab('ranked'); setVariant('ultimate_ttt'); }}>
+          <button className={`${styles.tab} ${tab === 'ranked' ? styles.activeTab : ''}`} onClick={() => setTab('ranked')}>
             Ranked
           </button>
           <button className={`${styles.tab} ${tab === 'private' ? styles.activeTab : ''}`} onClick={() => setTab('private')}>
@@ -226,7 +235,7 @@ export default function LobbyPage() {
             ) : (
               <>
                 <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
-                  Ultimate TTT · Rated · All time controls standard
+                  {GAME_VARIANTS.find(v => v.id === variant)?.name} · Rated
                 </p>
                 <Button onClick={handleRankedMatch} full>Find Ranked Match</Button>
               </>

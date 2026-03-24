@@ -1,3 +1,6 @@
+export { GAME_VARIANTS } from './variants.js';
+export type { VariantMeta } from './variants.js';
+
 export type {
   Player,
   Cell,

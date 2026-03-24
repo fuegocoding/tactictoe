@@ -1,5 +1,6 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import { roomManager } from './room-manager.js';
 import { QueueManager } from './queue-manager.js';
 import { startGame, handleMove, handleDisconnect, handleReconnect } from './game-session.js';
@@ -13,6 +14,9 @@ import type {
   QueueMatchedPayload,
   QueueStatusPayload,
 } from './types.js';
+
+const CASUAL_VARIANTS = new Set(GAME_VARIANTS.filter(v => v.allowCasual).map(v => v.id));
+const RATED_VARIANTS = new Set(GAME_VARIANTS.filter(v => v.allowRated).map(v => v.id));
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 const CLIENT_URL = process.env['CLIENT_URL'] ?? 'http://localhost:3000';
@@ -164,7 +168,7 @@ io.on('connection', (socket) => {
   socket.on('queue:join', (payload: JoinQueuePayload) => {
     const { variantId, guestId, displayName } = payload;
 
-    if (!['ultimate_ttt', 'standard_3x3'].includes(variantId)) {
+    if (!CASUAL_VARIANTS.has(variantId)) {
       socket.emit('error', { message: 'Unknown variant' });
       return;
     }
@@ -202,7 +206,7 @@ io.on('connection', (socket) => {
   socket.on('queue:join:rated', (payload: JoinRatedQueuePayload) => {
     const { variantId, guestId, userId, displayName } = payload;
 
-    if (!['ultimate_ttt'].includes(variantId)) {
+    if (!RATED_VARIANTS.has(variantId)) {
       socket.emit('error', { message: 'This variant is not available for rated play' });
       return;
     }

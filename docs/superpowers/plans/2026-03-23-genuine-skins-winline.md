@@ -17,6 +17,7 @@
 |------|---------|
 | `apps/web/src/components/CosmeticsContext.tsx` | React context + `useCosmetics` hook exposing `symbolX`, `symbolO` |
 | `apps/web/src/components/board/WinLine.tsx` | SVG overlay component drawing a line through winning cells |
+| `apps/web/src/components/board/PieceSymbol.tsx` | Renders a Lucide icon if `symbol` matches a known icon name, otherwise renders as text/emoji |
 
 ### Modified files
 | Path | What changes |
