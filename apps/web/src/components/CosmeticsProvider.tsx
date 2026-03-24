@@ -2,68 +2,91 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { CosmeticsContext } from './CosmeticsContext';
+
+const CSS_VAR_KEYS = [
+  '--board-cell-bg',
+  '--board-cell-border',
+  '--board-active-border',
+  '--board-inactive-border',
+  '--mark-x',
+  '--mark-o',
+  '--winline-color',
+  '--winline-width',
+  '--winline-filter',
+];
 
 export default function CosmeticsProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
+  const [symbolX, setSymbolX] = useState('X');
+  const [symbolO, setSymbolO] = useState('O');
 
-  // Need to extract the default variables on the first pass so we can revert when unequal
-  // But CSS variables are inherited, we just reset them to '' and let CSS fallback to root!
-  
   useEffect(() => {
     const loadCosmetics = async () => {
       if (status === 'loading') return;
       try {
         const res = await fetch('/api/cosmetics');
         const data = await res.json();
-        if (data.cosmetics) {
-          let equipped = data.cosmetics.filter((c: any) => c.isEquipped);
-          
-          if (status === 'unauthenticated') {
-             const guestSave = localStorage.getItem('guest_cosmetics');
-             if (guestSave) {
-               try {
-                 const savedIds = JSON.parse(guestSave) as string[];
-                 equipped = data.cosmetics.filter((c: any) => savedIds.includes(c.id));
-               } catch (e) {}
-             }
-          }
+        if (!data.cosmetics) return;
 
-          const overrides: Record<string, string> = {
-            '--board-cell-bg': '',
-            '--board-cell-border': '',
-            '--board-active-border': '',
-            '--board-inactive-border': '',
-            '--mark-x': '',
-            '--mark-o': ''
-          };
+        let equipped = data.cosmetics.filter((c: any) => c.isEquipped);
 
-          for (const c of equipped) {
-             try {
-               const parsed = JSON.parse(c.cssValue);
-               Object.assign(overrides, parsed);
-             } catch (e) {}
-          }
-          
-          for (const [key, value] of Object.entries(overrides)) {
-             if (value === '') {
-                document.documentElement.style.removeProperty(key);
-             } else {
-                document.documentElement.style.setProperty(key, value as string);
-             }
+        if (status === 'unauthenticated') {
+          const guestSave = localStorage.getItem('guest_cosmetics');
+          if (guestSave) {
+            try {
+              const savedIds = JSON.parse(guestSave) as string[];
+              equipped = data.cosmetics.filter((c: any) => savedIds.includes(c.id));
+            } catch {}
           }
         }
+
+        // Reset all CSS vars to defaults
+        const overrides: Record<string, string> = Object.fromEntries(
+          CSS_VAR_KEYS.map((k) => [k, ''])
+        );
+
+        let nextSymbolX = 'X';
+        let nextSymbolO = 'O';
+
+        for (const c of equipped) {
+          try {
+            const parsed = JSON.parse(c.cssValue);
+            // Extract non-CSS fields before merging
+            if (parsed.symbolX) nextSymbolX = parsed.symbolX;
+            if (parsed.symbolO) nextSymbolO = parsed.symbolO;
+            // Merge only CSS var keys
+            for (const key of CSS_VAR_KEYS) {
+              if (parsed[key] !== undefined) overrides[key] = parsed[key];
+            }
+          } catch {}
+        }
+
+        for (const [key, value] of Object.entries(overrides)) {
+          if (value === '') {
+            document.documentElement.style.removeProperty(key);
+          } else {
+            document.documentElement.style.setProperty(key, value);
+          }
+        }
+
+        setSymbolX(nextSymbolX);
+        setSymbolO(nextSymbolO);
       } catch (e) {
         console.error('Failed to load cosmetics', e);
       }
     };
 
     loadCosmetics();
-    
-    // Listen for custom event from SettingsPage
+
     const handleUpdate = () => loadCosmetics();
     window.addEventListener('cosmetics_updated', handleUpdate);
     return () => window.removeEventListener('cosmetics_updated', handleUpdate);
   }, [status]);
 
-  return <>{children}</>;
+  return (
+    <CosmeticsContext.Provider value={{ symbolX, symbolO }}>
+      {children}
+    </CosmeticsContext.Provider>
+  );
 }
