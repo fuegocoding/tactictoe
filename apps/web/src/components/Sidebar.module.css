@@ -111,6 +111,16 @@
 }
 .profileLink:hover { background: var(--bg-hover); }
 
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionIcon {
+  display: none;
+}
+
 .themeToggleWrap {
   display: flex;
   justify-content: flex-start;
@@ -129,4 +139,10 @@
   .navItem { padding: var(--space-3); justify-content: center; }
   .navLabel { display: none; }
   .userInfo { display: none; }
+
+  .actions { gap: var(--space-3); }
+  .actionBtn { padding: var(--space-2); min-width: unset; }
+  .actionText { display: none; }
+  .actionIcon { display: inline; font-size: 1.25rem; line-height: 1; }
+  .themeToggleWrap { justify-content: center; padding: 0; }
 }

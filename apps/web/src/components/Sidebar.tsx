@@ -89,10 +89,16 @@ export default function Sidebar() {
         ) : (
           <div className={styles.actions}>
             <Link href="/login" style={{ width: '100%' }}>
-              <Button variant="secondary" full>Sign In</Button>
+              <Button variant="secondary" className={styles.actionBtn} full>
+                <span className={styles.actionText}>Sign In</span>
+                <span className={styles.actionIcon}>🔑</span>
+              </Button>
             </Link>
             <Link href="/register" style={{ width: '100%' }}>
-              <Button variant="primary" full>Sign Up</Button>
+              <Button variant="primary" className={styles.actionBtn} full>
+                <span className={styles.actionText}>Sign Up</span>
+                <span className={styles.actionIcon}>✨</span>
+              </Button>
             </Link>
           </div>
         )}
