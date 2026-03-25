@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Board } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { PieceSymbol } from './PieceSymbol';
 
 interface FourDBoardProps {
   board: Board; // 81 cells
@@ -19,6 +21,7 @@ interface FourDBoardProps {
  *   flat index = boardIndex * 9 + cellIndex_within
  */
 export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = [] }: FourDBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
   const metaLabels = [
     ['(1,1)', '(1,2)', '(1,3)'],
     ['(2,1)', '(2,2)', '(2,3)'],
@@ -93,10 +96,16 @@ export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = 
                               ? '2px solid var(--accent, #3b82f6)'
                               : '1px solid var(--board-cell-border)',
                             borderRadius: '3px',
-                            color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
-                          {cell ?? ''}
+                          {cell === 'X' ? (
+                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={12} />
+                          ) : cell === 'O' ? (
+                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={12} />
+                          ) : null}
                         </button>
                       );
                     })

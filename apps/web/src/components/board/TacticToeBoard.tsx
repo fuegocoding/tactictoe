@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Board } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { PieceSymbol } from './PieceSymbol';
 
 type MoveMode = 'place' | 'move_obstacle';
 
@@ -30,6 +32,7 @@ export function TacticToeBoard({
   onCellClick,
   winCells = [],
 }: TacticToeBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
       <div style={{ display: 'flex', gap: 'var(--space-5)', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -97,17 +100,18 @@ export function TacticToeBoard({
                           ? '1px dashed var(--text-muted)'
                           : '1px solid var(--board-cell-border)',
                         borderRadius: 'var(--radius-sm)',
-                        color: isObstacle
-                          ? 'var(--text-muted)'
-                          : cell === 'X'
-                          ? 'var(--mark-x)'
-                          : cell === 'O'
-                          ? 'var(--mark-o)'
-                          : 'var(--text)',
+                        color: isObstacle ? 'var(--text-muted)' : 'var(--text)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         transition: 'background 0.15s, border-color 0.15s',
                       }}
                     >
-                      {isObstacle ? '▪' : (cell ?? '')}
+                      {isObstacle ? '▪' : cell === 'X' ? (
+                        <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={18} />
+                      ) : cell === 'O' ? (
+                        <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={18} />
+                      ) : null}
                     </button>
                   );
                 })

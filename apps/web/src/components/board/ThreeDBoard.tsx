@@ -42,8 +42,8 @@ function getWinCells(board: Board): number[] {
 }
 
 /** One small 3D cube — rendered with all 6 CSS faces + a sticker on each */
-function Cubelet({ cell, isWin }: { cell: string | number | null | undefined; isWin: boolean }) {
-  const symbol = cell != null ? String(cell) : '';
+function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | null | undefined; isWin: boolean; symbolX: string; symbolO: string }) {
+  const displaySymbol = cell === 'X' ? symbolX : cell === 'O' ? symbolO : null;
 
   const stickerBg = isWin
     ? '#f59e0b'                       // amber win highlight
@@ -80,13 +80,9 @@ function Cubelet({ cell, isWin }: { cell: string | number | null | undefined; is
             fontSize: 15,
             fontWeight: 900,
             color: '#fff',
-            // Layered text-shadow creates a 3D extruded look for X / O
-            textShadow: symbol
-              ? '0 1px 0 rgba(0,0,0,0.55), 0 2px 0 rgba(0,0,0,0.4), 0 3px 0 rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.35)'
-              : 'none',
             letterSpacing: '-0.01em',
           }}>
-            {symbol}
+            {displaySymbol ? <PieceSymbol symbol={displaySymbol} color="#fff" size={15} /> : null}
           </div>
         </div>
       ))}
@@ -95,7 +91,7 @@ function Cubelet({ cell, isWin }: { cell: string | number | null | undefined; is
 }
 
 /** Draggable 3D cube — view only, not for playing */
-function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
+function ThreeDViz({ board, winCells, symbolX, symbolO }: { board: Board; winCells: number[]; symbolX: string; symbolO: string }) {
   const [rotation, setRotation] = useState({ x: -25, y: 35 });
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false); // sync ref so onDragMove reads latest value instantly
@@ -183,7 +179,7 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
                       pointerEvents: 'none',
                     }}
                   >
-                    <Cubelet cell={cell} isWin={isWin} />
+                    <Cubelet cell={cell} isWin={isWin} symbolX={symbolX} symbolO={symbolO} />
                   </div>
                 );
               })
@@ -202,6 +198,7 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
  * onMove(boardIndex, cellIndex): boardIndex = layer (0–2), cellIndex = row*3+col (0–8)
  */
 export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells = [] }: ThreeDBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
   const effectiveWinCells = winCells.length > 0 ? winCells : getWinCells(board);
 
   return (
@@ -258,11 +255,17 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                             background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.2))' : 'var(--board-cell-bg)',
                             border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--board-cell-border)',
                             borderRadius: 'var(--radius-sm)',
-                            color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             transition: 'background 0.15s',
                           }}
                         >
-                          {cell !== null ? String(cell) : ''}
+                          {cell === 'X' ? (
+                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={22} />
+                          ) : cell === 'O' ? (
+                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={22} />
+                          ) : null}
                         </button>
                       );
                     })}
@@ -279,7 +282,7 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
       </div>
 
       {/* ── 3D Visualization ──────────────────────────────────── */}
-      <ThreeDViz board={board} winCells={effectiveWinCells} />
+      <ThreeDViz board={board} winCells={effectiveWinCells} symbolX={symbolX} symbolO={symbolO} />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Board } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { PieceSymbol } from './PieceSymbol';
 
 interface Ultimate3DBoardProps {
   microBoards: Board[];       // 27 boards, each 27 cells
@@ -27,6 +29,7 @@ export function Ultimate3DBoard({
   disabled,
   onMove,
 }: Ultimate3DBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
   const [selectedMetaLayer, setSelectedMetaLayer] = React.useState(0);
   const [selectedMicroLayer, setSelectedMicroLayer] = React.useState(0);
 
@@ -120,11 +123,14 @@ export function Ultimate3DBoard({
                 <div style={{
                   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '32px', fontWeight: 900, zIndex: 1,
-                  color: macroResult === 'X' ? 'var(--mark-x)' : 'var(--mark-o)',
                   opacity: 0.8,
                   pointerEvents: 'none',
                 }}>
-                  {macroResult}
+                  {macroResult === 'X' ? (
+                    <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={28} />
+                  ) : (
+                    <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={28} />
+                  )}
                 </div>
               )}
 
@@ -154,10 +160,16 @@ export function Ultimate3DBoard({
                           background: 'var(--board-cell-bg)',
                           border: '1px solid var(--board-cell-border)',
                           borderRadius: '2px',
-                          color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
-                        {cell !== null ? String(cell) : '·'}
+                        {cell === 'X' ? (
+                          <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={11} />
+                        ) : cell === 'O' ? (
+                          <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={11} />
+                        ) : '·'}
                       </button>
                     );
                   })
