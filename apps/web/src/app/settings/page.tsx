@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { PieceSymbol } from '@/components/board/PieceSymbol';
 import styles from './page.module.css';
 
 interface Cosmetic {
@@ -87,6 +87,7 @@ export default function SettingsPage() {
 
   const boards = cosmetics.filter(c => c.type === 'board');
   const pieces = cosmetics.filter(c => c.type === 'piece');
+  const winlines = cosmetics.filter(c => c.type === 'winline');
 
   if (loading) return <div className={styles.loading}>Loading cosmetics...</div>;
 
@@ -129,28 +130,67 @@ export default function SettingsPage() {
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Piece Themes</h2>
         <div className={styles.grid}>
-          {pieces.map(c => (
-            <Card key={c.id} className={`${styles.card} ${c.isEquipped ? styles.equipped : ''} ${!c.isUnlocked ? styles.locked : ''}`}>
-               <div className={styles.preview} style={JSON.parse(c.cssValue)}>
-                 <div className={styles.previewPieces}>
-                    <span style={{ color: 'var(--mark-x)' }}>X</span>
+          {pieces.map(c => {
+            const cv = JSON.parse(c.cssValue) as Record<string, string>;
+            const sx = cv['symbolX'] ?? 'X';
+            const so = cv['symbolO'] ?? 'O';
+            return (
+              <Card key={c.id} className={`${styles.card} ${c.isEquipped ? styles.equipped : ''} ${!c.isUnlocked ? styles.locked : ''}`}>
+                <div className={styles.preview} style={cv}>
+                  <div className={styles.previewPieces}>
+                    <PieceSymbol symbol={sx} color="var(--mark-x)" size={40} />
                     <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>vs</span>
-                    <span style={{ color: 'var(--mark-o)' }}>O</span>
-                 </div>
-               </div>
-               <div className={styles.info}>
-                 <h3>{c.name}</h3>
-                 <p className={styles.requirement}>{c.requiredScore > 0 ? `Unlocks at ${c.requiredScore} Rating` : 'Starter Edition'}</p>
-                 <Button 
-                   variant={c.isEquipped ? 'secondary' : 'primary'} 
-                   onClick={() => handleEquip(c)}
-                   disabled={!c.isUnlocked}
-                 >
-                   {c.isEquipped ? 'Unequip' : c.isUnlocked ? 'Equip' : 'Locked'}
-                 </Button>
-               </div>
-            </Card>
-          ))}
+                    <PieceSymbol symbol={so} color="var(--mark-o)" size={40} />
+                  </div>
+                </div>
+                <div className={styles.info}>
+                  <h3>{c.name}</h3>
+                  <p className={styles.requirement}>{c.requiredScore > 0 ? `Unlocks at ${c.requiredScore} Rating` : 'Starter Edition'}</p>
+                  <Button
+                    variant={c.isEquipped ? 'secondary' : 'primary'}
+                    onClick={() => handleEquip(c)}
+                    disabled={!c.isUnlocked}
+                  >
+                    {c.isEquipped ? 'Unequip' : c.isUnlocked ? 'Equip' : 'Locked'}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Win Line Skins</h2>
+        <div className={styles.grid}>
+          {winlines.map(c => {
+            const cv = JSON.parse(c.cssValue) as Record<string, string>;
+            return (
+              <Card key={c.id} className={`${styles.card} ${c.isEquipped ? styles.equipped : ''} ${!c.isUnlocked ? styles.locked : ''}`}>
+                <div className={styles.previewWinLine} style={cv}>
+                  <svg viewBox="0 0 3 3" className={styles.winLinePreviewSvg}>
+                    <line
+                      x1="0.3" y1="0.3" x2="2.7" y2="2.7"
+                      stroke="var(--winline-color, #3b82f6)"
+                      strokeLinecap="round"
+                      style={{ filter: 'var(--winline-filter, none)', strokeWidth: '0.28' }}
+                    />
+                  </svg>
+                </div>
+                <div className={styles.info}>
+                  <h3>{c.name}</h3>
+                  <p className={styles.requirement}>{c.requiredScore > 0 ? `Unlocks at ${c.requiredScore} Rating` : 'Starter Edition'}</p>
+                  <Button
+                    variant={c.isEquipped ? 'secondary' : 'primary'}
+                    onClick={() => handleEquip(c)}
+                    disabled={!c.isUnlocked}
+                  >
+                    {c.isEquipped ? 'Unequip' : c.isUnlocked ? 'Equip' : 'Locked'}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

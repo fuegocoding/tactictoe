@@ -104,6 +104,21 @@
   flex: 1;
 }
 
+.previewWinLine {
+  height: 140px;
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.winLinePreviewSvg {
+  width: 120px;
+  height: 120px;
+  overflow: visible;
+}
+
 .loading {
   padding: var(--space-12);
   text-align: center;
