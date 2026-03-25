@@ -10,7 +10,7 @@ import styles from './page.module.css';
 interface Cosmetic {
   id: string;
   name: string;
-  type: 'board' | 'piece';
+  type: 'board' | 'piece' | 'winline';
   cssValue: string;
   requiredScore: number;
   isUnlocked: boolean;

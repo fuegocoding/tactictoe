@@ -11,15 +11,20 @@ export async function GET() {
 
   if (cosmetics.length === 0) {
     const DEFAULT_COSMETICS = [
-      { id: 'board_default', name: 'Starter Board', type: 'board', cssValue: '{}', requiredScore: 0 },
-      { id: 'board_cherry', name: 'Cherry Wood', type: 'board', cssValue: '{"--board-cell-bg":"#4A2E2B","--board-cell-border":"#8B3A33"}', requiredScore: 1200 },
-      { id: 'board_neon', name: 'Cyber Neon', type: 'board', cssValue: '{"--board-cell-bg":"#0A0A12","--board-cell-border":"#00FFCC","--board-active-border":"#FF00FF"}', requiredScore: 1400 },
-      { id: 'board_gold', name: 'Aurum Prestige', type: 'board', cssValue: '{"--board-cell-bg":"#191919","--board-cell-border":"#FFD700","--board-active-border":"#FFF8DC"}', requiredScore: 1600 },
-      
-      { id: 'piece_default', name: 'Starter Marks', type: 'piece', cssValue: '{}', requiredScore: 0 },
-      { id: 'piece_neon', name: 'Cyber Neon', type: 'piece', cssValue: '{"--mark-x":"#FF00FF","--mark-o":"#00FFCC"}', requiredScore: 1200 },
-      { id: 'piece_pastel', name: 'Pastel Dream', type: 'piece', cssValue: '{"--mark-x":"#FFB3BA","--mark-o":"#BAE1FF"}', requiredScore: 1400 },
-      { id: 'piece_ruby', name: 'Ruby & Pearl', type: 'piece', cssValue: '{"--mark-x":"#E0115F","--mark-o":"#F0EAD6"}', requiredScore: 1600 },
+      { id: 'board_default', name: 'Classic', type: 'board', cssValue: '{}', requiredScore: 0 },
+      { id: 'board_midnight', name: 'Midnight Dark', type: 'board', cssValue: '{"--board-cell-bg":"#1a1a1a","--board-cell-border":"#2a2a2a","--board-active-border":"#f59e0b","--board-inactive-border":"#2a2a2a"}', requiredScore: 200 },
+      { id: 'board_neon', name: 'Neon Cyber', type: 'board', cssValue: '{"--board-cell-bg":"#0d0221","--board-cell-border":"#ff0055","--board-active-border":"#00ffff","--board-inactive-border":"#ff0055"}', requiredScore: 600 },
+
+      { id: 'piece_default', name: 'Classic', type: 'piece', cssValue: '{"--mark-x":"#1a1a1a","--mark-o":"#d97706"}', requiredScore: 0 },
+      { id: 'piece_donuts', name: 'Donuts', type: 'piece', cssValue: '{"--mark-x":"#c0392b","--mark-o":"#8e5c3a","symbolX":"🍩","symbolO":"🍫"}', requiredScore: 50 },
+      { id: 'piece_space', name: 'Space', type: 'piece', cssValue: '{"--mark-x":"#e74c3c","--mark-o":"#3498db","symbolX":"Rocket","symbolO":"Globe"}', requiredScore: 100 },
+      { id: 'piece_cosmic', name: 'Cosmic', type: 'piece', cssValue: '{"--mark-x":"#f1c40f","--mark-o":"#9b59b6","symbolX":"Star","symbolO":"Moon"}', requiredScore: 150 },
+      { id: 'piece_animals', name: 'Animals', type: 'piece', cssValue: '{"--mark-x":"#e74c3c","--mark-o":"#e67e22","symbolX":"Cat","symbolO":"Dog"}', requiredScore: 300 },
+
+      { id: 'winline_default', name: 'Classic Line', type: 'winline', cssValue: '{"--winline-color":"#3b82f6","--winline-width":"0.12","--winline-filter":"none"}', requiredScore: 0 },
+      { id: 'winline_neon', name: 'Neon Glow', type: 'winline', cssValue: '{"--winline-color":"#00ffcc","--winline-width":"0.14","--winline-filter":"drop-shadow(0 0 0.08px #00ffcc) drop-shadow(0 0 0.2px #00ffcc)"}', requiredScore: 150 },
+      { id: 'winline_fire', name: 'Fire Line', type: 'winline', cssValue: '{"--winline-color":"#ff4500","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.08px #ff6b35) drop-shadow(0 0 0.25px #ff4500)"}', requiredScore: 400 },
+      { id: 'winline_gold', name: 'Gold Strike', type: 'winline', cssValue: '{"--winline-color":"#ffd700","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.1px #ffd700) drop-shadow(0 0 0.3px #b8860b)"}', requiredScore: 700 },
     ];
     await (prisma as any).cosmetic.createMany({ data: DEFAULT_COSMETICS });
     cosmetics = await (prisma as any).cosmetic.findMany({ orderBy: { requiredScore: 'asc' } });
