@@ -11,10 +11,13 @@ import { ThreeDBoard } from '@/components/board/ThreeDBoard';
 import { FourDBoard } from '@/components/board/FourDBoard';
 import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
+import { GarrisonBoard } from '@/components/board/GarrisonBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
-import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState, TTT3DState, TTT4DState, Ultimate3DState, TacticToeState, OrderChaosState, TacticToeMove } from '@tactictoe/game-engine';
-import { getWinCells, getGomokuWinCells } from '@tactictoe/game-engine';
+import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState, TTT3DState, TTT4DState, Ultimate3DState, TacticToeState, OrderChaosState, TacticToeMove, GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
+import { getWinCells, getGomokuWinCells, Garrison } from '@tactictoe/game-engine';
+
+const garrisonEngine = new Garrison();
 import { GridBoard } from '@/components/board/GridBoard';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './page.module.css';
@@ -105,6 +108,8 @@ export default function RoomPage() {
   const [placingAs, setPlacingAs] = useState<string | number>('X');
   const [tacticToeMode, setTacticToeMode] = useState<'place' | 'move_obstacle'>('place');
   const [tacticToeSelectedObstacle, setTacticToeSelectedObstacle] = useState<number | null>(null);
+  const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
+  const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
   const prevStateRef = useRef<GameState | null>(null);
   const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
@@ -319,6 +324,61 @@ export default function RoomPage() {
       }
     }
   }, [socket, code, roomState.gameState, tacticToeMode, tacticToeSelectedObstacle]);
+
+  const handleGarrisonHandClick = useCallback((pieceId: string) => {
+    if (!roomState.gameState || !isMyTurn) return;
+    const s = roomState.gameState as GarrisonState;
+    if (garrisonSelectedPiece === pieceId) { setGarrisonSelectedPiece(null); setGarrisonLegalDests([]); return; }
+    const occupied = new Set(s.pieces.filter(p => p.square >= 0 && !p.captured).map(p => p.square));
+    const dests: number[] = [];
+    for (let i = 0; i < 64; i++) { if (!occupied.has(i)) dests.push(i); }
+    setGarrisonSelectedPiece(pieceId);
+    setGarrisonLegalDests(dests);
+  }, [roomState.gameState, isMyTurn, garrisonSelectedPiece]);
+
+  const handleGarrisonSquareClick = useCallback((square: number, pieceId: string | null) => {
+    if (!roomState.gameState || !isMyTurn) return;
+    const s = roomState.gameState as GarrisonState;
+
+    if (garrisonSelectedPiece === null) {
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === mySymbol && piece.square >= 0) {
+          const dests = garrisonEngine.getLegalMoves(s)
+            .map(m => m.data as GarrisonMove)
+            .filter(m => m.pieceId === pieceId)
+            .map(m => m.to);
+          setGarrisonSelectedPiece(pieceId);
+          setGarrisonLegalDests(dests);
+        }
+      }
+      return;
+    }
+
+    // Deselect if clicked same square with no valid dest info
+    if (!garrisonLegalDests.includes(square)) {
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === mySymbol && piece.square >= 0) {
+          setGarrisonSelectedPiece(pieceId);
+          setGarrisonLegalDests([]);
+          return;
+        }
+      }
+      setGarrisonSelectedPiece(null);
+      setGarrisonLegalDests([]);
+      return;
+    }
+
+    const selectedPiece = s.pieces.find(p => p.id === garrisonSelectedPiece)!;
+    const movePayload = selectedPiece.square === -1
+      ? { roomCode: code, garrisonType: 'place' as const, garrisonPieceId: garrisonSelectedPiece, garrisonTo: square }
+      : { roomCode: code, garrisonType: 'move' as const, garrisonPieceId: garrisonSelectedPiece, garrisonFrom: selectedPiece.square, garrisonTo: square };
+
+    socket.emit('game:move', movePayload);
+    setGarrisonSelectedPiece(null);
+    setGarrisonLegalDests([]);
+  }, [roomState.gameState, isMyTurn, garrisonSelectedPiece, garrisonLegalDests, mySymbol, socket, code]);
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -536,6 +596,15 @@ export default function RoomPage() {
                     const s = roomState.gameState as OrderChaosState;
                     return s.terminal?.reason === 'win' && s.terminal.winner === 'X' ? (s as any).terminal.winCells ?? [] : [];
                   })()}
+                />
+              ) : roomState.gameState!.variantId === 'garrison' ? (
+                <GarrisonBoard
+                  state={roomState.gameState as GarrisonState}
+                  disabled={!isMyTurn}
+                  selectedPieceId={isMyTurn ? garrisonSelectedPiece : null}
+                  legalDestinations={isMyTurn ? garrisonLegalDests : []}
+                  onHandPieceClick={handleGarrisonHandClick}
+                  onBoardSquareClick={handleGarrisonSquareClick}
                 />
               ) : roomState.gameState!.variantId === 'gomoku' ? (
                 <GridBoard

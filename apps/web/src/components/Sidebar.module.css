@@ -144,7 +144,8 @@
     margin: 0;
     padding: var(--space-4);
     border: none;
-    background: transparent;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-raised);
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;

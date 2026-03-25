@@ -22,4 +22,5 @@ export const GAME_VARIANTS: VariantMeta[] = [
   { id: 'order_chaos',  name: 'Order & Chaos',  description: '6×6 asymmetric game. One side orders, one creates chaos.', allowPrivate: true, allowCasual: true, allowRated: true },
   { id: 'tactic_toe',   name: 'Tactic Toe',     description: '3D board with 8 moveable obstacles. Plan ahead.',          allowPrivate: true, allowCasual: true, allowRated: true },
   { id: 'ultimate_3d',  name: 'Ultimate 3D',    description: 'Ultimate TTT expanded to 3D. 729 cells, one winner.',      allowPrivate: true, allowCasual: true, allowRated: true },
+  { id: 'garrison',     name: 'Garrison',       description: 'Place chess pieces on an 8×8 board. Win by 5-in-a-row.',    allowPrivate: true, allowCasual: true, allowRated: false },
 ];

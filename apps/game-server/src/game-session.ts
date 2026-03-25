@@ -1,5 +1,5 @@
 import type { Server, Socket } from 'socket.io';
-import { UltimateTTT, StandardTTT, Gomoku, WildTTT, SOSTTT, MisereTTT, NotaktoTTT, NumericalTTT, VanishingTTT, TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, type GameRules, type GameState } from '@tactictoe/game-engine';
+import { UltimateTTT, StandardTTT, Gomoku, WildTTT, SOSTTT, MisereTTT, NotaktoTTT, NumericalTTT, VanishingTTT, TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison, type GameRules, type GameState } from '@tactictoe/game-engine';
 import { roomManager as defaultRoomManager, createRoomManager } from './room-manager.js';
 
 // Allow injecting a room manager for tests
@@ -65,6 +65,7 @@ const engines: Record<string, GameRules> = {
   order_chaos: new OrderChaos(),
   tactic_toe: new TacticToe(),
   ultimate_3d: new Ultimate3D(),
+  garrison: new Garrison(),
 };
 
 function getEngine(variantId: string): GameRules {
@@ -126,6 +127,11 @@ export function handleMove(
     room.variantId === 'ultimate_ttt' ? { boardIndex: payload.boardIndex, cellIndex: payload.cellIndex } :
     (room.variantId === 'wild_ttt' || room.variantId === 'sos_ttt') ? { cellIndex: payload.cellIndex, symbol: payload.symbol } :
     room.variantId === 'numerical_ttt' ? { cellIndex: payload.cellIndex, numberPlaced: payload.numberPlaced } :
+    room.variantId === 'garrison' ? (
+      payload.garrisonType === 'place'
+        ? { type: 'place', pieceId: payload.garrisonPieceId, to: payload.garrisonTo }
+        : { type: 'move', pieceId: payload.garrisonPieceId, from: payload.garrisonFrom, to: payload.garrisonTo }
+    ) :
     { cellIndex: payload.cellIndex };
 
   const result = engine.applyMove(

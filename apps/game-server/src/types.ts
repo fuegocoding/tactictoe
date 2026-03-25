@@ -49,6 +49,11 @@ export interface MakeMovePayload {
   cellIndex: number;
   symbol?: string | number;
   numberPlaced?: number;
+  // garrison
+  garrisonType?: 'place' | 'move';
+  garrisonPieceId?: string;
+  garrisonFrom?: number;
+  garrisonTo?: number;
 }
 
 // ─── Socket.io event payloads (server → client) ───────────────────────────────

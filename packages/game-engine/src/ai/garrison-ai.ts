@@ -14,9 +14,10 @@ export function getGarrisonAIMove(
   const legal = engine.getLegalMoves(state);
   if (legal.length === 0) throw new Error('No legal garrison moves');
 
-  let iterations = 200;
-  if (difficulty === 'medium') iterations = 800;
-  if (difficulty === 'hard') iterations = 2000;
+  // Garrison has a large branching factor — keep iterations low to avoid blocking UI
+  let iterations = 20;
+  if (difficulty === 'medium') iterations = 60;
+  if (difficulty === 'hard') iterations = 120;
 
   const move = mctsGetMove(state, engine, aiPlayer, iterations);
   return move.data as GarrisonMove;

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
-  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
+  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison, checkFiveInARow,
   getWinCells, getGomokuWinCells,
 } from '@tactictoe/game-engine';
 import type { GameState, TerminalResult } from '@tactictoe/game-engine';
@@ -21,6 +21,7 @@ import type { TTT4DState } from '@tactictoe/game-engine';
 import type { OrderChaosState } from '@tactictoe/game-engine';
 import type { TacticToeState } from '@tactictoe/game-engine';
 import type { Ultimate3DState } from '@tactictoe/game-engine';
+import type { GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
 
 type LocalGameState = GameState & { terminal?: TerminalResult | null };
 import { StandardBoard } from '@/components/board/StandardBoard';
@@ -30,16 +31,18 @@ import { ThreeDBoard } from '@/components/board/ThreeDBoard';
 import { FourDBoard } from '@/components/board/FourDBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
+import { GarrisonBoard } from '@/components/board/GarrisonBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network, Shield } from 'lucide-react';
 import styles from './page.module.css';
 
 type Variant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d'
+  | 'garrison';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
   standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
@@ -56,6 +59,7 @@ const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: 
   order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
   tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
   ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
+  garrison:      { label: 'Garrison',    description: 'Place chess pieces on an 8×8 board. Get 5-in-a-row.',    Icon: Shield },
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -73,6 +77,7 @@ const engines: Record<Variant, GameRules> = {
   order_chaos:   new OrderChaos(),
   tactic_toe:    new TacticToe(),
   ultimate_3d:   new Ultimate3D(),
+  garrison:      new Garrison(),
 };
 
 interface LocalState {
@@ -86,6 +91,8 @@ interface LocalState {
   placingAs: string | number;
   tacticMoveMode: 'place' | 'move_obstacle';
   tacticSelectedObstacle: number | null;
+  garrisonSelectedPiece: string | null;
+  garrisonLegalDests: number[];
 }
 
 type LocalAction =
@@ -98,7 +105,8 @@ type LocalAction =
   | { type: 'SET_NAME'; player: 1 | 2; name: string }
   | { type: 'SET_PLACING_AS'; symbol: string | number }
   | { type: 'SET_TACTIC_MODE'; mode: 'place' | 'move_obstacle' }
-  | { type: 'SET_TACTIC_OBSTACLE'; cell: number | null };
+  | { type: 'SET_TACTIC_OBSTACLE'; cell: number | null }
+  | { type: 'SET_GARRISON_PIECE'; pieceId: string | null; dests: number[] };
 
 function getInitialPlacingAs(variant: Variant): string | number {
   if (variant === 'sos_ttt') return 'S';
@@ -124,6 +132,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
         placingAs: getInitialPlacingAs(state.variant),
         tacticMoveMode: 'place',
         tacticSelectedObstacle: null,
+        garrisonSelectedPiece: null,
+        garrisonLegalDests: [],
       };
     }
     case 'MOVE':
@@ -145,7 +155,7 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
           tacticSelectedObstacle: null,
         };
       }
-      return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null };
+      return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null, garrisonSelectedPiece: null, garrisonLegalDests: [] };
     }
     case 'REMATCH': {
       const engine = engines[state.variant as Variant];
@@ -158,6 +168,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
         placingAs: getInitialPlacingAs(state.variant),
         tacticMoveMode: 'place',
         tacticSelectedObstacle: null,
+        garrisonSelectedPiece: null,
+        garrisonLegalDests: [],
       };
     }
     case 'NEW_GAME':
@@ -168,6 +180,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       return { ...state, tacticMoveMode: action.mode, tacticSelectedObstacle: null };
     case 'SET_TACTIC_OBSTACLE':
       return { ...state, tacticSelectedObstacle: action.cell };
+    case 'SET_GARRISON_PIECE':
+      return { ...state, garrisonSelectedPiece: action.pieceId, garrisonLegalDests: action.dests };
     default:
       return state;
   }
@@ -184,6 +198,8 @@ const initialState: LocalState = {
   placingAs: 'X',
   tacticMoveMode: 'place',
   tacticSelectedObstacle: null,
+  garrisonSelectedPiece: null,
+  garrisonLegalDests: [],
 };
 
 function formatMoveRows(moves: string[]) {
@@ -213,7 +229,7 @@ export default function LocalPage() {
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!state.gameState) return;
-    if (state.variant === 'tactic_toe') return; // handled by handleTacticCell
+    if (state.variant === 'tactic_toe' || state.variant === 'garrison') return; // handled separately
     const engine = engines[state.variant as Variant];
 
     let coordinate = '';
@@ -330,6 +346,75 @@ export default function LocalPage() {
           dispatch({ type: 'SET_TACTIC_OBSTACLE', cell: null });
         }
       }
+    }
+  };
+
+  const handleGarrisonHandPiece = (pieceId: string) => {
+    if (!state.gameState || state.phase !== 'playing') return;
+    const s = state.gameState as GarrisonState;
+    if (state.garrisonSelectedPiece === pieceId) {
+      dispatch({ type: 'SET_GARRISON_PIECE', pieceId: null, dests: [] });
+      return;
+    }
+    const occupied = new Set(s.pieces.filter(p => p.square >= 0 && !p.captured).map(p => p.square));
+    const dests: number[] = [];
+    for (let i = 0; i < 64; i++) { if (!occupied.has(i)) dests.push(i); }
+    dispatch({ type: 'SET_GARRISON_PIECE', pieceId, dests });
+  };
+
+  const handleGarrisonSquareClick = (square: number, pieceId: string | null) => {
+    if (!state.gameState || state.phase !== 'playing') return;
+    const s = state.gameState as GarrisonState;
+    const engine = engines['garrison'];
+
+    if (state.garrisonSelectedPiece === null) {
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === s.currentPlayer && piece.square >= 0) {
+          const dests = engine.getLegalMoves(s)
+            .map(m => m.data as GarrisonMove)
+            .filter(m => m.pieceId === pieceId)
+            .map(m => m.to);
+          dispatch({ type: 'SET_GARRISON_PIECE', pieceId, dests });
+        }
+      }
+      return;
+    }
+
+    if (!state.garrisonLegalDests.includes(square)) {
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === s.currentPlayer && piece.square >= 0) {
+          const dests = engine.getLegalMoves(s)
+            .map(m => m.data as GarrisonMove)
+            .filter(m => m.pieceId === pieceId)
+            .map(m => m.to);
+          dispatch({ type: 'SET_GARRISON_PIECE', pieceId, dests });
+          return;
+        }
+      }
+      dispatch({ type: 'SET_GARRISON_PIECE', pieceId: null, dests: [] });
+      return;
+    }
+
+    const selectedPiece = s.pieces.find(p => p.id === state.garrisonSelectedPiece)!;
+    const moveData: GarrisonMove = selectedPiece.square === -1
+      ? { type: 'place', pieceId: state.garrisonSelectedPiece!, to: square }
+      : { type: 'move', pieceId: state.garrisonSelectedPiece!, from: selectedPiece.square, to: square };
+
+    const result = engine.applyMove(s, { data: moveData }, s.currentPlayer);
+    if (!result.ok) { dispatch({ type: 'SET_GARRISON_PIECE', pieceId: null, dests: [] }); return; }
+
+    const coord = selectedPiece.square === -1
+      ? `${String.fromCharCode(97 + (square % 8))}${Math.floor(square / 8) + 1}(+${state.garrisonSelectedPiece!.split('_')[1]})`
+      : `${String.fromCharCode(97 + (selectedPiece.square % 8))}${Math.floor(selectedPiece.square / 8) + 1}-${String.fromCharCode(97 + (square % 8))}${Math.floor(square / 8) + 1}`;
+
+    dispatch({ type: 'SET_GARRISON_PIECE', pieceId: null, dests: [] });
+    const terminal = engine.checkTerminal(result.state);
+    if (terminal) {
+      dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate: coord });
+    } else {
+      dispatch({ type: 'MOVE', gameState: result.state, coordinate: coord });
     }
   };
 
@@ -587,6 +672,20 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={handleUltimate3DMove}
+                />
+              ) : variant === 'garrison' ? (
+                <GarrisonBoard
+                  state={gameState as GarrisonState}
+                  disabled={phase === 'over'}
+                  selectedPieceId={state.garrisonSelectedPiece}
+                  legalDestinations={state.garrisonLegalDests}
+                  onHandPieceClick={handleGarrisonHandPiece}
+                  onBoardSquareClick={handleGarrisonSquareClick}
+                  winSquares={
+                    gameState.terminal?.winner
+                      ? (checkFiveInARow(gameState.terminal.winner, (gameState as GarrisonState).pieces) ?? [])
+                      : []
+                  }
                 />
               ) : (
                 <StandardBoard

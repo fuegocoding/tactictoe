@@ -153,7 +153,10 @@ body {
 }
 
 @media (max-width: 768px) {
-  .app-main { margin-left: var(--sidebar-width-mobile); }
+  .app-main {
+    margin-left: var(--sidebar-width-mobile);
+    padding-top: var(--space-16);
+  }
 }
 
 /* ── Utility Classes ────────────────────────────────────────────────────── */
