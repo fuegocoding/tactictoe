@@ -48,13 +48,15 @@ async function main() {
     }
   ];
 
-  for (const a of achievements) {
-    await (prisma as any).achievement.upsert({
-      where: { conditionCode: a.conditionCode },
-      update: a,
-      create: a,
-    });
-  }
+  await Promise.all(
+    achievements.map((a) =>
+      (prisma as any).achievement.upsert({
+        where: { conditionCode: a.conditionCode },
+        update: a,
+        create: a,
+      })
+    )
+  );
 }
 
 main()
