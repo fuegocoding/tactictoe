@@ -6,6 +6,7 @@ import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
   TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
+  getWinCells, getGomokuWinCells,
 } from '@tactictoe/game-engine';
 import type { GameState, TerminalResult } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
@@ -521,6 +522,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = gameState as GomokuState;
+                    return s.terminal?.reason === 'win' ? (getGomokuWinCells(s.board) ?? []) : [];
+                  })()}
                 />
               ) : variant === 'sos_ttt' ? (
                 <GridBoard
@@ -529,6 +534,7 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={[]}
                 />
               ) : variant === 'order_chaos' ? (
                 <GridBoard
@@ -537,6 +543,7 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={[]}
                 />
               ) : variant === 'vanishing_ttt' ? (
                 <StandardBoard
@@ -544,6 +551,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' && s.board ? (getWinCells(s.board) ?? []) : [];
+                  })()}
                 />
               ) : variant === 'ttt_3d' ? (
                 <ThreeDBoard
@@ -583,6 +594,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' && s.board ? (getWinCells(s.board) ?? []) : [];
+                  })()}
                 />
               )}
             </div>
