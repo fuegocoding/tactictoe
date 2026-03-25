@@ -38,7 +38,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
               const savedIds = JSON.parse(guestSave) as string[];
               equipped = data.cosmetics.filter((c: any) => savedIds.includes(c.id));
             } catch (e) {
-              console.error('Failed to parse guest cosmetics', e);
+              console.warn('Failed to parse guest cosmetics from localStorage:', e);
             }
           }
         }
@@ -62,7 +62,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
               if (parsed[key] !== undefined) overrides[key] = parsed[key];
             }
           } catch (e) {
-            console.error('Failed to parse cosmetic cssValue', e);
+            console.error(`Failed to parse cosmetic cssValue for cosmetic ${c.id}:`, e);
           }
         }
 
