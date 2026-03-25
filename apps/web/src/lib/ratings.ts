@@ -73,6 +73,31 @@ export async function processGameResult(payload: GameResultPayload) {
     ]);
   }
 
+  // Award credits to logged in users based on outcome
+  const getCredits = (outcome: 'win' | 'loss' | 'draw') => {
+    if (outcome === 'win') return 10;
+    if (outcome === 'draw') return 5;
+    return 2;
+  };
+
+  const updates = [];
+  if (player1.userId) {
+    updates.push(prisma.user.update({
+      where: { id: player1.userId },
+      data: { credits: { increment: getCredits(outcome1) } }
+    }));
+  }
+  if (player2.userId) {
+    updates.push(prisma.user.update({
+      where: { id: player2.userId },
+      data: { credits: { increment: getCredits(outcome2) } }
+    }));
+  }
+
+  if (updates.length > 0) {
+    await Promise.all(updates).catch(console.error);
+  }
+
   // Always record the match
   const match = await prisma.match.create({
     data: {
