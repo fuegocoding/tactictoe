@@ -76,3 +76,8 @@ export {
   getUltimate3DAIMove,
 } from './ai/index.js';
 export type { OrderChaosAIMove, TacticToeAIMove, Ultimate3DAIMove } from './ai/index.js';
+
+export { Garrison } from './rules/garrison.js';
+export type { GarrisonState, GarrisonMove } from './rules/garrison.js';
+export { getGarrisonAIMove } from './ai/index.js';
+export { checkFiveInARow } from './rules/garrison-five.js';
