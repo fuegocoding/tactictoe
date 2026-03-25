@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getAttackSquares,
   isInCheck,
+  getMoveDestinations,
 } from '../src/rules/garrison-check.js';
 import type { GarrisonPiece } from '../src/rules/garrison-check.js';
 
@@ -96,5 +97,23 @@ describe('isInCheck', () => {
     const king = piece('X_K', 'K', 'X', -1);
     const rook = piece('O_R1', 'R', 'O', 0);
     expect(isInCheck('X', [king, rook])).toBe(false);
+  });
+});
+
+describe('getMoveDestinations', () => {
+  it('own-piece squares excluded', () => {
+    const r = piece('X_R1', 'R', 'X', 0);      // rook at a1 (square 0)
+    const own = piece('X_N1', 'N', 'X', 3);    // own knight at d1 (square 3)
+    const dests = getMoveDestinations(r, [r, own]);
+    expect(dests).not.toContain(3); // own piece square is excluded
+    expect(dests).toContain(1);     // squares between are reachable
+    expect(dests).toContain(2);
+  });
+
+  it('enemy-piece square retained', () => {
+    const r = piece('X_R1', 'R', 'X', 0);       // rook at a1 (square 0)
+    const enemy = piece('O_Q', 'Q', 'O', 3);    // enemy queen at d1 (square 3)
+    const dests = getMoveDestinations(r, [r, enemy]);
+    expect(dests).toContain(3); // enemy square is a valid capture destination
   });
 });
