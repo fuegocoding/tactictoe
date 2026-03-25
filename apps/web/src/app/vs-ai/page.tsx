@@ -6,6 +6,7 @@ import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
   TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
+  getWinCells, getGomokuWinCells,
 } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
@@ -548,20 +549,30 @@ export default function VsAIPage() {
             ) : variant === 'gomoku' ? (
               <GridBoard board={(gameState as GomokuState).board} cols={15} rows={15}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
-                onMove={(_, ci) => handleMove(0, ci)} />
+                onMove={(_, ci) => handleMove(0, ci)}
+                winCells={(() => {
+                  const s = gameState as GomokuState;
+                  return (s as any).terminal?.reason === 'win' ? (getGomokuWinCells(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'sos_ttt' ? (
               <GridBoard board={(gameState as SOSTTTState).board} cols={8} rows={8}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
-                onMove={(_, ci) => handleMove(0, ci)} />
+                onMove={(_, ci) => handleMove(0, ci)}
+                winCells={[]} />
             ) : variant === 'order_chaos' ? (
               <GridBoard board={(gameState as OrderChaosState).board} cols={6} rows={6}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
-                onMove={(_, ci) => handleMove(0, ci)} />
+                onMove={(_, ci) => handleMove(0, ci)}
+                winCells={[]} />
             ) : variant === 'vanishing_ttt' ? (
               <StandardBoard
                 board={getVanishingVisible(gameState as VanishingTTTState) as any}
                 currentPlayer={gameState.currentPlayer} disabled={!isMyTurn}
-                onMove={(_, ci) => handleMove(0, ci)} />
+                onMove={(_, ci) => handleMove(0, ci)}
+                winCells={(() => {
+                  const s = gameState as any;
+                  return s.terminal?.reason === 'win' && s.board ? (getWinCells(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'ttt_3d' ? (
               <ThreeDBoard board={(gameState as TTT3DState).board}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
@@ -590,7 +601,11 @@ export default function VsAIPage() {
               <StandardBoard
                 board={(gameState as StandardTTTState).board}
                 currentPlayer={gameState.currentPlayer} disabled={!isMyTurn}
-                onMove={(_, ci) => handleMove(0, ci)} />
+                onMove={(_, ci) => handleMove(0, ci)}
+                winCells={(() => {
+                  const s = gameState as any;
+                  return s.terminal?.reason === 'win' && s.board ? (getWinCells(s.board) ?? []) : [];
+                })()} />
             )}
           </div>
 
