@@ -1,0 +1,126 @@
+.page {
+  padding: var(--space-8);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: var(--space-8);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin-bottom: var(--space-2);
+}
+
+.subtitle {
+  color: var(--text-muted);
+}
+
+.section {
+  margin-bottom: var(--space-10);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.card.equipped {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.card.locked {
+  opacity: 0.7;
+  filter: grayscale(100%);
+}
+
+.preview {
+  height: 140px;
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.previewBoard {
+  display: grid;
+  grid-template-columns: repeat(2, 40px);
+  grid-template-rows: repeat(2, 40px);
+  gap: 4px;
+}
+
+.previewCell {
+  background: var(--board-cell-bg);
+  border: 1px solid var(--board-cell-border);
+  border-radius: var(--radius-sm);
+}
+
+.previewPieces {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 48px;
+  font-weight: 800;
+  font-family: var(--font-sans);
+}
+
+.info {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.info h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.requirement {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.previewWinLine {
+  height: 140px;
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.winLinePreviewSvg {
+  width: 120px;
+  height: 120px;
+  overflow: visible;
+}
+
+.loading {
+  padding: var(--space-12);
+  text-align: center;
+  color: var(--text-muted);
+}

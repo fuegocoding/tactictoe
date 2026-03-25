@@ -62,6 +62,7 @@ export default function LobbyPage() {
   useEffect(() => {
     if (queue.queueState === 'matched' && queue.matchedRoomCode !== null && queue.matchedPlayerIndex !== null) {
       sessionStorage.setItem(`room:${queue.matchedRoomCode}:playerIndex`, String(queue.matchedPlayerIndex));
+      sessionStorage.setItem(`room:${queue.matchedRoomCode}:isMatchmaking`, 'true');
       if (queue.matchedRated) sessionStorage.setItem(`room:${queue.matchedRoomCode}:rated`, 'true');
       router.push(`/room/${queue.matchedRoomCode}`);
     }
@@ -113,7 +114,7 @@ export default function LobbyPage() {
       <div className={styles.twoColumn}>
         <div className={styles.leftColumn}>
           <div className={styles.hero}>
-            <h1 className={styles.title} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'inherit' }}>
+            <h1 className={styles.title}>
               <Grid3x3 size={36} strokeWidth={2.5} color="url(#logo-grad)" />
               <div>
                 <span style={{ color: '#ef4444' }}>TIC</span>

@@ -7,9 +7,13 @@ import { useGuestSession } from '@/hooks/useGuestSession';
 import { useSocket } from '@/hooks/useSocket';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { StandardBoard } from '@/components/board/StandardBoard';
+import { ThreeDBoard } from '@/components/board/ThreeDBoard';
+import { FourDBoard } from '@/components/board/FourDBoard';
+import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
+import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
-import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState } from '@tactictoe/game-engine';
+import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState, TTT3DState, TTT4DState, Ultimate3DState, TacticToeState, OrderChaosState, TacticToeMove } from '@tactictoe/game-engine';
 import { getWinCells, getGomokuWinCells } from '@tactictoe/game-engine';
 import { GridBoard } from '@/components/board/GridBoard';
 import { QRCodeSVG } from 'qrcode.react';
@@ -95,9 +99,12 @@ export default function RoomPage() {
   const [rated, setRated] = useState(false);
   const [initialRating, setInitialRating] = useState<number | null>(null);
   const [finalRating, setFinalRating] = useState<number | null>(null);
+  const [isMatchmaking, setIsMatchmaking] = useState(false);
 
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [placingAs, setPlacingAs] = useState<string | number>('X');
+  const [tacticToeMode, setTacticToeMode] = useState<'place' | 'move_obstacle'>('place');
+  const [tacticToeSelectedObstacle, setTacticToeSelectedObstacle] = useState<number | null>(null);
   const prevStateRef = useRef<GameState | null>(null);
   const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
@@ -174,6 +181,12 @@ export default function RoomPage() {
 
     const savedIndex = sessionStorage.getItem(`room:${code}:playerIndex`);
     const isRated = sessionStorage.getItem(`room:${code}:rated`) === 'true';
+    const savedMatchmaking = sessionStorage.getItem(`room:${code}:isMatchmaking`) === 'true';
+
+    if (savedMatchmaking) {
+      setIsMatchmaking(true);
+      sessionStorage.removeItem(`room:${code}:isMatchmaking`);
+    }
 
     if (isRated) {
       setRated(true);
@@ -275,7 +288,7 @@ export default function RoomPage() {
       if (!roomState.gameState) return;
       const moveData =
         roomState.gameState.variantId === 'ultimate_ttt' ? { roomCode: code, boardIndex, cellIndex } :
-        (roomState.gameState.variantId === 'wild_ttt' || roomState.gameState.variantId === 'sos_ttt') ? { roomCode: code, boardIndex, cellIndex, symbol: placingAs } :
+        (roomState.gameState.variantId === 'wild_ttt' || roomState.gameState.variantId === 'sos_ttt' || roomState.gameState.variantId === 'order_chaos') ? { roomCode: code, boardIndex, cellIndex, symbol: placingAs } :
         roomState.gameState.variantId === 'numerical_ttt' ? { roomCode: code, boardIndex, cellIndex, numberPlaced: typeof placingAs === 'number' ? placingAs : Number(placingAs) } :
         { roomCode: code, boardIndex, cellIndex };
 
@@ -283,6 +296,29 @@ export default function RoomPage() {
     },
     [socket, code, roomState.gameState, placingAs]
   );
+
+  const handleTacticToeMove = useCallback((globalIndex: number) => {
+    if (!roomState.gameState || roomState.gameState.variantId !== 'tactic_toe') return;
+    const state = roomState.gameState as TacticToeState;
+    if (tacticToeMode === 'place') {
+      socket.emit('game:move', { roomCode: code, type: 'place', cellIndex: globalIndex });
+    } else {
+      if (tacticToeSelectedObstacle === null) {
+        if (state.board[globalIndex] === 'B') {
+          setTacticToeSelectedObstacle(globalIndex);
+        }
+      } else {
+        if (state.board[globalIndex] === null) {
+          socket.emit('game:move', { roomCode: code, type: 'move_obstacle', fromCell: tacticToeSelectedObstacle, toCell: globalIndex });
+          setTacticToeSelectedObstacle(null);
+        } else if (state.board[globalIndex] === 'B') {
+          setTacticToeSelectedObstacle(globalIndex);
+        } else {
+          setTacticToeSelectedObstacle(null);
+        }
+      }
+    }
+  }, [socket, code, roomState.gameState, tacticToeMode, tacticToeSelectedObstacle]);
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -314,12 +350,16 @@ export default function RoomPage() {
       {roomState.phase === 'waiting' && status === 'connected' && !roomState.error && (
         <div className={styles.waiting}>
           <p className={styles.waitingTitle}>Waiting for opponent…</p>
-          <p className={styles.waitingCode}>{code}</p>
-          <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
-          <CopyButton text={shareUrl} />
-          <div style={{ marginTop: 'var(--space-4)', background: 'white', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)' }}>
-            <QRCodeSVG value={shareUrl} size={160} />
-          </div>
+          {!isMatchmaking && (
+            <>
+              <p className={styles.waitingCode}>{code}</p>
+              <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
+              <CopyButton text={shareUrl} />
+              <div className={styles.qrCodeWrapper}>
+                <QRCodeSVG value={shareUrl} size={160} />
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -354,7 +394,7 @@ export default function RoomPage() {
               </p>
             )}
 
-            {roomState.phase === 'playing' && (roomState.gameState!.variantId === 'wild_ttt' || roomState.gameState!.variantId === 'sos_ttt') && (
+            {roomState.phase === 'playing' && (roomState.gameState!.variantId === 'wild_ttt' || roomState.gameState!.variantId === 'sos_ttt' || roomState.gameState!.variantId === 'order_chaos') && (
               <div className={styles.wildPicker}>
                 <span className={styles.wildPickerLabel}>Place as:</span>
                 <button
@@ -385,6 +425,26 @@ export default function RoomPage() {
                     {num}
                   </button>
                 )) }
+              </div>
+            )}
+
+            {roomState.phase === 'playing' && roomState.gameState!.variantId === 'tactic_toe' && (
+              <div className={styles.wildPicker}>
+                <span className={styles.wildPickerLabel}>Turn action:</span>
+                <button
+                  className={`${styles.wildBtn} ${styles.x} ${tacticToeMode === 'place' ? styles.active : ''}`}
+                  onClick={() => { setTacticToeMode('place'); setTacticToeSelectedObstacle(null); }}
+                  style={{ width: 'auto', padding: '0 var(--space-3)', fontSize: '14px' }}
+                >
+                  Place Mark
+                </button>
+                <button
+                  className={`${styles.wildBtn} ${styles.o} ${tacticToeMode === 'move_obstacle' ? styles.active : ''}`}
+                  onClick={() => setTacticToeMode('move_obstacle')}
+                  style={{ width: 'auto', padding: '0 var(--space-3)', fontSize: '14px' }}
+                >
+                  Move Obstacle
+                </button>
               </div>
             )}
 
@@ -419,6 +479,63 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={handleMove}
+                />
+              ) : roomState.gameState!.variantId === 'ttt_3d' ? (
+                <ThreeDBoard
+                  board={(roomState.gameState as TTT3DState).board}
+                  currentPlayer={roomState.gameState!.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={(boardIndex, cellIndex) => handleMove(0, boardIndex * 9 + cellIndex)}
+                  winCells={(() => {
+                    const s = roomState.gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
+                />
+              ) : roomState.gameState!.variantId === 'ttt_4d' ? (
+                <FourDBoard
+                  board={(roomState.gameState as TTT4DState).board}
+                  currentPlayer={roomState.gameState!.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={(boardIndex, cellIndex) => handleMove(0, boardIndex * 9 + cellIndex)}
+                  winCells={(() => {
+                    const s = roomState.gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
+                />
+              ) : roomState.gameState!.variantId === 'ultimate_3d' ? (
+                <Ultimate3DBoard
+                  microBoards={(roomState.gameState as Ultimate3DState).microBoards}
+                  macroResults={(roomState.gameState as Ultimate3DState).macroResults}
+                  nextMacroConstraint={(roomState.gameState as Ultimate3DState).nextMacroConstraint}
+                  currentPlayer={roomState.gameState!.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={handleMove}
+                />
+              ) : roomState.gameState!.variantId === 'tactic_toe' ? (
+                <TacticToeBoard
+                  board={(roomState.gameState as TacticToeState).board}
+                  currentPlayer={roomState.gameState!.currentPlayer}
+                  disabled={!isMyTurn}
+                  moveMode={tacticToeMode}
+                  selectedObstacle={tacticToeSelectedObstacle}
+                  onCellClick={handleTacticToeMove}
+                  winCells={(() => {
+                    const s = roomState.gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
+                />
+              ) : roomState.gameState!.variantId === 'order_chaos' ? (
+                <GridBoard
+                  board={(roomState.gameState as OrderChaosState).board}
+                  cols={6}
+                  rows={6}
+                  currentPlayer={roomState.gameState!.currentPlayer}
+                  disabled={!isMyTurn}
+                  onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = roomState.gameState as OrderChaosState;
+                    return s.terminal?.reason === 'win' && s.terminal.winner === 'X' ? (s as any).terminal.winCells ?? [] : [];
+                  })()}
                 />
               ) : roomState.gameState!.variantId === 'gomoku' ? (
                 <GridBoard

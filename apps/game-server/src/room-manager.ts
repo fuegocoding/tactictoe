@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import type { RoomState, ConnectedPlayer } from './types.js';
 
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/I/1/l
@@ -16,7 +17,7 @@ class RoomManager {
     for (let attempt = 0; attempt < 50; attempt++) {
       let code = '';
       for (let i = 0; i < 6; i++) {
-        code += ROOM_CODE_CHARS[Math.floor(Math.random() * ROOM_CODE_CHARS.length)];
+        code += ROOM_CODE_CHARS[randomInt(ROOM_CODE_CHARS.length)];
       }
       if (!this.rooms.has(code)) return code;
     }

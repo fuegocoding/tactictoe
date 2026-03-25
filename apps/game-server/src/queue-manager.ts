@@ -1,4 +1,4 @@
-interface QueueEntry {
+export interface QueueEntry {
   socketId: string;
   guestId: string;
   userId?: string;

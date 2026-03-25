@@ -1,4 +1,5 @@
 import { createServer } from 'http';
+import { randomInt } from 'node:crypto';
 import { Server } from 'socket.io';
 import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import { roomManager } from './room-manager.js';
@@ -45,7 +46,7 @@ const io = new Server(httpServer, {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateDisplayName(): string {
-  return `Guest#${Math.floor(1000 + Math.random() * 9000)}`;
+  return `Guest#${randomInt(1000, 10000)}`;
 }
 
 const qm = new QueueManager();
@@ -83,15 +84,12 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Check if this is a pre-assigned player (from matchmaking) or a reconnect after disconnect.
-    // Both cases share socketId === '' — pre-assigned players start with '' and disconnected players
-    // are reset to '' by removeSocket(). The difference is room.status: 'waiting' = arriving from
-    // matchmaking for the first time; 'active' = reconnecting mid-game.
-    const reconnectingPlayer = room.players.find(
-      (p) => p.guestId === payload.guestId && p.socketId === ''
-    );
+    // Check if this is a returning player (either from matchmaking with socketId='',
+    // a mid-game reconnect, or just a page reload/React Strict Mode double-firing).
+    const existingPlayer = room.players.find((p) => p.guestId === payload.guestId);
 
-    if (reconnectingPlayer) {
+    if (existingPlayer) {
+      // Use roomManager to properly clear any disconnect timers
       roomManager.reconnectPlayer(room, payload.guestId, socket.id);
       socket.join(payload.roomCode);
 
@@ -99,16 +97,23 @@ io.on('connection', (socket) => {
         // Mid-game reconnect — restore state
         handleReconnect(io, room, socket.id);
         console.log(`[room:reconnect] code=${payload.roomCode} guest=${payload.guestId}`);
+      } else if (room.status === 'finished') {
+        // Post-game reconnect
+        socket.emit('game:reconnect', {
+          gameState: room.gameState,
+          myPlayerIndex: existingPlayer.playerIndex,
+          players: room.players.map((p) => ({ displayName: p.displayName, playerIndex: p.playerIndex })),
+        });
       } else {
-        // Matched player arriving at room page — confirm their slot
+        // Matched or returning player arriving at waiting room — confirm their slot
         const playerList = room.players.map((p) => ({ displayName: p.displayName, playerIndex: p.playerIndex }));
-        socket.emit('room:joined', { roomCode: payload.roomCode, playerIndex: reconnectingPlayer.playerIndex, players: playerList });
+        socket.emit('room:joined', { roomCode: payload.roomCode, playerIndex: existingPlayer.playerIndex, players: playerList });
 
-        // Start the game once both players have arrived
-        if (room.players.every((p) => p.socketId !== '')) {
+        // Start the game once both players have arrived and have valid socketIds
+        if (room.players.length === 2 && room.players.every((p) => p.socketId !== '')) {
           startGame(io, room);
         }
-        console.log(`[room:ready] code=${payload.roomCode} guest=${payload.guestId} playerIndex=${reconnectingPlayer.playerIndex}`);
+        console.log(`[room:ready] code=${payload.roomCode} guest=${payload.guestId} playerIndex=${existingPlayer.playerIndex}`);
       }
       return;
     }

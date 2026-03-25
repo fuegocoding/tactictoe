@@ -49,6 +49,7 @@ model VerificationToken {
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 model User {
+  credits       Int       @default(0)
   id            String    @id @default(cuid())
   email         String    @unique
   emailVerified DateTime?
@@ -148,6 +149,7 @@ model Match {
 // ─── Progression & Meta ───────────────────────────────────────────────────────
 
 model Cosmetic {
+  price         Int       @default(0)
   id            String    @id @default(cuid())
   name          String
   type          String    // 'board' | 'piece'

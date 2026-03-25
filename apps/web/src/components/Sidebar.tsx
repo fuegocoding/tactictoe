@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot, Settings, Shield } from 'lucide-react';
+import { Globe, Monitor, Grid3x3, BookOpen, Trophy, Bot, Settings, Shield, ShoppingCart } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import Avatar from './Avatar';
 import Button from './ui/Button';
@@ -56,6 +56,10 @@ export default function Sidebar() {
           <span className={styles.icon}><BookOpen size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Learn</span>
         </Link>
+        <Link href="/shop" className={`${styles.navItem} ${pathname === '/shop' ? styles.active : ''}`}>
+          <span className={styles.icon}><ShoppingCart size={18} strokeWidth={1.75} /></span>
+          <span className={styles.navLabel}>Shop</span>
+        </Link>
         <Link href="/settings" className={`${styles.navItem} ${pathname === '/settings' ? styles.active : ''}`}>
           <span className={styles.icon}><Settings size={18} strokeWidth={1.75} /></span>
           <span className={styles.navLabel}>Settings</span>
@@ -89,10 +93,14 @@ export default function Sidebar() {
         ) : (
           <div className={styles.actions}>
             <Link href="/login" style={{ width: '100%' }}>
-              <Button variant="secondary" full>Sign In</Button>
+              <Button variant="secondary" className={styles.actionBtn} full>
+                <span className={styles.actionText}>Sign In</span>
+              </Button>
             </Link>
             <Link href="/register" style={{ width: '100%' }}>
-              <Button variant="primary" full>Sign Up</Button>
+              <Button variant="primary" className={styles.actionBtn} full>
+                <span className={styles.actionText}>Sign Up</span>
+              </Button>
             </Link>
           </div>
         )}
