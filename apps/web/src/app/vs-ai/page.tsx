@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
-  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D,
+  TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison,
   getWinCells, getGomokuWinCells,
 } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
@@ -21,6 +21,7 @@ import type { TTT4DState } from '@tactictoe/game-engine';
 import type { OrderChaosState } from '@tactictoe/game-engine';
 import type { TacticToeState } from '@tactictoe/game-engine';
 import type { Ultimate3DState } from '@tactictoe/game-engine';
+import type { GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
 import { StandardBoard } from '@/components/board/StandardBoard';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
@@ -28,19 +29,21 @@ import { ThreeDBoard } from '@/components/board/ThreeDBoard';
 import { FourDBoard } from '@/components/board/FourDBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
+import { GarrisonBoard } from '@/components/board/GarrisonBoard';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import { useAI } from '@/hooks/useAI';
 import type { AIVariant } from '@/hooks/useAI';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, HelpCircle, Eye, Box, Layers, Swords, Shuffle, Network, Shield } from 'lucide-react';
 import styles from './page.module.css';
 import localStyles from '../local/page.module.css';
 
 type Variant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d'
+  | 'garrison';
 
 const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
   standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
@@ -57,6 +60,7 @@ const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: 
   order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
   tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
   ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
+  garrison:      { label: 'Garrison',    description: 'Chess-like pieces on an 8×8 board. Get 5-in-a-row.',     Icon: Shield },
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -74,6 +78,7 @@ const engines: Record<Variant, GameRules> = {
   order_chaos:   new OrderChaos(),
   tactic_toe:    new TacticToe(),
   ultimate_3d:   new Ultimate3D(),
+  garrison:      new Garrison(),
 };
 
 const DIFFICULTY_LABELS: Record<AIDifficulty, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -92,6 +97,8 @@ export default function VsAIPage() {
   const [placingAs, setPlacingAs] = useState<string | number>('X');
   const [tacticMoveMode, setTacticMoveMode] = useState<'place' | 'move_obstacle'>('place');
   const [tacticSelectedObstacle, setTacticSelectedObstacle] = useState<number | null>(null);
+  const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
+  const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
   const movesRef = useRef<HTMLDivElement>(null);
 
   const ai = useAI(variant as AIVariant, difficulty);
@@ -128,6 +135,8 @@ export default function VsAIPage() {
     setPlacingAs(variant === 'sos_ttt' ? 'S' : variant === 'numerical_ttt' ? 1 : 'X');
     setTacticMoveMode('place');
     setTacticSelectedObstacle(null);
+    setGarrisonSelectedPiece(null);
+    setGarrisonLegalDests([]);
   };
 
   // Trigger AI move when it's the AI's turn
@@ -183,6 +192,15 @@ export default function VsAIPage() {
         } else if (variant === 'ultimate_3d') {
           moveData = { macroCell: move.boardIndex, microCell: move.cellIndex };
           coordStr = `M${move.boardIndex}[m${Math.floor(move.cellIndex / 9) + 1}(${Math.floor((move.cellIndex % 9) / 3) + 1},${(move.cellIndex % 3) + 1})]`;
+        } else if (variant === 'garrison') {
+          const gm = move.garrisonMove as GarrisonMove;
+          moveData = gm;
+          if (gm.type === 'place') {
+            const sq = gm.to;
+            coordStr = `${String.fromCharCode(97 + (sq % 8))}${Math.floor(sq / 8) + 1}(+${gm.pieceId.split('_')[1]})`;
+          } else {
+            coordStr = `${String.fromCharCode(97 + (gm.from % 8))}${Math.floor(gm.from / 8) + 1}-${String.fromCharCode(97 + (gm.to % 8))}${Math.floor(gm.to / 8) + 1}`;
+          }
         } else {
           moveData = { cellIndex: move.cellIndex };
           coordStr = formatCoord(0, move.cellIndex);
@@ -222,7 +240,7 @@ export default function VsAIPage() {
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
-    if (variant === 'tactic_toe' || variant === 'ultimate_3d') return; // handled separately
+    if (variant === 'tactic_toe' || variant === 'ultimate_3d' || variant === 'garrison') return; // handled separately
     const engine = engines[variant];
 
     let moveData: unknown;
@@ -349,6 +367,93 @@ export default function VsAIPage() {
           setTacticSelectedObstacle(null);
         }
       }
+    }
+  };
+
+  const handleGarrisonHandClick = (pieceId: string) => {
+    if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    const s = gameState as GarrisonState;
+    const piece = s.pieces.find(p => p.id === pieceId);
+    if (!piece) return;
+    // A hand piece can be placed on any empty square — collect empty squares as destinations
+    const occupied = new Set(s.pieces.filter(p => p.square >= 0 && !p.captured).map(p => p.square));
+    const dests: number[] = [];
+    for (let i = 0; i < 64; i++) { if (!occupied.has(i)) dests.push(i); }
+    setGarrisonSelectedPiece(pieceId);
+    setGarrisonLegalDests(dests);
+  };
+
+  const handleGarrisonSquareClick = (square: number, pieceId: string | null) => {
+    if (!gameState || phase !== 'playing' || gameState.currentPlayer !== humanPlayer || aiThinking) return;
+    const s = gameState as GarrisonState;
+    const engine = engines['garrison'];
+
+    if (garrisonSelectedPiece === null) {
+      // Select a board piece belonging to human
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === humanPlayer && piece.square >= 0) {
+          const dests = engine.getLegalMoves(s)
+            .map(m => m.data as GarrisonMove)
+            .filter(m => m.pieceId === pieceId)
+            .map(m => m.to);
+          setGarrisonSelectedPiece(pieceId);
+          setGarrisonLegalDests(dests);
+        }
+      }
+      return;
+    }
+
+    // Attempt to apply the move
+    const moveData: GarrisonMove = garrisonLegalDests.includes(square)
+      ? s.pieces.find(p => p.id === garrisonSelectedPiece)!.square === -1
+        ? { type: 'place', pieceId: garrisonSelectedPiece, to: square }
+        : { type: 'move', pieceId: garrisonSelectedPiece, from: s.pieces.find(p => p.id === garrisonSelectedPiece)!.square, to: square }
+      : null as unknown as GarrisonMove;
+
+    if (!garrisonLegalDests.includes(square)) {
+      // Clicked an invalid square — deselect or reselect
+      if (pieceId) {
+        const piece = s.pieces.find(p => p.id === pieceId);
+        if (piece && piece.player === humanPlayer && piece.square >= 0) {
+          const dests = engine.getLegalMoves(s)
+            .map(m => m.data as GarrisonMove)
+            .filter(m => m.pieceId === pieceId)
+            .map(m => m.to);
+          setGarrisonSelectedPiece(pieceId);
+          setGarrisonLegalDests(dests);
+          return;
+        }
+      }
+      setGarrisonSelectedPiece(null);
+      setGarrisonLegalDests([]);
+      return;
+    }
+
+    const result = engine.applyMove(s, { data: moveData }, humanPlayer);
+    if (!result.ok) { setGarrisonSelectedPiece(null); setGarrisonLegalDests([]); return; }
+
+    const piece = s.pieces.find(p => p.id === garrisonSelectedPiece)!;
+    const coord = piece.square === -1
+      ? `${String.fromCharCode(97 + (square % 8))}${Math.floor(square / 8) + 1}(+${garrisonSelectedPiece.split('_')[1]})`
+      : `${String.fromCharCode(97 + (piece.square % 8))}${Math.floor(piece.square / 8) + 1}-${String.fromCharCode(97 + (square % 8))}${Math.floor(square / 8) + 1}`;
+
+    setMoveHistory(prev => [...prev, coord]);
+    setGarrisonSelectedPiece(null);
+    setGarrisonLegalDests([]);
+
+    const term = engine.checkTerminal(result.state);
+    if (term) {
+      setGameState(result.state); setPhase('over'); setWinner(term.winner);
+      setScores(prev => {
+        const next = { ...prev };
+        if (term.winner === humanPlayer) next.human++;
+        else if (term.winner === aiPlayer) next.ai++;
+        else next.draws++;
+        return next;
+      });
+    } else {
+      setGameState(result.state);
     }
   };
 
@@ -596,6 +701,15 @@ export default function VsAIPage() {
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                 disabled={!isMyTurn}
                 onMove={handleUltimate3DMove}
+              />
+            ) : variant === 'garrison' ? (
+              <GarrisonBoard
+                state={gameState as GarrisonState}
+                disabled={!isMyTurn}
+                selectedPieceId={isMyTurn ? garrisonSelectedPiece : null}
+                legalDestinations={isMyTurn ? garrisonLegalDests : []}
+                onHandPieceClick={handleGarrisonHandClick}
+                onBoardSquareClick={handleGarrisonSquareClick}
               />
             ) : (
               <StandardBoard

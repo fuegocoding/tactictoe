@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import type { AIDifficulty, Player, GameState } from '@tactictoe/game-engine';
+import type { AIDifficulty, Player, GameState, GarrisonMove } from '@tactictoe/game-engine';
 
 export interface AIMove {
   boardIndex: number;
@@ -12,12 +12,15 @@ export interface AIMove {
   tacticType?: 'place' | 'move_obstacle';
   fromCell?: number;
   toCell?: number;
+  // For garrison
+  garrisonMove?: GarrisonMove;
 }
 
 export type AIVariant =
   | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'notakto' | 'wild_ttt'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
-  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d';
+  | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d'
+  | 'garrison';
 
 /**
  * Hook that returns a `getMove` function for AI opponents.
@@ -44,6 +47,7 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             getOrderChaosAIMove,
             getTacticToeAIMove,
             getUltimate3DAIMove,
+            getGarrisonAIMove,
           } = await import('@tactictoe/game-engine');
 
           if (variant === 'standard_3x3') {
@@ -95,6 +99,9 @@ export function useAI(variant: AIVariant, difficulty: AIDifficulty) {
             const move = getUltimate3DAIMove(state as Parameters<typeof getUltimate3DAIMove>[0], aiPlayer, difficulty);
             // boardIndex = macroCell, cellIndex = microCell
             resolve({ boardIndex: move.macroCell, cellIndex: move.microCell });
+          } else if (variant === 'garrison') {
+            const move = getGarrisonAIMove(state as Parameters<typeof getGarrisonAIMove>[0], aiPlayer, difficulty);
+            resolve({ boardIndex: 0, cellIndex: 0, garrisonMove: move });
           }
         } catch (err) {
           reject(err instanceof Error ? err : new Error(String(err)));
