@@ -1,7 +1,9 @@
 import React from 'react';
 import type { Board } from '@tactictoe/game-engine';
+import { getWinCells } from '@tactictoe/game-engine';
 import { useCosmetics } from '@/components/CosmeticsContext';
 import { PieceSymbol } from './PieceSymbol';
+import { ThreeDViz } from './ThreeDBoard';
 
 interface Ultimate3DBoardProps {
   microBoards: Board[];       // 27 boards, each 27 cells
@@ -188,6 +190,15 @@ export function Ultimate3DBoard({
       <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', maxWidth: 440, lineHeight: 1.5 }}>
         Switch meta-layers to see all 27 macro-cells. The highlighted macro-cell is where you must play.
         Win 3 macro-cells in a 3D line to claim the match.
+      </div>
+
+      <div style={{ marginTop: 'var(--space-6)' }}>
+        <ThreeDViz
+          board={macroResults as Board}
+          winCells={getWinCells(macroResults as Board)}
+          symbolX={symbolX}
+          symbolO={symbolO}
+        />
       </div>
     </div>
   );
