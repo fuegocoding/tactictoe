@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Garrison } from '../src/rules/garrison.js';
 import type { GarrisonState, GarrisonMove } from '../src/rules/garrison.js';
+import { getGarrisonAIMove } from '../src/ai/garrison-ai.js';
 
 const engine = new Garrison();
 
@@ -175,5 +176,21 @@ describe('Garrison win conditions', () => {
     if (result.ok) {
       expect((result.state as GarrisonState).terminal?.winner).toBe('X');
     }
+  });
+});
+
+describe('Garrison AI', () => {
+  it('easy AI returns a valid move', () => {
+    const state = engine.initialize({ variantId: 'garrison', seed: 42 }) as GarrisonState;
+    const move = getGarrisonAIMove(state, 'X', 'easy');
+    expect(move).toBeDefined();
+    expect(move.type).toMatch(/^(place|move)$/);
+  });
+
+  it('hard AI returns a valid move', () => {
+    const state = engine.initialize({ variantId: 'garrison', seed: 99 }) as GarrisonState;
+    const move = getGarrisonAIMove(state, 'X', 'hard');
+    expect(move).toBeDefined();
+    expect(move.type).toMatch(/^(place|move)$/);
   });
 });
