@@ -37,9 +37,7 @@ async function main() {
     { name: 'Void', type: 'winline', cssValue: '{"--winline-color":"#7c3aed","--winline-width":"0.16","--winline-filter":"drop-shadow(0 0 0.1px #a78bfa) drop-shadow(0 0 0.35px #4c1d95)"}', requiredScore: 1000 },
   ];
 
-  for (const c of cosmetics) {
-    await (prisma as any).cosmetic.create({ data: c });
-  }
+  await (prisma as any).cosmetic.createMany({ data: cosmetics });
 
   console.log(`Seeded ${cosmetics.length} cosmetics`);
 }
