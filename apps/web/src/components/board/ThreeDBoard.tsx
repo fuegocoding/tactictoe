@@ -18,7 +18,7 @@ const CUBE = 40;
 const SPACING = CUBE + 10;
 const HALF = CUBE / 2;
 
-function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | null; isWin: boolean; symbolX: string; symbolO: string }) {
+function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | null; isWin: boolean; symbolX: string; symbolO: string }) {
   const isX = cell === 'X';
   const isO = cell === 'O';
   const color = isX ? 'var(--mark-x)' : isO ? 'var(--mark-o)' : 'transparent';
