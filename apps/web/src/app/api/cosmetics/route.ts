@@ -62,7 +62,10 @@ export async function GET() {
 
   const response = cosmetics.map((c: any) => {
     const uc = userCosmetics.find((u: any) => u.cosmeticId === c.id);
-    const isUnlocked = c.requiredScore <= 0 || maxScore >= c.requiredScore || !!uc;
+    // If it's a paid item (price > 0), you have to buy it (so it's unlocked if you own it)
+    // If it's a score-based free item (price == 0), you unlock it by reaching the required score.
+    // If requiredScore is <= 0 and price is <= 0, it's default unlocked.
+    const isUnlocked = (c.price > 0) ? !!uc : (c.requiredScore <= 0 || maxScore >= c.requiredScore || !!uc);
     return {
       ...c,
       isUnlocked,

@@ -49,7 +49,7 @@ export default function ShopPage() {
 
   const handleBuy = async (c: Cosmetic) => {
     if (!session?.user) {
-      setErrorMsg('You must be logged in to buy cosmetics.');
+      alert('Login to buy items');
       return;
     }
 
@@ -101,7 +101,7 @@ export default function ShopPage() {
         {errorMsg && <p style={{ color: 'var(--text-danger)', marginTop: '8px' }}>{errorMsg}</p>}
       </div>
 
-      {buyableCosmetics.length === 0 ? (
+      {buyableCosmetics.length === 0 && session?.user ? (
         <div className={styles.section}>
           <p>You have unlocked all available items in the shop!</p>
         </div>
@@ -127,7 +127,7 @@ export default function ShopPage() {
                    <Button
                      variant="primary"
                      onClick={() => handleBuy(c)}
-                     disabled={purchasing === c.id || credits < c.price || !session?.user}
+                     disabled={purchasing === c.id || (session?.user && credits < c.price)}
                    >
                      {purchasing === c.id ? 'Buying...' : 'Buy'}
                    </Button>
@@ -161,7 +161,7 @@ export default function ShopPage() {
                     <Button
                       variant="primary"
                       onClick={() => handleBuy(c)}
-                      disabled={purchasing === c.id || credits < c.price || !session?.user}
+                      disabled={purchasing === c.id || (session?.user && credits < c.price)}
                     >
                       {purchasing === c.id ? 'Buying...' : 'Buy'}
                     </Button>
@@ -197,7 +197,7 @@ export default function ShopPage() {
                     <Button
                       variant="primary"
                       onClick={() => handleBuy(c)}
-                      disabled={purchasing === c.id || credits < c.price || !session?.user}
+                      disabled={purchasing === c.id || (session?.user && credits < c.price)}
                     >
                       {purchasing === c.id ? 'Buying...' : 'Buy'}
                     </Button>
