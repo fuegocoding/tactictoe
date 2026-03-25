@@ -60,8 +60,8 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
             position: 'absolute',
             inset: 0,
             transform,
-            background: '#141414',          // dark cube body — visible in both themes
-            border: '2px solid #000',        // black gap between cubelets (Rubik's look)
+            background: 'rgba(20, 20, 20, 0.45)', // semi-transparent so inner cubes show through
+            border: '1px solid rgba(0, 0, 0, 0.7)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
