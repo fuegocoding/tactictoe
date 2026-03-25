@@ -39,12 +39,22 @@
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
   font-family: var(--font-logo);
   font-size: var(--text-3xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
   margin-bottom: var(--space-2);
+}
+
+@media (min-width: 840px) {
+  .title {
+    justify-content: flex-start;
+  }
 }
 
 .title span { color: var(--accent); }
@@ -140,8 +150,14 @@
 
 .variantButtons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
+}
+
+@media (min-width: 480px) {
+  .variantButtons {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .variantBtn {
@@ -200,6 +216,7 @@
   gap: 0;
   border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-5);
+  overflow-x: auto;
 }
 
 .tab {
