@@ -10,6 +10,7 @@ import { StandardBoard } from '@/components/board/StandardBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
 import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState } from '@tactictoe/game-engine';
+import { getWinCells, getGomokuWinCells } from '@tactictoe/game-engine';
 import { GridBoard } from '@/components/board/GridBoard';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './page.module.css';
@@ -427,6 +428,10 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer as 'X' | 'O'}
                   disabled={!isMyTurn}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = roomState.gameState as GomokuState;
+                    return (s as any).terminal?.reason === 'win' ? (getGomokuWinCells(s.board) ?? []) : [];
+                  })()}
                 />
               ) : roomState.gameState!.variantId === 'sos_ttt' ? (
                 <GridBoard
@@ -436,6 +441,7 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer as 'X' | 'O'}
                   disabled={!isMyTurn}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={[]}
                 />
               ) : (
                 <StandardBoard
@@ -443,6 +449,10 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
+                  winCells={(() => {
+                    const s = roomState.gameState as any;
+                    return s.terminal?.reason === 'win' && s.board ? (getWinCells(s.board) ?? []) : [];
+                  })()}
                 />
               )}
             </div>
