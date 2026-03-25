@@ -44,7 +44,7 @@ async function getLeaderboardRows(variantId: string, period: string, seasonId?: 
       take: 50,
       include: { user: { include: { profile: { select: { username: true, displayName: true } } } } },
     });
-    return ratings.filter(r => r.user.profile !== null);
+    return ratings.filter((r: any) => r.user.profile !== null);
   }
 
   const cutoff = new Date(Date.now() - (period === 'week' ? 7 : 30) * 86_400_000);

@@ -99,6 +99,7 @@ export default function RoomPage() {
   const [rated, setRated] = useState(false);
   const [initialRating, setInitialRating] = useState<number | null>(null);
   const [finalRating, setFinalRating] = useState<number | null>(null);
+  const [isMatchmaking, setIsMatchmaking] = useState(false);
 
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [placingAs, setPlacingAs] = useState<string | number>('X');
@@ -180,6 +181,12 @@ export default function RoomPage() {
 
     const savedIndex = sessionStorage.getItem(`room:${code}:playerIndex`);
     const isRated = sessionStorage.getItem(`room:${code}:rated`) === 'true';
+    const savedMatchmaking = sessionStorage.getItem(`room:${code}:isMatchmaking`) === 'true';
+
+    if (savedMatchmaking) {
+      setIsMatchmaking(true);
+      sessionStorage.removeItem(`room:${code}:isMatchmaking`);
+    }
 
     if (isRated) {
       setRated(true);
@@ -343,12 +350,16 @@ export default function RoomPage() {
       {roomState.phase === 'waiting' && status === 'connected' && !roomState.error && (
         <div className={styles.waiting}>
           <p className={styles.waitingTitle}>Waiting for opponent…</p>
-          <p className={styles.waitingCode}>{code}</p>
-          <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
-          <CopyButton text={shareUrl} />
-          <div style={{ marginTop: 'var(--space-4)', background: 'white', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)' }}>
-            <QRCodeSVG value={shareUrl} size={160} />
-          </div>
+          {!isMatchmaking && (
+            <>
+              <p className={styles.waitingCode}>{code}</p>
+              <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
+              <CopyButton text={shareUrl} />
+              <div className={styles.qrCodeWrapper}>
+                <QRCodeSVG value={shareUrl} size={160} />
+              </div>
+            </>
+          )}
         </div>
       )}
 
