@@ -86,9 +86,13 @@ export class VanishingTTT implements GameRules {
   getLegalMoves(state: GameState): Move[] {
     const s = castState(state);
     if (s.terminal !== null) return [];
-    return s.board
-      .map((cell, i): Move | null => (cell === null ? { data: { cellIndex: i } } : null))
-      .filter((m): m is Move => m !== null);
+    const moves: Move[] = [];
+    for (let i = 0; i < s.board.length; i++) {
+      if (s.board[i] === null) {
+        moves.push({ data: { cellIndex: i } });
+      }
+    }
+    return moves;
   }
 
   checkTerminal(state: GameState): TerminalResult | null {
