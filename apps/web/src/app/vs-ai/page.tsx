@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
@@ -84,6 +85,7 @@ const engines: Record<Variant, GameRules> = {
 const DIFFICULTY_LABELS: Record<AIDifficulty, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
 
 export default function VsAIPage() {
+  const { data: session } = useSession();
   const [variant, setVariant] = useState<Variant>('ultimate_ttt');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
   const [humanPlayer, setHumanPlayer] = useState<Player>('X');
@@ -100,6 +102,7 @@ export default function VsAIPage() {
   const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
   const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
   const movesRef = useRef<HTMLDivElement>(null);
+  const creditAwardedRef = useRef(false);
 
   const ai = useAI(variant as AIVariant, difficulty);
   const aiPlayer: Player = humanPlayer === 'X' ? 'O' : 'X';
@@ -107,6 +110,18 @@ export default function VsAIPage() {
   useEffect(() => {
     if (movesRef.current) movesRef.current.scrollTop = movesRef.current.scrollHeight;
   }, [moveHistory]);
+
+  // Award credits to logged-in users when a vs-AI game ends
+  useEffect(() => {
+    if (phase !== 'over' || winner === undefined || !session?.user || creditAwardedRef.current) return;
+    creditAwardedRef.current = true;
+    const outcome = winner === humanPlayer ? 'win' : winner === null ? 'draw' : 'loss';
+    fetch('/api/vs-ai/result', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ outcome }),
+    }).catch(() => {/* silently ignore */});
+  }, [phase, winner, session, humanPlayer]);
 
   function formatCoord(boardIndex: number, cellIndex: number): string {
     if (variant === 'ultimate_ttt') {
@@ -127,6 +142,7 @@ export default function VsAIPage() {
     const engine = engines[variant];
     const seed = Date.now();
     const state = engine.initialize({ variantId: variant, seed });
+    creditAwardedRef.current = false;
     setGameState(state);
     setPhase('playing');
     setWinner(undefined);
