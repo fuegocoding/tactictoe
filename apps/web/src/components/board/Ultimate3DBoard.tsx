@@ -195,7 +195,7 @@ export function Ultimate3DBoard({
       <div style={{ marginTop: 'var(--space-6)' }}>
         <ThreeDViz
           board={macroResults as Board}
-          winCells={getWinCells(macroResults as Board)}
+          winCells={getWinCells(macroResults as Board) ?? undefined}
           symbolX={symbolX}
           symbolO={symbolO}
         />

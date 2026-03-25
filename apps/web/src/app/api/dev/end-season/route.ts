@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { concludeSeason } from '@/lib/season';
 
-export async function POST() {
-  // In a production app, verify an Admin Secret Header or Role here
-  if (process.env.NODE_ENV === 'production' && process.env.ADMIN_SECRET !== 'tactictoe-dev') {
-    // For safety, allow it to run in dev without secrets, but block prod unless secret provided
-    // (Actual auth skip for brevity context)
+export async function POST(req: Request) {
+  // Verify Admin Secret
+  const authHeader = req.headers.get('Authorization');
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
