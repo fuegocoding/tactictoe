@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="24" height="24" rx="4" fill="#1e1e2f" stroke="none" />
+  <!-- Grid -->
+  <path d="M8 4v16" stroke="#4a4a6a"/>
+  <path d="M16 4v16" stroke="#4a4a6a"/>
+  <path d="M4 8h16" stroke="#4a4a6a"/>
+  <path d="M4 16h16" stroke="#4a4a6a"/>
+
+  <!-- X in top left -->
+  <path d="M4.5 4.5l3 3" stroke="#ef4444"/>
+  <path d="M7.5 4.5l-3 3" stroke="#ef4444"/>
+
+  <!-- O in center -->
+  <circle cx="12" cy="12" r="1.5" stroke="#3b82f6"/>
+
+  <!-- X in bottom right -->
+  <path d="M16.5 16.5l3 3" stroke="#ef4444"/>
+  <path d="M19.5 16.5l-3 3" stroke="#ef4444"/>
+</svg>
