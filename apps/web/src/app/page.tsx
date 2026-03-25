@@ -113,7 +113,7 @@ export default function LobbyPage() {
       <div className={styles.twoColumn}>
         <div className={styles.leftColumn}>
           <div className={styles.hero}>
-            <h1 className={styles.title} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'inherit' }}>
+            <h1 className={styles.title}>
               <Grid3x3 size={36} strokeWidth={2.5} color="url(#logo-grad)" />
               <div>
                 <span style={{ color: '#ef4444' }}>TIC</span>
