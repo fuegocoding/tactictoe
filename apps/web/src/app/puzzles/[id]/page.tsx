@@ -80,7 +80,10 @@ function getSolvedSet(): Set<string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return new Set(raw ? JSON.parse(raw) : []);
-  } catch { return new Set(); }
+  } catch (err) {
+    console.error('Failed to read from localStorage:', err);
+    return new Set();
+  }
 }
 
 function markSolved(id: string) {
@@ -88,7 +91,9 @@ function markSolved(id: string) {
     const set = getSolvedSet();
     set.add(id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set)));
-  } catch {}
+  } catch (err) {
+    console.error('Failed to save to localStorage:', err);
+  }
 }
 
 // ---------- move matching ----------

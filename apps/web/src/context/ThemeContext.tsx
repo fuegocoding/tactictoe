@@ -27,7 +27,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const next: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
     document.documentElement.setAttribute('data-theme', next);
-    try { localStorage.setItem('theme', next); } catch {}
+    try {
+      localStorage.setItem('theme', next);
+    } catch (error) {
+      console.error('Failed to save theme to localStorage:', error);
+    }
   };
 
   return (
