@@ -39,7 +39,9 @@ export default function SettingsPage() {
                 ...c,
                 isEquipped: savedIds.includes(c.id)
               }));
-            } catch (e) {}
+            } catch (e) {
+              console.error('Failed to parse guest cosmetics from localStorage:', e);
+            }
           }
         }
         
