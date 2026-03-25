@@ -60,8 +60,10 @@ export async function GET() {
   const maxScore = highestRating?.rating ?? 1500;
   const credits = userDbData?.credits ?? 0;
 
+  const userCosmeticsMap = new Map<string, any>(userCosmetics.map((u: any) => [u.cosmeticId, u]));
+
   const response = cosmetics.map((c: any) => {
-    const uc = userCosmetics.find((u: any) => u.cosmeticId === c.id);
+    const uc = userCosmeticsMap.get(c.id);
     // If it's a paid item (price > 0), you have to buy it (so it's unlocked if you own it)
     // If it's a score-based free item (price == 0), you unlock it by reaching the required score.
     // If requiredScore is <= 0 and price is <= 0, it's default unlocked.
