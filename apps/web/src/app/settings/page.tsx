@@ -77,6 +77,7 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cosmeticId: c.id, equip: !c.isEquipped })
       });
+      window.dispatchEvent(new Event('cosmetics_updated'));
     } else {
       const equippedIds = nextCosmetics.filter(x => x.isEquipped).map(x => x.id);
       localStorage.setItem('guest_cosmetics', JSON.stringify(equippedIds));
