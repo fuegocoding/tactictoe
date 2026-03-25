@@ -91,13 +91,11 @@ export default function Sidebar() {
             <Link href="/login" style={{ width: '100%' }}>
               <Button variant="secondary" className={styles.actionBtn} full>
                 <span className={styles.actionText}>Sign In</span>
-                <span className={styles.actionIcon}>🔑</span>
               </Button>
             </Link>
             <Link href="/register" style={{ width: '100%' }}>
               <Button variant="primary" className={styles.actionBtn} full>
                 <span className={styles.actionText}>Sign Up</span>
-                <span className={styles.actionIcon}>✨</span>
               </Button>
             </Link>
           </div>

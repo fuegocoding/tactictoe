@@ -117,10 +117,6 @@
   justify-content: center;
 }
 
-.actionIcon {
-  display: none;
-}
-
 .themeToggleWrap {
   display: flex;
   justify-content: flex-start;
@@ -140,9 +136,22 @@
   .navLabel { display: none; }
   .userInfo { display: none; }
 
-  .actions { gap: var(--space-3); }
-  .actionBtn { padding: var(--space-2); min-width: unset; }
-  .actionText { display: none; }
-  .actionIcon { display: inline; font-size: 1.25rem; line-height: 1; }
-  .themeToggleWrap { justify-content: center; padding: 0; }
+  .profileSection {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: calc(100vw - var(--sidebar-width-mobile));
+    margin: 0;
+    padding: var(--space-4);
+    border: none;
+    background: transparent;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 100;
+  }
+  .actions { flex-direction: row; gap: var(--space-3); width: auto; }
+  .actionBtn { padding: var(--space-2) var(--space-4); min-width: unset; font-size: var(--text-sm); }
+  .actionText { display: inline; }
+  .themeToggleWrap { padding: 0; margin-top: 0; margin-left: auto; }
 }
