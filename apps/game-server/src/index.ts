@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { GAME_VARIANTS } from '@tactictoe/game-engine';
@@ -45,7 +46,7 @@ const io = new Server(httpServer, {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateDisplayName(): string {
-  return `Guest#${Math.floor(1000 + Math.random() * 9000)}`;
+  return `Guest#${randomInt(1000, 10000)}`;
 }
 
 const qm = new QueueManager();

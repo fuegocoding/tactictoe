@@ -1,11 +1,14 @@
-import { createHash } from 'crypto';
+import { createHash, randomUUID, randomInt } from 'crypto';
 
 export function generateGuestId(): string {
-  return crypto.randomUUID();
+  // Replace insecure Math.random() with a secure UUIDv4 generator
+  const secureId = randomUUID();
+  return secureId;
 }
 
 export function generateDisplayName(): string {
-  const num = Math.floor(1000 + Math.random() * 9000);
+  // Use cryptographically secure randomInt to avoid modulo bias
+  const num = randomInt(1000, 10000);
   return `Guest#${num}`;
 }
 
