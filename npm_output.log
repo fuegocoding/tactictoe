@@ -1,0 +1,740 @@
+
+> web@0.0.1 dev /app/apps/web
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.8s
+ ○ Compiling / ...
+ ✓ Compiled / in 7.7s (1006 modules)
+ GET / 200 in 8388ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 7.8s (512 modules)
+ ✓ Compiled (742 modules)
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET / 200 in 243ms
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ POST /api/guest-session 500 in 56ms
+ POST /api/guest-session 500 in 55ms
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ POST /api/guest-session 500 in 58ms
+ POST /api/guest-session 500 in 56ms
+ GET /api/auth/session 200 in 66ms
+ GET /api/auth/session 200 in 16ms
+ ✓ Compiled /api/cosmetics in 363ms (744 modules)
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+prisma:error
+Invalid `prisma.cosmetic.findMany()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.cosmetic.findMany()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/cosmetics/route.ts:17:21)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ GET /api/cosmetics 500 in 551ms
+ GET / 200 in 133ms
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ POST /api/guest-session 500 in 56ms
+ POST /api/guest-session 500 in 53ms
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+prisma:error
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.guestSession.create()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/guest-session/route.ts:86:5)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ POST /api/guest-session 500 in 56ms
+ POST /api/guest-session 500 in 55ms
+ GET /api/auth/session 200 in 77ms
+ GET /api/auth/session 200 in 32ms
+prisma:error
+Invalid `prisma.cosmetic.findMany()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+ ⨯ PrismaClientInitializationError:
+Invalid `prisma.cosmetic.findMany()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:8
+   |
+ 7 |   provider = "postgresql"
+ 8 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at $n.handleRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/cosmetics/route.ts:17:21)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57228
+    at async eT.execute (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46851)
+    at async eT.handle (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:58760)
+    at async doRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1496:28)
+    at async DevServer.renderPageComponent (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:818:17)
+    at async /app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/app/node_modules/.pnpm/next@14.2.35_@babel+core@7.29.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ GET /api/cosmetics 500 in 23ms

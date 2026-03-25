@@ -1,0 +1,12 @@
+
+> game-server@0.0.1 start /app/apps/game-server
+> node dist/index.js
+
+Game server listening on port 4000
+CORS origin: http://localhost:3000
+[connect] bvR6OPDK0LJczNYwAAAB
+[disconnect] bvR6OPDK0LJczNYwAAAB
+[connect] mq-bpQJnh3SXSafBAAAD
+[disconnect] mq-bpQJnh3SXSafBAAAD
+[connect] 8ZkAX9w7APoW2PYQAAAF
+[disconnect] 8ZkAX9w7APoW2PYQAAAF

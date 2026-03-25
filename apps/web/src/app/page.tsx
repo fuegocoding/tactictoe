@@ -62,6 +62,7 @@ export default function LobbyPage() {
   useEffect(() => {
     if (queue.queueState === 'matched' && queue.matchedRoomCode !== null && queue.matchedPlayerIndex !== null) {
       sessionStorage.setItem(`room:${queue.matchedRoomCode}:playerIndex`, String(queue.matchedPlayerIndex));
+      sessionStorage.setItem(`room:${queue.matchedRoomCode}:isMatchmaking`, 'true');
       if (queue.matchedRated) sessionStorage.setItem(`room:${queue.matchedRoomCode}:rated`, 'true');
       router.push(`/room/${queue.matchedRoomCode}`);
     }

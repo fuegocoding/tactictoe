@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     ]);
 
     return NextResponse.json({
-      users: users.map(u => ({
+      users: users.map((u: any) => ({
         id: u.id,
         email: u.email,
         role: u.role,
