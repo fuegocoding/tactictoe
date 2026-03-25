@@ -3,21 +3,33 @@
 import React, { useState, useRef } from 'react';
 import type { Board } from '@tactictoe/game-engine';
 import { WIN_LINES_3D } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { PieceSymbol } from './PieceSymbol';
 
 interface ThreeDBoardProps {
   board: Board; // 27 cells
   currentPlayer: 'X' | 'O';
   disabled: boolean;
   onMove: (boardIndex: number, cellIndex: number) => void;
-  /** Highlight winning cells */
   winCells?: number[];
 }
 
 const LAYER_LABELS = ['Layer 1 (Bottom)', 'Layer 2 (Middle)', 'Layer 3 (Top)'];
 
-// 3D visualization constants
-const VIZ_CELL = 26;  // cell square size in px
-const VIZ_GAP  = 40;  // center-to-center spacing in px
+// ── 3D visualization constants ───────────────────────────────────────────────
+const CUBE     = 32;        // cubelet side length in px
+const HALF     = CUBE / 2;  // 16px — used for face translateZ
+const SPACING  = 40;        // center-to-center spacing (gap = SPACING - CUBE = 8px)
+
+// Six face transforms for a CUBE×CUBE×CUBE CSS box
+const FACES = [
+  `translateZ(${HALF}px)`,                 // front
+  `rotateY(180deg) translateZ(${HALF}px)`, // back
+  `rotateY(90deg)  translateZ(${HALF}px)`, // right
+  `rotateY(-90deg) translateZ(${HALF}px)`, // left
+  `rotateX(-90deg) translateZ(${HALF}px)`, // top
+  `rotateX(90deg)  translateZ(${HALF}px)`, // bottom
+];
 
 function getWinCells(board: Board): number[] {
   for (const line of WIN_LINES_3D) {
@@ -29,19 +41,74 @@ function getWinCells(board: Board): number[] {
   return [];
 }
 
+/** One small 3D cube — rendered with all 6 CSS faces + a sticker on each */
+function Cubelet({ cell, isWin }: { cell: string | number | null | undefined; isWin: boolean }) {
+  const symbol = cell != null ? String(cell) : '';
+
+  const stickerBg = isWin
+    ? '#f59e0b'                       // amber win highlight
+    : cell === 'X' ? '#dc2626'        // red  X
+    : cell === 'O' ? '#2563eb'        // blue O
+    : 'rgba(255,255,255,0.07)';       // almost invisible when empty
+
+  return (
+    <div style={{ position: 'relative', width: CUBE, height: CUBE, transformStyle: 'preserve-3d' }}>
+      {FACES.map((transform, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transform,
+            background: '#141414',          // dark cube body — visible in both themes
+            border: '2px solid #000',        // black gap between cubelets (Rubik's look)
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backfaceVisibility: 'visible',
+          }}
+        >
+          {/* Colored sticker */}
+          <div style={{
+            width: CUBE - 6,
+            height: CUBE - 6,
+            background: stickerBg,
+            borderRadius: 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 15,
+            fontWeight: 900,
+            color: '#fff',
+            // Layered text-shadow creates a 3D extruded look for X / O
+            textShadow: symbol
+              ? '0 1px 0 rgba(0,0,0,0.55), 0 2px 0 rgba(0,0,0,0.4), 0 3px 0 rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.35)'
+              : 'none',
+            letterSpacing: '-0.01em',
+          }}>
+            {symbol}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Draggable 3D cube — view only, not for playing */
 function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
   const [rotation, setRotation] = useState({ x: -25, y: 35 });
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false); // sync ref so onDragMove reads latest value instantly
   const lastPos = useRef({ x: 0, y: 0 });
 
   const onDragStart = (x: number, y: number) => {
+    isDraggingRef.current = true;
     setIsDragging(true);
     lastPos.current = { x, y };
   };
 
   const onDragMove = (x: number, y: number) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     const dx = x - lastPos.current.x;
     const dy = y - lastPos.current.y;
     lastPos.current = { x, y };
@@ -51,8 +118,13 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
     }));
   };
 
+  const onDragEnd = () => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{
         fontSize: 9,
         fontWeight: 600,
@@ -65,21 +137,21 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
 
       <div
         style={{
-          perspective: '500px',
+          perspective: '600px',
           perspectiveOrigin: '50% 50%',
-          width: '210px',
-          height: '210px',
+          width: 220,
+          height: 220,
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: 'none',
           flexShrink: 0,
         }}
         onMouseDown={e => onDragStart(e.clientX, e.clientY)}
         onMouseMove={e => onDragMove(e.clientX, e.clientY)}
-        onMouseUp={() => setIsDragging(false)}
-        onMouseLeave={() => setIsDragging(false)}
+        onMouseUp={onDragEnd}
+        onMouseLeave={onDragEnd}
         onTouchStart={e => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }}
         onTouchMove={e => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
-        onTouchEnd={() => setIsDragging(false)}
+        onTouchEnd={onDragEnd}
       >
         <div
           style={{
@@ -96,9 +168,9 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
                 const globalIndex = layer * 9 + row * 3 + col;
                 const cell = board[globalIndex];
                 const isWin = winCells.includes(globalIndex);
-                const x = (col - 1) * VIZ_GAP;
-                const y = (row - 1) * VIZ_GAP;
-                const z = (layer - 1) * VIZ_GAP;
+                const x = (col - 1) * SPACING;
+                const y = (row - 1) * SPACING;
+                const z = (layer - 1) * SPACING;
                 return (
                   <div
                     key={globalIndex}
@@ -106,29 +178,12 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
                       position: 'absolute',
                       left: '50%',
                       top: '50%',
-                      width: VIZ_CELL,
-                      height: VIZ_CELL,
+                      transformStyle: 'preserve-3d',
                       transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px)`,
-                      background: isWin
-                        ? 'var(--accent-subtle)'
-                        : cell
-                        ? 'var(--board-cell-bg)'
-                        : 'var(--bg-subtle)',
-                      border: isWin
-                        ? '1.5px solid var(--accent)'
-                        : '1px solid var(--board-cell-border)',
-                      borderRadius: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 13,
-                      fontWeight: 'bold',
-                      color: cell === 'X' ? 'var(--mark-x)' : 'var(--mark-o)',
                       pointerEvents: 'none',
-                      opacity: cell ? 1 : 0.3,
                     }}
                   >
-                    {cell != null ? String(cell) : ''}
+                    <Cubelet cell={cell} isWin={isWin} />
                   </div>
                 );
               })
@@ -141,8 +196,8 @@ function ThreeDViz({ board, winCells }: { board: Board; winCells: number[] }) {
 }
 
 /**
- * Renders a 3×3×3 board as three flat 3×3 grids for play, plus a draggable
- * 3D cube visualization to the right for spatial reference.
+ * Renders a 3×3×3 board as three labeled flat grids for gameplay (left)
+ * and a draggable CSS 3D Rubik's-cube-style visualization (right).
  *
  * onMove(boardIndex, cellIndex): boardIndex = layer (0–2), cellIndex = row*3+col (0–8)
  */
@@ -159,27 +214,15 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
       width: '100%',
     }}>
 
-      {/* ── Playing grids ── */}
+      {/* ── Playing grids ─────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', alignItems: 'center' }}>
-        <div style={{
-          display: 'flex',
-          gap: 'var(--space-5)',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}>
+        <div style={{ display: 'flex', gap: 'var(--space-5)', flexWrap: 'wrap', justifyContent: 'center' }}>
           {[0, 1, 2].map(layer => (
             <div key={layer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <div style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.05em',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-              }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 {LAYER_LABELS[layer]}
               </div>
 
-              {/* Mini 3×3 grid with row/col labels */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '18px repeat(3, minmax(0, 1fr))',
@@ -187,15 +230,12 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                 gap: '3px',
                 width: '180px',
               }}>
-                {/* Top-left corner */}
                 <div />
-                {/* Col labels */}
                 {['a', 'b', 'c'].map(col => (
                   <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
                     {col}
                   </div>
                 ))}
-                {/* Rows */}
                 {[0, 1, 2].map(row => (
                   <React.Fragment key={row}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
@@ -209,20 +249,14 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                         <button
                           key={col}
                           disabled={disabled || cell !== null}
-                          onClick={() => {
-                            if (!disabled && cell === null) onMove(layer, row * 3 + col);
-                          }}
+                          onClick={() => { if (!disabled && cell === null) onMove(layer, row * 3 + col); }}
                           style={{
                             aspectRatio: '1',
                             fontSize: 'clamp(16px, 4vw, 26px)',
                             fontWeight: 'bold',
                             cursor: disabled || cell !== null ? 'default' : 'pointer',
-                            background: isWin
-                              ? 'var(--accent-subtle, rgba(59,130,246,0.2))'
-                              : 'var(--board-cell-bg)',
-                            border: isWin
-                              ? '2px solid var(--accent, #3b82f6)'
-                              : '1px solid var(--board-cell-border)',
+                            background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.2))' : 'var(--board-cell-bg)',
+                            border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--board-cell-border)',
                             borderRadius: 'var(--radius-sm)',
                             color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
                             transition: 'background 0.15s',
@@ -239,18 +273,12 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
           ))}
         </div>
 
-        <div style={{
-          fontSize: '11px',
-          color: 'var(--text-muted)',
-          textAlign: 'center',
-          maxWidth: 400,
-          lineHeight: 1.5,
-        }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', maxWidth: 400, lineHeight: 1.5 }}>
           Win by getting 3-in-a-row across any layer, column, row, or diagonal through all three layers.
         </div>
       </div>
 
-      {/* ── 3D Visualization ── */}
+      {/* ── 3D Visualization ──────────────────────────────────── */}
       <ThreeDViz board={board} winCells={effectiveWinCells} />
     </div>
   );

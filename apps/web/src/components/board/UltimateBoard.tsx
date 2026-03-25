@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Board, BoardResult } from '@tactictoe/game-engine';
+import { useCosmetics } from '@/components/CosmeticsContext';
+import { PieceSymbol } from './PieceSymbol';
 
 interface UltimateBoardProps {
   boards: [Board, Board, Board, Board, Board, Board, Board, Board, Board];
@@ -28,6 +30,7 @@ export function UltimateBoard({
   disabled,
   onMove,
 }: UltimateBoardProps) {
+  const { symbolX, symbolO } = useCosmetics();
   return (
     <div
       style={{
@@ -95,7 +98,11 @@ export function UltimateBoard({
                       color: result === 'X' ? 'var(--mark-x)' : result === 'O' ? 'var(--mark-o)' : 'var(--text-muted)',
                     }}
                   >
-                    {result === 'draw' ? '=' : result}
+                    {result === 'draw' ? '=' : result === 'X' ? (
+                      <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={36} />
+                    ) : (
+                      <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={36} />
+                    )}
                   </div>
                 )}
                 <div
@@ -121,10 +128,16 @@ export function UltimateBoard({
                         background: 'var(--board-cell-bg)',
                         border: '1px solid var(--board-cell-border)',
                         borderRadius: 'var(--radius-sm)',
-                        color: cell === 'X' ? 'var(--mark-x)' : cell === 'O' ? 'var(--mark-o)' : 'var(--text)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      {cell ?? ''}
+                      {cell === 'X' ? (
+                        <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={14} />
+                      ) : cell === 'O' ? (
+                        <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={14} />
+                      ) : null}
                     </button>
                   ))}
                 </div>
