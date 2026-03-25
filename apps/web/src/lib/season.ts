@@ -44,11 +44,11 @@ export async function concludeSeason() {
       });
 
       // 4. Apply soft reset (bring everyone 25% closer to 1500)
-      for (const r of ratings) {
+      const updatePromises = ratings.map((r: any) => {
         const diff = 1500 - r.rating;
         const newRating = r.rating + (0.25 * diff);
         // Also resets RD and volatility slightly to encourage movement at season start
-        await tx.rating.update({
+        return tx.rating.update({
           where: { id: r.id },
           data: {
             rating: newRating,
@@ -58,7 +58,8 @@ export async function concludeSeason() {
             draws: 0
           }
         });
-      }
+      });
+      await Promise.all(updatePromises);
     }
 
     // 5. Start new season
@@ -76,5 +77,7 @@ export async function concludeSeason() {
       nextSeason,
       snapshotsTaken: ratings.length
     };
+  }, {
+    timeout: 30000 // Increase timeout to 30 seconds for bulk operations
   });
 }
