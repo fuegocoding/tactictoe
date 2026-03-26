@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { GarrisonState } from '@tactictoe/game-engine';
-import type { GarrisonPiece } from '@tactictoe/game-engine';
+import type { GarrisonState, GarrisonPiece } from '@tactictoe/game-engine';
 
 const LIGHT_SQ = '#f0d9b5';
 const DARK_SQ  = '#b58863';
