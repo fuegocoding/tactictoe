@@ -113,7 +113,7 @@ export async function processGameResult(payload: GameResultPayload) {
       reason,
       ratingDelta1: delta1,
       ratingDelta2: delta2,
-      moveHistory: moveHistory ?? Prisma.DbNull,
+      moveHistory: moveHistory ?? undefined,
     },
   });
 

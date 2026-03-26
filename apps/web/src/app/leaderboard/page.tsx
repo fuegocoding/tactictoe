@@ -63,8 +63,8 @@ async function getLeaderboardRows(variantId: string, period: string, seasonId?: 
   ]);
 
   const activeUserIds = Array.from(new Set([
-    ...p1Rows.map(r => r.player1Id!),
-    ...p2Rows.map(r => r.player2Id!),
+    ...p1Rows.map((r: any) => r.player1Id!),
+    ...p2Rows.map((r: any) => r.player2Id!),
   ]));
 
   if (activeUserIds.length === 0) return [];
@@ -75,7 +75,7 @@ async function getLeaderboardRows(variantId: string, period: string, seasonId?: 
     take: 50,
     include: { user: { include: { profile: { select: { username: true, displayName: true } } } } },
   });
-  return ratings.filter(r => r.user.profile !== null);
+  return ratings.filter((r: any) => r.user.profile !== null);
 }
 
 export default async function LeaderboardPage({ searchParams }: Props) {

@@ -754,8 +754,8 @@ export default function VsAIPage() {
                 onHandPieceClick={handleGarrisonHandClick}
                 onBoardSquareClick={handleGarrisonSquareClick}
                 winSquares={
-                  gameState.terminal?.winner
-                    ? (checkFiveInARow(gameState.terminal.winner, (gameState as GarrisonState).pieces) ?? [])
+                  (gameState as GarrisonState).terminal?.winner
+                    ? (checkFiveInARow((gameState as GarrisonState).terminal!.winner!, (gameState as GarrisonState).pieces) ?? [])
                     : []
                 }
               />

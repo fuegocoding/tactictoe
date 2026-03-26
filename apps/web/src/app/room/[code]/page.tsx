@@ -618,8 +618,8 @@ export default function RoomPage() {
                   onHandPieceClick={handleGarrisonHandClick}
                   onBoardSquareClick={handleGarrisonSquareClick}
                   winSquares={
-                    roomState.gameState!.terminal?.winner
-                      ? (checkFiveInARow(roomState.gameState!.terminal.winner, (roomState.gameState as GarrisonState).pieces) ?? [])
+                    (roomState.gameState as GarrisonState).terminal?.winner
+                      ? (checkFiveInARow((roomState.gameState as GarrisonState).terminal!.winner!, (roomState.gameState as GarrisonState).pieces) ?? [])
                       : []
                   }
                 />
