@@ -87,4 +87,37 @@ describe('UltimateBoard', () => {
     fireEvent.click(screen.getAllByRole('button')[0]!);
     expect(onMove).not.toHaveBeenCalled();
   });
+
+  it('renders an SVG win line when winCells is provided', () => {
+    const results = [...emptyResults] as typeof emptyResults;
+    results[0] = 'X';
+    results[4] = 'X';
+    results[8] = 'X';
+    const { container } = render(
+      <UltimateBoard
+        boards={emptyBoards}
+        boardResults={results}
+        nextBoardConstraint={null}
+        currentPlayer="O"
+        disabled={true}
+        onMove={vi.fn()}
+        winCells={[0, 4, 8]}
+      />
+    );
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('does not render an SVG win line when winCells is empty', () => {
+    const { container } = render(
+      <UltimateBoard
+        boards={emptyBoards}
+        boardResults={emptyResults}
+        nextBoardConstraint={null}
+        currentPlayer="X"
+        disabled={false}
+        onMove={vi.fn()}
+      />
+    );
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+  });
 });
