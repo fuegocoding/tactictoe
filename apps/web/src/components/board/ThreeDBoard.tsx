@@ -104,7 +104,7 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
         }} />
         <div style={{
           position: 'absolute',
-          transform: `translate3d(${GIZMO_ARM + 10}px, -50%, 0) ${billboard}`,
+          transform: `translate3d(${GIZMO_ARM + 10}px, -6px, 0) ${billboard}`,
           fontSize: 9, fontWeight: 700, color: '#ef4444', whiteSpace: 'nowrap',
         }}>X</div>
 
@@ -120,7 +120,7 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
         }} />
         <div style={{
           position: 'absolute',
-          transform: `translate3d(-50%, ${GIZMO_ARM + 10}px, 0) ${billboard}`,
+          transform: `translate3d(-4px, ${GIZMO_ARM + 10}px, 0) ${billboard}`,
           fontSize: 9, fontWeight: 700, color: '#22c55e', whiteSpace: 'nowrap',
         }}>Y</div>
 
@@ -131,7 +131,15 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
           background: '#3b82f6',
           top: 0, left: -1,
           transform: 'rotateX(-90deg)',
-          transformOrigin: 'center top',
+          transformOrigin: 'center bottom',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-50%, -50%, ${GIZMO_ARM + 2}px) ${billboard}`,
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          background: '#3b82f6',
         }} />
         <div style={{
           position: 'absolute',
