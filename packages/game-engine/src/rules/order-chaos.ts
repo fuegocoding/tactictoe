@@ -66,7 +66,15 @@ function buildWinLines6x6(): readonly (readonly number[])[] {
   return lines;
 }
 
-const WIN_LINES_6X6 = buildWinLines6x6();
+export const WIN_LINES_6X6 = buildWinLines6x6();
+
+export function getWinCells6x6(board: Board): number[] | null {
+  for (const line of WIN_LINES_6X6) {
+    const cell = board[line[0]];
+    if (cell !== null && line.every(i => board[i] === cell)) return [...line];
+  }
+  return null;
+}
 
 function checkOrderWin(board: Board): boolean {
   for (const line of WIN_LINES_6X6) {

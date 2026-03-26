@@ -98,6 +98,14 @@ function buildWinLines4D(): readonly (readonly [number, number, number])[] {
 
 export const WIN_LINES_4D = buildWinLines4D();
 
+export function getWinCells4D(board: Board): number[] | null {
+  for (const line of WIN_LINES_4D) {
+    const cell = board[line[0]];
+    if (cell !== null && line.every(i => board[i] === cell)) return [...line];
+  }
+  return null;
+}
+
 function checkWinner4D(board: Board): Player | null {
   for (const [a, b, c] of WIN_LINES_4D) {
     const cell = board[a];
