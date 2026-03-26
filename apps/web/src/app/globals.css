@@ -50,6 +50,11 @@ button { cursor: pointer; border: none; background: none; }
   --winline-width:  0.12;
   --winline-filter: none;
 
+  /* 3D Cube */
+  --cube-face-empty: rgba(255, 255, 255, 0.18);
+  --cube-face-border: rgba(0, 0, 0, 0.14);
+  --cube-layer-border: rgba(0, 0, 0, 0.10);
+
   /* Shadows */
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow:        0 2px 8px rgba(0, 0, 0, 0.08);
@@ -126,6 +131,11 @@ button { cursor: pointer; border: none; background: none; }
   --winline-color:  #60a5fa;
   --winline-width:  0.12;
   --winline-filter: none;
+
+  /* 3D Cube */
+  --cube-face-empty: rgba(0, 0, 0, 0.35);
+  --cube-face-border: rgba(255, 255, 255, 0.15);
+  --cube-layer-border: rgba(255, 255, 255, 0.12);
 
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow:        0 2px 8px rgba(0, 0, 0, 0.5);
