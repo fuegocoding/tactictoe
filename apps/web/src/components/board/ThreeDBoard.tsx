@@ -13,7 +13,7 @@ export interface ThreeDBoardProps {
   winCells?: number[];
 }
 
-const LAYER_LABELS = ['Layer 1 (Top)', 'Layer 2 (Middle)', 'Layer 3 (Bottom)'];
+const LAYER_LABELS = ['Top', 'Middle', 'Bottom'];
 const CUBE = 40;
 const SPACING = CUBE + 10;
 const HALF = CUBE / 2;
