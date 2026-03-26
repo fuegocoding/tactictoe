@@ -35,6 +35,20 @@ async function main() {
     { name: 'Fire Line',    type: 'winline', cssValue: '{"--winline-color":"#ff4500","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.08px #ff6b35) drop-shadow(0 0 0.25px #ff4500)"}', requiredScore: 0, price: 300 },
     { name: 'Gold Strike',  type: 'winline', cssValue: '{"--winline-color":"#ffd700","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.1px #ffd700) drop-shadow(0 0 0.3px #b8860b)"}', requiredScore: 0, price: 600 },
     { name: 'Void',         type: 'winline', cssValue: '{"--winline-color":"#7c3aed","--winline-width":"0.16","--winline-filter":"drop-shadow(0 0 0.1px #a78bfa) drop-shadow(0 0 0.35px #4c1d95)"}', requiredScore: 0, price: 900 },
+
+    // ── Chess Piece Sets ──────────────────────────────────
+    { name: 'cburnett',  type: 'chess_piece', cssValue: '{"set":"cburnett"}',  requiredScore: 0, price: 0 },
+    { name: 'Merida',    type: 'chess_piece', cssValue: '{"set":"merida"}',    requiredScore: 0, price: 200 },
+    { name: 'Alpha',     type: 'chess_piece', cssValue: '{"set":"alpha"}',     requiredScore: 0, price: 400 },
+    { name: 'Staunty',   type: 'chess_piece', cssValue: '{"set":"staunty"}',   requiredScore: 0, price: 600 },
+    { name: 'Tatiana',   type: 'chess_piece', cssValue: '{"set":"tatiana"}',   requiredScore: 0, price: 800 },
+
+    // ── Chess Board Themes ────────────────────────────────
+    { name: 'Brown',     type: 'chess_board', cssValue: '{"--chess-light":"#f0d9b5","--chess-dark":"#b58863"}', requiredScore: 0, price: 0 },
+    { name: 'Blue',      type: 'chess_board', cssValue: '{"--chess-light":"#dee3e6","--chess-dark":"#8ca2ad"}', requiredScore: 0, price: 150 },
+    { name: 'Green',     type: 'chess_board', cssValue: '{"--chess-light":"#ffffdd","--chess-dark":"#86a666"}', requiredScore: 0, price: 300 },
+    { name: 'Purple',    type: 'chess_board', cssValue: '{"--chess-light":"#e8d9eb","--chess-dark":"#9f72b5"}', requiredScore: 0, price: 500 },
+    { name: 'Marble',    type: 'chess_board', cssValue: '{"--chess-light":"#f0ece4","--chess-dark":"#7a9e7e"}', requiredScore: 0, price: 750 },
   ];
 
   await (prisma as any).cosmetic.createMany({ data: cosmetics });

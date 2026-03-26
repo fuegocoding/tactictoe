@@ -25,6 +25,18 @@ export async function GET() {
       { id: 'winline_neon', name: 'Neon Glow', type: 'winline', cssValue: '{"--winline-color":"#00ffcc","--winline-width":"0.14","--winline-filter":"drop-shadow(0 0 0.08px #00ffcc) drop-shadow(0 0 0.2px #00ffcc)"}', requiredScore: 150, price: 100 },
       { id: 'winline_fire', name: 'Fire Line', type: 'winline', cssValue: '{"--winline-color":"#ff4500","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.08px #ff6b35) drop-shadow(0 0 0.25px #ff4500)"}', requiredScore: 400, price: 300 },
       { id: 'winline_gold', name: 'Gold Strike', type: 'winline', cssValue: '{"--winline-color":"#ffd700","--winline-width":"0.15","--winline-filter":"drop-shadow(0 0 0.1px #ffd700) drop-shadow(0 0 0.3px #b8860b)"}', requiredScore: 700, price: 800 },
+
+      { id: 'chess_piece_cburnett', name: 'cburnett',  type: 'chess_piece', cssValue: '{"set":"cburnett"}',  requiredScore: 0, price: 0 },
+      { id: 'chess_piece_merida',   name: 'Merida',    type: 'chess_piece', cssValue: '{"set":"merida"}',    requiredScore: 0, price: 200 },
+      { id: 'chess_piece_alpha',    name: 'Alpha',     type: 'chess_piece', cssValue: '{"set":"alpha"}',     requiredScore: 0, price: 400 },
+      { id: 'chess_piece_staunty',  name: 'Staunty',   type: 'chess_piece', cssValue: '{"set":"staunty"}',   requiredScore: 0, price: 600 },
+      { id: 'chess_piece_tatiana',  name: 'Tatiana',   type: 'chess_piece', cssValue: '{"set":"tatiana"}',   requiredScore: 0, price: 800 },
+
+      { id: 'chess_board_brown',    name: 'Brown',     type: 'chess_board', cssValue: '{"--chess-light":"#f0d9b5","--chess-dark":"#b58863"}', requiredScore: 0, price: 0 },
+      { id: 'chess_board_blue',     name: 'Blue',      type: 'chess_board', cssValue: '{"--chess-light":"#dee3e6","--chess-dark":"#8ca2ad"}', requiredScore: 0, price: 150 },
+      { id: 'chess_board_green',    name: 'Green',     type: 'chess_board', cssValue: '{"--chess-light":"#ffffdd","--chess-dark":"#86a666"}', requiredScore: 0, price: 300 },
+      { id: 'chess_board_purple',   name: 'Purple',    type: 'chess_board', cssValue: '{"--chess-light":"#e8d9eb","--chess-dark":"#9f72b5"}', requiredScore: 0, price: 500 },
+      { id: 'chess_board_marble',   name: 'Marble',    type: 'chess_board', cssValue: '{"--chess-light":"#f0ece4","--chess-dark":"#7a9e7e"}', requiredScore: 0, price: 750 },
     ];
     await (prisma as any).cosmetic.createMany({ data: DEFAULT_COSMETICS });
     cosmetics = await (prisma as any).cosmetic.findMany({ orderBy: { requiredScore: 'asc' } });

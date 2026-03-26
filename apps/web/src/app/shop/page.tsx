@@ -10,7 +10,7 @@ import styles from './page.module.css';
 interface Cosmetic {
   id: string;
   name: string;
-  type: 'board' | 'piece' | 'winline';
+  type: 'board' | 'piece' | 'winline' | 'chess_piece' | 'chess_board';
   cssValue: string;
   requiredScore: number;
   price: number;
@@ -88,6 +88,8 @@ export default function ShopPage() {
   const boards = buyableCosmetics.filter(c => c.type === 'board');
   const pieces = buyableCosmetics.filter(c => c.type === 'piece');
   const winlines = buyableCosmetics.filter(c => c.type === 'winline');
+  const chessBoards = buyableCosmetics.filter(c => c.type === 'chess_board');
+  const chessPieces = buyableCosmetics.filter(c => c.type === 'chess_piece');
 
   if (loading) return <div className={styles.loading}>Loading shop...</div>;
 
@@ -198,6 +200,86 @@ export default function ShopPage() {
                       variant="primary"
                       onClick={() => handleBuy(c)}
                       disabled={purchasing === c.id || (session?.user && credits < c.price)}
+                    >
+                      {purchasing === c.id ? 'Buying...' : 'Buy'}
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {chessBoards.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Chess Board Themes</h2>
+          <div className={styles.grid}>
+            {chessBoards.map(c => {
+              const cv = JSON.parse(c.cssValue) as Record<string, string>;
+              const light = cv['--chess-light'] ?? '#f0d9b5';
+              const dark  = cv['--chess-dark']  ?? '#b58863';
+              return (
+                <Card key={c.id} className={styles.card}>
+                  <div className={styles.preview}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 28px)', gridTemplateRows: 'repeat(4, 28px)' }}>
+                      {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(i => {
+                        const row = Math.floor(i / 4);
+                        const col = i % 4;
+                        const isLight = (row + col) % 2 === 0;
+                        return (
+                          <div key={i} style={{ width: 28, height: 28, background: isLight ? light : dark }} />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className={styles.info}>
+                    <h3>{c.name}</h3>
+                    <p className={styles.requirement}>Price: {c.price} credits</p>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleBuy(c)}
+                      disabled={purchasing === c.id || (!!session?.user && credits < c.price)}
+                    >
+                      {purchasing === c.id ? 'Buying...' : 'Buy'}
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {chessPieces.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Chess Piece Sets</h2>
+          <div className={styles.grid}>
+            {chessPieces.map(c => {
+              const cv = JSON.parse(c.cssValue) as { set: string };
+              return (
+                <Card key={c.id} className={styles.card}>
+                  <div className={styles.preview}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 44px)', gap: 6 }}>
+                      {(['wK', 'bQ', 'wR', 'bN'] as const).map(p => (
+                        <img
+                          key={p}
+                          src={`/pieces/${cv.set}/${p}.svg`}
+                          width={44}
+                          height={44}
+                          alt={p}
+                          style={{ display: 'block' }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.info}>
+                    <h3>{c.name}</h3>
+                    <p className={styles.requirement}>Price: {c.price} credits</p>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleBuy(c)}
+                      disabled={purchasing === c.id || (!!session?.user && credits < c.price)}
                     >
                       {purchasing === c.id ? 'Buying...' : 'Buy'}
                     </Button>

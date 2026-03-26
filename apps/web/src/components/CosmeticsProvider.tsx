@@ -14,12 +14,15 @@ const CSS_VAR_KEYS = [
   '--winline-color',
   '--winline-width',
   '--winline-filter',
+  '--chess-light',
+  '--chess-dark',
 ];
 
 export default function CosmeticsProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const [symbolX, setSymbolX] = useState('X');
   const [symbolO, setSymbolO] = useState('O');
+  const [chessSet, setChessSet] = useState('cburnett');
 
   useEffect(() => {
     const loadCosmetics = async () => {
@@ -50,6 +53,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
 
         let nextSymbolX = 'X';
         let nextSymbolO = 'O';
+        let nextChessSet = 'cburnett';
 
         for (const c of equipped) {
           try {
@@ -57,6 +61,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
             // Extract non-CSS fields before merging
             if (parsed.symbolX) nextSymbolX = parsed.symbolX;
             if (parsed.symbolO) nextSymbolO = parsed.symbolO;
+            if (parsed.set) nextChessSet = parsed.set;
             // Merge only CSS var keys
             for (const key of CSS_VAR_KEYS) {
               if (parsed[key] !== undefined) overrides[key] = parsed[key];
@@ -76,6 +81,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
 
         setSymbolX(nextSymbolX);
         setSymbolO(nextSymbolO);
+        setChessSet(nextChessSet);
       } catch (e) {
         console.error('Failed to load cosmetics', e);
       }
@@ -89,7 +95,7 @@ export default function CosmeticsProvider({ children }: { children: React.ReactN
   }, [status]);
 
   return (
-    <CosmeticsContext.Provider value={{ symbolX, symbolO }}>
+    <CosmeticsContext.Provider value={{ symbolX, symbolO, chessSet }}>
       {children}
     </CosmeticsContext.Provider>
   );
