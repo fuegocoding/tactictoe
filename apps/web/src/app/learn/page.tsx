@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft, Eye, Box, Layers, Swords, Shuffle, Network } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, BookOpen, ArrowLeft, Eye, Box, Layers, Swords, Shuffle, Network, Shield } from 'lucide-react';
 import styles from './page.module.css';
 
 const LEARN_DATA = [
@@ -167,6 +167,21 @@ const LEARN_DATA = [
       'Moving obstacles is a tactical tool — reshape the battlefield to create or block winning lines!',
       'Win by getting 3-in-a-row in any 3D direction (obstacles do not form winning lines).',
       'Each match has a unique random obstacle layout, making every game different.'
+    ]
+  },
+  {
+    id: 'garrison',
+    label: 'Garrison',
+    Icon: Shield,
+    description: 'A chess-meets-five-in-a-row hybrid. Win by checkmate or getting exactly 5 pieces in a row.',
+    rules: [
+      'Played on a standard 8×8 chess board. Both players start with their King already placed (randomly, never adjacent to each other) and a hand of 6 pieces: 1 Queen, 2 Rooks, 2 Bishops, and 2 Knights.',
+      'On your turn, you must do exactly one of two things: (1) PLACE a piece from your hand onto any empty square, or (2) MOVE a piece already on the board to any square it can legally reach using standard chess movement.',
+      'There are TWO ways to win: achieve CHECKMATE (your opponent\'s King is in check with no legal move to escape), OR form a line of EXACTLY 5 of your own pieces — horizontally, vertically, or diagonally.',
+      'EXACTLY 5 in a row is required — a line of 6 or more does NOT count as a win. Keep this in mind when building threats.',
+      'Chess movement rules apply fully: Queens move any number of squares in any direction, Rooks move in straight lines, Bishops move diagonally, Knights jump in an L-shape and can leap over other pieces. There is no castling, en passant, or pawn promotion.',
+      'Check rules are strictly enforced: if your King is in check, your only legal moves are those that resolve the check (move the King, block the attack, or capture the attacker). You cannot make a move that leaves your own King in check.',
+      'Captures are permanent — pieces removed from the board are gone for good. Use captures to open lines for 5-in-a-row or to dismantle your opponent\'s threats.'
     ]
   },
   {
