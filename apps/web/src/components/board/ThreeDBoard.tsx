@@ -31,13 +31,13 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
     width: CUBE,
     height: CUBE,
     background: isWin && isOccupied
-      ? 'var(--accent)'
+      ? 'var(--win-bg, rgba(34,197,94,0.85))'
       : isWin
-      ? 'var(--accent-subtle, rgba(59,130,246,0.15))'
+      ? 'var(--win-bg-subtle, rgba(34,197,94,0.15))'
       : isOccupied
       ? pieceColor
       : 'var(--cube-face-empty)',
-    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--cube-face-border)',
+    border: isWin ? '2px solid var(--win-border, #22c55e)' : '1px solid var(--cube-face-border)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -46,7 +46,9 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
   };
 
   const faceContent = isOccupied && symbol ? (
-    <PieceSymbol symbol={symbol} color="rgba(255,255,255,0.85)" size={CUBE * 0.6} />
+    <div style={{ color: 'var(--cube-symbol)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <PieceSymbol symbol={symbol} color="currentColor" size={CUBE * 0.6} />
+    </div>
   ) : null;
 
   return (
@@ -130,8 +132,8 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
           width: 2, height: GIZMO_ARM,
           background: '#3b82f6',
           top: 0, left: -1,
-          transform: 'rotateX(-90deg)',
-          transformOrigin: 'center bottom',
+          transform: 'rotateX(90deg)',
+          transformOrigin: 'center top',
         }} />
         <div style={{
           position: 'absolute',
@@ -182,6 +184,8 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
     setIsDragging(false);
   };
 
+  const billboardTransform = `rotateZ(${-rotation.z}deg) rotateX(${-rotation.x}deg)`;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{
@@ -225,9 +229,36 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
               position: 'relative',
             }}
           >
+            {/* Column labels A, B, C — front edge of bottom layer */}
+            {['A', 'B', 'C'].map((label, col) => (
+              <div key={`col-${col}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${(col - 1) * SPACING}px - 50%), calc(${1.6 * SPACING}px - 50%), ${(1 - 2) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
+            {/* Row labels 1, 2, 3 — left edge of top layer */}
+            {['1', '2', '3'].map((label, row) => (
+              <div key={`row-${row}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${-1.6 * SPACING}px - 50%), calc(${(row - 1) * SPACING}px - 50%), ${(1 - 0) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
+            {/* Layer labels L1, L2, L3 — right-back edge */}
+            {['L1', 'L2', 'L3'].map((label, layer) => (
+              <div key={`layer-lbl-${layer}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${1.6 * SPACING}px - 50%), calc(${-1.6 * SPACING}px - 50%), ${(1 - layer) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
             {/* Layer outline frames — one flat border per z-slice */}
             {[0, 1, 2].map(layer => {
-              const z = (layer - 1) * SPACING;
+              const z = (1 - layer) * SPACING;
               const frameSize = 2 * SPACING + CUBE + 8;
               return (
                 <div
@@ -255,7 +286,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
                   const isWin = winCells?.includes(globalIndex) ?? false;
                   const x = (col - 1) * SPACING;
                   const y = (row - 1) * SPACING;
-                  const z = (layer - 1) * SPACING;
+                  const z = (1 - layer) * SPACING;
                   return (
                     <div
                       key={globalIndex}
@@ -336,8 +367,8 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                             fontSize: 'clamp(16px, 4vw, 26px)',
                             fontWeight: 'bold',
                             cursor: disabled || cell !== null ? 'default' : 'pointer',
-                            background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.2))' : 'var(--board-cell-bg)',
-                            border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--board-cell-border)',
+                            background: isWin ? 'var(--win-bg-subtle, rgba(34,197,94,0.15))' : 'var(--board-cell-bg)',
+                            border: isWin ? '2px solid var(--win-border, #22c55e)' : '1px solid var(--board-cell-border)',
                             borderRadius: 'var(--radius-sm)',
                             display: 'flex',
                             alignItems: 'center',
