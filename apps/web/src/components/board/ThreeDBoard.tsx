@@ -22,7 +22,7 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
   const isX = cell === 'X';
   const isO = cell === 'O';
   const isOccupied = isX || isO;
-  const pieceColor = isX ? 'var(--mark-x)' : isO ? 'var(--mark-o)' : undefined;
+  const pieceColor = isOccupied ? (isX ? 'var(--mark-x)' : 'var(--mark-o)') : undefined;
   const symbol = isX ? symbolX : isO ? symbolO : null;
 
   const faceStyle: React.CSSProperties = {
