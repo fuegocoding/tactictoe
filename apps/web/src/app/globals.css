@@ -54,6 +54,10 @@ button { cursor: pointer; border: none; background: none; }
   --cube-face-empty: rgba(255, 255, 255, 0.18);
   --cube-face-border: rgba(0, 0, 0, 0.14);
   --cube-layer-border: rgba(0, 0, 0, 0.10);
+  --cube-symbol: rgba(255, 255, 255, 0.9);
+  --win-bg: rgba(34, 197, 94, 0.85);
+  --win-bg-subtle: rgba(34, 197, 94, 0.15);
+  --win-border: #22c55e;
 
   /* Shadows */
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.05);
@@ -136,6 +140,10 @@ button { cursor: pointer; border: none; background: none; }
   --cube-face-empty: rgba(0, 0, 0, 0.35);
   --cube-face-border: rgba(255, 255, 255, 0.15);
   --cube-layer-border: rgba(255, 255, 255, 0.12);
+  --cube-symbol: rgba(0, 0, 0, 0.8);
+  --win-bg: rgba(34, 197, 94, 0.85);
+  --win-bg-subtle: rgba(34, 197, 94, 0.15);
+  --win-border: #22c55e;
 
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow:        0 2px 8px rgba(0, 0, 0, 0.5);

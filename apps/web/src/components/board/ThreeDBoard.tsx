@@ -31,13 +31,13 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
     width: CUBE,
     height: CUBE,
     background: isWin && isOccupied
-      ? 'var(--accent)'
+      ? 'var(--win-bg, rgba(34,197,94,0.85))'
       : isWin
-      ? 'var(--accent-subtle, rgba(59,130,246,0.15))'
+      ? 'var(--win-bg-subtle, rgba(34,197,94,0.15))'
       : isOccupied
       ? pieceColor
       : 'var(--cube-face-empty)',
-    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--cube-face-border)',
+    border: isWin ? '2px solid var(--win-border, #22c55e)' : '1px solid var(--cube-face-border)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -46,7 +46,9 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
   };
 
   const faceContent = isOccupied && symbol ? (
-    <PieceSymbol symbol={symbol} color="rgba(255,255,255,0.85)" size={CUBE * 0.6} />
+    <div style={{ color: 'var(--cube-symbol)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <PieceSymbol symbol={symbol} color="currentColor" size={CUBE * 0.6} />
+    </div>
   ) : null;
 
   return (
@@ -130,8 +132,8 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
           width: 2, height: GIZMO_ARM,
           background: '#3b82f6',
           top: 0, left: -1,
-          transform: 'rotateX(-90deg)',
-          transformOrigin: 'center bottom',
+          transform: 'rotateX(90deg)',
+          transformOrigin: 'center top',
         }} />
         <div style={{
           position: 'absolute',
@@ -227,7 +229,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
           >
             {/* Layer outline frames — one flat border per z-slice */}
             {[0, 1, 2].map(layer => {
-              const z = (layer - 1) * SPACING;
+              const z = (1 - layer) * SPACING;
               const frameSize = 2 * SPACING + CUBE + 8;
               return (
                 <div
@@ -255,7 +257,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
                   const isWin = winCells?.includes(globalIndex) ?? false;
                   const x = (col - 1) * SPACING;
                   const y = (row - 1) * SPACING;
-                  const z = (layer - 1) * SPACING;
+                  const z = (1 - layer) * SPACING;
                   return (
                     <div
                       key={globalIndex}
@@ -336,8 +338,8 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                             fontSize: 'clamp(16px, 4vw, 26px)',
                             fontWeight: 'bold',
                             cursor: disabled || cell !== null ? 'default' : 'pointer',
-                            background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.2))' : 'var(--board-cell-bg)',
-                            border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--board-cell-border)',
+                            background: isWin ? 'var(--win-bg-subtle, rgba(34,197,94,0.15))' : 'var(--board-cell-bg)',
+                            border: isWin ? '2px solid var(--win-border, #22c55e)' : '1px solid var(--board-cell-border)',
                             borderRadius: 'var(--radius-sm)',
                             display: 'flex',
                             alignItems: 'center',
