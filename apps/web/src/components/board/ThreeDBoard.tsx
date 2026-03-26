@@ -17,6 +17,7 @@ const LAYER_LABELS = ['Layer 1 (Top)', 'Layer 2 (Middle)', 'Layer 3 (Bottom)'];
 const CUBE = 40;
 const SPACING = CUBE + 10;
 const HALF = CUBE / 2;
+const GIZMO_ARM = 28;
 
 function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | null; isWin: boolean; symbolX: string; symbolO: string }) {
   const isX = cell === 'X';
@@ -62,6 +63,82 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
       <div style={{ ...faceStyle, transform: `rotateX(90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Bottom */}
       <div style={{ ...faceStyle, transform: `rotateX(-90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
+    </div>
+  );
+}
+
+function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
+  const billboard = `rotateZ(${-rotation.z}deg) rotateX(${-rotation.x}deg)`;
+
+  return (
+    <div
+      style={{
+        perspective: '300px',
+        width: 64,
+        height: 64,
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: 0,
+          height: 0,
+          transformStyle: 'preserve-3d',
+          transform: `rotateX(${rotation.x}deg) rotateZ(${rotation.z}deg)`,
+        }}
+      >
+        {/* X axis — red, points right (+X) */}
+        <div style={{ position: 'absolute', width: GIZMO_ARM, height: 2, background: '#ef4444', top: -1, left: 0 }} />
+        <div style={{
+          position: 'absolute',
+          left: GIZMO_ARM, top: -4,
+          width: 0, height: 0,
+          borderTop: '5px solid transparent',
+          borderBottom: '5px solid transparent',
+          borderLeft: '7px solid #ef4444',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(${GIZMO_ARM + 10}px, -50%, 0) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#ef4444', whiteSpace: 'nowrap',
+        }}>X</div>
+
+        {/* Y axis — green, points down (+Y in CSS) */}
+        <div style={{ position: 'absolute', width: 2, height: GIZMO_ARM, background: '#22c55e', top: 0, left: -1 }} />
+        <div style={{
+          position: 'absolute',
+          top: GIZMO_ARM, left: -4,
+          width: 0, height: 0,
+          borderLeft: '5px solid transparent',
+          borderRight: '5px solid transparent',
+          borderTop: '7px solid #22c55e',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-50%, ${GIZMO_ARM + 10}px, 0) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#22c55e', whiteSpace: 'nowrap',
+        }}>Y</div>
+
+        {/* Z axis — blue, points toward viewer (+Z in CSS 3D) */}
+        <div style={{
+          position: 'absolute',
+          width: 2, height: GIZMO_ARM,
+          background: '#3b82f6',
+          top: 0, left: -1,
+          transform: 'rotateX(-90deg)',
+          transformOrigin: 'center top',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-50%, 0, ${GIZMO_ARM + 6}px) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#3b82f6', whiteSpace: 'nowrap',
+        }}>Z</div>
+      </div>
     </div>
   );
 }
