@@ -13,44 +13,140 @@ export interface ThreeDBoardProps {
   winCells?: number[];
 }
 
-const LAYER_LABELS = ['Layer 1 (Top)', 'Layer 2 (Middle)', 'Layer 3 (Bottom)'];
+const LAYER_LABELS = ['Top', 'Middle', 'Bottom'];
 const CUBE = 40;
 const SPACING = CUBE + 10;
 const HALF = CUBE / 2;
+const GIZMO_ARM = 28;
 
 function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | null; isWin: boolean; symbolX: string; symbolO: string }) {
   const isX = cell === 'X';
   const isO = cell === 'O';
-  const color = isX ? 'var(--mark-x)' : isO ? 'var(--mark-o)' : 'transparent';
+  const isOccupied = isX || isO;
+  const pieceColor = isOccupied ? (isX ? 'var(--mark-x)' : 'var(--mark-o)') : undefined;
+  const symbol = isX ? symbolX : isO ? symbolO : null;
+
   const faceStyle: React.CSSProperties = {
     position: 'absolute',
     width: CUBE,
     height: CUBE,
-    background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.5))' : 'rgba(20, 20, 20, 0.45)',
-    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid rgba(0, 0, 0, 0.7)',
+    background: isWin && isOccupied
+      ? 'var(--accent)'
+      : isWin
+      ? 'var(--accent-subtle, rgba(59,130,246,0.15))'
+      : isOccupied
+      ? pieceColor
+      : 'var(--cube-face-empty)',
+    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--cube-face-border)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backfaceVisibility: 'visible',
+    boxSizing: 'border-box',
   };
+
+  const faceContent = isOccupied && symbol ? (
+    <PieceSymbol symbol={symbol} color="rgba(255,255,255,0.85)" size={CUBE * 0.6} />
+  ) : null;
 
   return (
     <div style={{ position: 'relative', width: CUBE, height: CUBE, transformStyle: 'preserve-3d' }}>
       {/* Front */}
-      <div style={{ ...faceStyle, transform: `translateZ(${HALF}px)` }}>
-        {isX && <PieceSymbol symbol={symbolX} color={color} size={CUBE * 0.6} />}
-        {isO && <PieceSymbol symbol={symbolO} color={color} size={CUBE * 0.6} />}
-      </div>
+      <div style={{ ...faceStyle, transform: `translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Back */}
-      <div style={{ ...faceStyle, transform: `rotateY(180deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(180deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Right */}
-      <div style={{ ...faceStyle, transform: `rotateY(90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Left */}
-      <div style={{ ...faceStyle, transform: `rotateY(-90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(-90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Top */}
-      <div style={{ ...faceStyle, transform: `rotateX(90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateX(90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Bottom */}
-      <div style={{ ...faceStyle, transform: `rotateX(-90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateX(-90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
+    </div>
+  );
+}
+
+function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
+  const billboard = `rotateZ(${-rotation.z}deg) rotateX(${-rotation.x}deg)`;
+
+  return (
+    <div
+      style={{
+        perspective: '300px',
+        width: 64,
+        height: 64,
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: 0,
+          height: 0,
+          transformStyle: 'preserve-3d',
+          transform: `rotateX(${rotation.x}deg) rotateZ(${rotation.z}deg)`,
+        }}
+      >
+        {/* X axis — red, points right (+X) */}
+        <div style={{ position: 'absolute', width: GIZMO_ARM, height: 2, background: '#ef4444', top: -1, left: 0 }} />
+        <div style={{
+          position: 'absolute',
+          left: GIZMO_ARM, top: -4,
+          width: 0, height: 0,
+          borderTop: '5px solid transparent',
+          borderBottom: '5px solid transparent',
+          borderLeft: '7px solid #ef4444',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(${GIZMO_ARM + 10}px, -6px, 0) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#ef4444', whiteSpace: 'nowrap',
+        }}>X</div>
+
+        {/* Y axis — green, points down (+Y in CSS) */}
+        <div style={{ position: 'absolute', width: 2, height: GIZMO_ARM, background: '#22c55e', top: 0, left: -1 }} />
+        <div style={{
+          position: 'absolute',
+          top: GIZMO_ARM, left: -4,
+          width: 0, height: 0,
+          borderLeft: '5px solid transparent',
+          borderRight: '5px solid transparent',
+          borderTop: '7px solid #22c55e',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-4px, ${GIZMO_ARM + 10}px, 0) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#22c55e', whiteSpace: 'nowrap',
+        }}>Y</div>
+
+        {/* Z axis — blue, points toward viewer (+Z in CSS 3D) */}
+        <div style={{
+          position: 'absolute',
+          width: 2, height: GIZMO_ARM,
+          background: '#3b82f6',
+          top: 0, left: -1,
+          transform: 'rotateX(-90deg)',
+          transformOrigin: 'center bottom',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-50%, -50%, ${GIZMO_ARM + 2}px) ${billboard}`,
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          background: '#3b82f6',
+        }} />
+        <div style={{
+          position: 'absolute',
+          transform: `translate3d(-3px, 0, ${GIZMO_ARM + 6}px) ${billboard}`,
+          fontSize: 9, fontWeight: 700, color: '#3b82f6', whiteSpace: 'nowrap',
+        }}>Z</div>
+      </div>
     </div>
   );
 }
@@ -86,9 +182,6 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
     setIsDragging(false);
   };
 
-  // Billboard transform to make text always face the camera
-  const billboardTransform = `rotateZ(${-rotation.z}deg) rotateX(${-rotation.x}deg)`;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{
@@ -101,133 +194,88 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
         3D View — drag to rotate
       </div>
 
-      <div
-        style={{
-          perspective: '800px',
-          perspectiveOrigin: '50% 50%',
-          width: 280,
-          height: 280,
-          cursor: isDragging ? 'grabbing' : 'grab',
-          userSelect: 'none',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        onMouseDown={e => onDragStart(e.clientX, e.clientY)}
-        onMouseMove={e => onDragMove(e.clientX, e.clientY)}
-        onMouseUp={onDragEnd}
-        onMouseLeave={onDragEnd}
-        onTouchStart={e => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }}
-        onTouchMove={e => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
-        onTouchEnd={onDragEnd}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
         <div
           style={{
-            transformStyle: 'preserve-3d',
-            transform: `rotateX(${rotation.x}deg) rotateZ(${rotation.z}deg)`,
-            width: 0,
-            height: 0,
-            position: 'relative',
+            perspective: '800px',
+            perspectiveOrigin: '50% 50%',
+            width: 280,
+            height: 280,
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
+          onMouseDown={e => onDragStart(e.clientX, e.clientY)}
+          onMouseMove={e => onDragMove(e.clientX, e.clientY)}
+          onMouseUp={onDragEnd}
+          onMouseLeave={onDragEnd}
+          onTouchStart={e => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }}
+          onTouchMove={e => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
+          onTouchEnd={onDragEnd}
         >
-          {/* Axis Labels */}
+          <div
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: `rotateX(${rotation.x}deg) rotateZ(${rotation.z}deg)`,
+              width: 0,
+              height: 0,
+              position: 'relative',
+            }}
+          >
+            {/* Layer outline frames — one flat border per z-slice */}
+            {[0, 1, 2].map(layer => {
+              const z = (layer - 1) * SPACING;
+              const frameSize = 2 * SPACING + CUBE + 8;
+              return (
+                <div
+                  key={`layer-frame-${layer}`}
+                  style={{
+                    position: 'absolute',
+                    width: frameSize,
+                    height: frameSize,
+                    border: '1px solid var(--cube-layer-border)',
+                    background: 'transparent',
+                    transform: `translate3d(${-frameSize / 2}px, ${-frameSize / 2}px, ${z}px)`,
+                    pointerEvents: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              );
+            })}
 
-          {/* X Axis (Columns: A, B, C) - Front edge of the bottom floor (Layer 3) */}
-          {['A', 'B', 'C'].map((label, col) => {
-            const x = (col - 1) * SPACING;
-            const y = 1.6 * SPACING;
-            const z = SPACING; // Layer 3 (Bottom)
-            return (
-              <div
-                key={`x-${col}`}
-                style={{
-                  position: 'absolute',
-                  transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px) ${billboardTransform}`,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'var(--text-muted, rgba(255,255,255,0.7))',
-                  pointerEvents: 'none',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                }}
-              >
-                {label}
-              </div>
-            );
-          })}
-
-          {/* Y Axis (Rows: 1, 2, 3) - Left edge of the top floor (Layer 1) */}
-          {['1', '2', '3'].map((label, row) => {
-            const x = -1.6 * SPACING;
-            const y = (row - 1) * SPACING;
-            const z = -SPACING; // Layer 1 (Top)
-            return (
-              <div
-                key={`y-${row}`}
-                style={{
-                  position: 'absolute',
-                  transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px) ${billboardTransform}`,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'var(--text-muted, rgba(255,255,255,0.7))',
-                  pointerEvents: 'none',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                }}
-              >
-                {label}
-              </div>
-            );
-          })}
-
-          {/* Z Axis (Layers: L1, L2, L3) - Right-back edge of the vertical stack */}
-          {['L1', 'L2', 'L3'].map((label, layer) => {
-            const x = 1.6 * SPACING;  // Right
-            const y = -1.6 * SPACING; // Back
-            const z = (layer - 1) * SPACING;
-            return (
-              <div
-                key={`z-${layer}`}
-                style={{
-                  position: 'absolute',
-                  transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px) ${billboardTransform}`,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'var(--text-muted, rgba(255,255,255,0.7))',
-                  pointerEvents: 'none',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                }}
-              >
-                {label}
-              </div>
-            );
-          })}
-
-          {[0, 1, 2].flatMap(layer =>
-            [0, 1, 2].flatMap(row =>
-              [0, 1, 2].map(col => {
-                const globalIndex = layer * 9 + row * 3 + col;
-                const cell = board[globalIndex] ?? null;
-                const isWin = winCells?.includes(globalIndex) ?? false;
-                const x = (col - 1) * SPACING;
-                const y = (row - 1) * SPACING;
-                const z = (layer - 1) * SPACING;
-                return (
-                  <div
-                    key={globalIndex}
-                    style={{
-                      position: 'absolute',
-                      transformStyle: 'preserve-3d',
-                      transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px)`,
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    <Cubelet cell={cell} isWin={isWin} symbolX={symbolX} symbolO={symbolO} />
-                  </div>
-                );
-              })
-            )
-          )}
+            {/* Cubelets */}
+            {[0, 1, 2].flatMap(layer =>
+              [0, 1, 2].flatMap(row =>
+                [0, 1, 2].map(col => {
+                  const globalIndex = layer * 9 + row * 3 + col;
+                  const cell = board[globalIndex] ?? null;
+                  const isWin = winCells?.includes(globalIndex) ?? false;
+                  const x = (col - 1) * SPACING;
+                  const y = (row - 1) * SPACING;
+                  const z = (layer - 1) * SPACING;
+                  return (
+                    <div
+                      key={globalIndex}
+                      style={{
+                        position: 'absolute',
+                        transformStyle: 'preserve-3d',
+                        transform: `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), ${z}px)`,
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <Cubelet cell={cell} isWin={isWin} symbolX={symbolX} symbolO={symbolO} />
+                    </div>
+                  );
+                })
+              )
+            )}
+          </div>
         </div>
+
+        <AxisGizmo rotation={rotation} />
       </div>
     </div>
   );
