@@ -7,8 +7,9 @@ import {
   VanishingTTT, VANISHING_FADE_AFTER,
   TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison, checkFiveInARow,
   getWinCells, getGomokuWinCells,
+  getWinCells3D, getWinCells4D, getWinCells6x6,
 } from '@tactictoe/game-engine';
-import type { GameState, TerminalResult } from '@tactictoe/game-engine';
+import type { Board, GameState, TerminalResult } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
 import type { UltimateTTTState } from '@tactictoe/game-engine';
@@ -635,8 +636,8 @@ export default function LocalPage() {
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
                   winCells={(() => {
-                    const s = gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = gameState as OrderChaosState;
+                    return s.terminal?.reason === 'win' ? (getWinCells6x6(s.board) ?? []) : [];
                   })()}
                 />
               ) : variant === 'vanishing_ttt' ? (
@@ -657,8 +658,8 @@ export default function LocalPage() {
                   disabled={phase === 'over'}
                   onMove={handleMove}
                   winCells={(() => {
-                    const s = gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = gameState as TTT3DState;
+                    return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
                   })()}
                 />
               ) : variant === 'ttt_4d' ? (
@@ -668,8 +669,8 @@ export default function LocalPage() {
                   disabled={phase === 'over'}
                   onMove={handleMove}
                   winCells={(() => {
-                    const s = gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = gameState as TTT4DState;
+                    return s.terminal?.reason === 'win' ? (getWinCells4D(s.board) ?? []) : [];
                   })()}
                 />
               ) : variant === 'tactic_toe' ? (
@@ -681,8 +682,8 @@ export default function LocalPage() {
                   selectedObstacle={state.tacticSelectedObstacle}
                   onCellClick={handleTacticCell}
                   winCells={(() => {
-                    const s = gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = gameState as TacticToeState;
+                    return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
                   })()}
                 />
               ) : variant === 'ultimate_3d' ? (
@@ -694,8 +695,10 @@ export default function LocalPage() {
                   disabled={phase === 'over'}
                   onMove={handleUltimate3DMove}
                   winCells={(() => {
-                    const s = gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = gameState as Ultimate3DState;
+                    if (s.terminal?.reason !== 'win') return [];
+                    const macroBoard = s.macroResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null) as Board;
+                    return getWinCells3D(macroBoard) ?? [];
                   })()}
                 />
               ) : variant === 'garrison' ? (
