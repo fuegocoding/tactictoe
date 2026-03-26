@@ -14,7 +14,7 @@ import Card from '@/components/ui/Card';
 import RatingBadge from '@/components/RatingBadge';
 import HeroBoard from '@/components/HeroBoard';
 import { GAME_VARIANTS } from '@tactictoe/game-engine';
-import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, Eye, Layers, Box, Shuffle, Swords, Network, HelpCircle } from 'lucide-react';
+import { Grip, Table2, Grid3x3, Target, Ban, Asterisk, Type, Hash, Eye, Layers, Box, Shuffle, Swords, Network, HelpCircle, Shield } from 'lucide-react';
 import styles from './page.module.css';
 
 type TabId = 'quick' | 'private' | 'ranked';
@@ -34,6 +34,7 @@ const VARIANT_ICONS: Record<string, any> = {
   order_chaos:   Shuffle,
   tactic_toe:    Swords,
   ultimate_3d:   Network,
+  garrison:      Shield,
 };
 
 export default function LobbyPage() {
