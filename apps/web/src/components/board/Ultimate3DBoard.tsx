@@ -12,6 +12,7 @@ interface Ultimate3DBoardProps {
   currentPlayer: 'X' | 'O';
   disabled: boolean;
   onMove: (macroCell: number, microCell: number) => void;
+  winCells?: number[];
 }
 
 const LAYER_LABELS = ['Meta-Layer 1', 'Meta-Layer 2', 'Meta-Layer 3'];
@@ -30,6 +31,7 @@ export function Ultimate3DBoard({
   currentPlayer,
   disabled,
   onMove,
+  winCells: _winCells,
 }: Ultimate3DBoardProps) {
   const { symbolX, symbolO } = useCosmetics();
   const [selectedMetaLayer, setSelectedMetaLayer] = React.useState(0);

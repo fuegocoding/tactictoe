@@ -599,6 +599,12 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer}
                   disabled={phase === 'over'}
                   onMove={handleMove}
+                  winCells={(() => {
+                    const s = gameState as UltimateTTTState;
+                    if (s.terminal?.reason !== 'win') return [];
+                    const metaBoard = s.boardResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null);
+                    return getWinCells(metaBoard) ?? [];
+                  })()}
                 />
               ) : variant === 'gomoku' ? (
                 <GridBoard
@@ -628,7 +634,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
-                  winCells={[]}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
                 />
               ) : variant === 'vanishing_ttt' ? (
                 <StandardBoard
@@ -647,6 +656,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={handleMove}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
                 />
               ) : variant === 'ttt_4d' ? (
                 <FourDBoard
@@ -654,6 +667,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={handleMove}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
                 />
               ) : variant === 'tactic_toe' ? (
                 <TacticToeBoard
@@ -663,6 +680,10 @@ export default function LocalPage() {
                   moveMode={state.tacticMoveMode}
                   selectedObstacle={state.tacticSelectedObstacle}
                   onCellClick={handleTacticCell}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
                 />
               ) : variant === 'ultimate_3d' ? (
                 <Ultimate3DBoard
@@ -672,6 +693,10 @@ export default function LocalPage() {
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                   disabled={phase === 'over'}
                   onMove={handleUltimate3DMove}
+                  winCells={(() => {
+                    const s = gameState as any;
+                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                  })()}
                 />
               ) : variant === 'garrison' ? (
                 <GarrisonBoard
