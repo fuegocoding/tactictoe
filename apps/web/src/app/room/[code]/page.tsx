@@ -14,8 +14,8 @@ import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import { GarrisonBoard } from '@/components/board/GarrisonBoard';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
-import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState, TTT3DState, TTT4DState, Ultimate3DState, TacticToeState, OrderChaosState, TacticToeMove, GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
-import { getWinCells, getGomokuWinCells, Garrison } from '@tactictoe/game-engine';
+import type { GameState, UltimateTTTState, StandardTTTState, GomokuState, SOSTTTState, NumericalTTTState, TTT3DState, TTT4DState, Ultimate3DState, TacticToeState, OrderChaosState, TacticToeMove, GarrisonState, GarrisonMove, Board } from '@tactictoe/game-engine';
+import { getWinCells, getGomokuWinCells, Garrison, getWinCells3D, getWinCells4D, getWinCells6x6, checkFiveInARow } from '@tactictoe/game-engine';
 
 const garrisonEngine = new Garrison();
 import { GridBoard } from '@/components/board/GridBoard';
@@ -539,6 +539,12 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={handleMove}
+                  winCells={(() => {
+                    const s = roomState.gameState as UltimateTTTState;
+                    if (s.terminal?.reason !== 'win') return [];
+                    const metaBoard = s.boardResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null);
+                    return getWinCells(metaBoard) ?? [];
+                  })()}
                 />
               ) : roomState.gameState!.variantId === 'ttt_3d' ? (
                 <ThreeDBoard
@@ -547,8 +553,8 @@ export default function RoomPage() {
                   disabled={!isMyTurn}
                   onMove={(boardIndex, cellIndex) => handleMove(0, boardIndex * 9 + cellIndex)}
                   winCells={(() => {
-                    const s = roomState.gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = roomState.gameState as TTT3DState;
+                    return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
                   })()}
                 />
               ) : roomState.gameState!.variantId === 'ttt_4d' ? (
@@ -558,8 +564,8 @@ export default function RoomPage() {
                   disabled={!isMyTurn}
                   onMove={(boardIndex, cellIndex) => handleMove(0, boardIndex * 9 + cellIndex)}
                   winCells={(() => {
-                    const s = roomState.gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = roomState.gameState as TTT4DState;
+                    return s.terminal?.reason === 'win' ? (getWinCells4D(s.board) ?? []) : [];
                   })()}
                 />
               ) : roomState.gameState!.variantId === 'ultimate_3d' ? (
@@ -570,6 +576,12 @@ export default function RoomPage() {
                   currentPlayer={roomState.gameState!.currentPlayer}
                   disabled={!isMyTurn}
                   onMove={handleMove}
+                  winCells={(() => {
+                    const s = roomState.gameState as Ultimate3DState;
+                    if (s.terminal?.reason !== 'win') return [];
+                    const macroBoard = s.macroResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null) as Board;
+                    return getWinCells3D(macroBoard) ?? [];
+                  })()}
                 />
               ) : roomState.gameState!.variantId === 'tactic_toe' ? (
                 <TacticToeBoard
@@ -580,8 +592,8 @@ export default function RoomPage() {
                   selectedObstacle={tacticToeSelectedObstacle}
                   onCellClick={handleTacticToeMove}
                   winCells={(() => {
-                    const s = roomState.gameState as any;
-                    return s.terminal?.reason === 'win' ? (s.terminal.winCells ?? []) : [];
+                    const s = roomState.gameState as TacticToeState;
+                    return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
                   })()}
                 />
               ) : roomState.gameState!.variantId === 'order_chaos' ? (
@@ -594,7 +606,7 @@ export default function RoomPage() {
                   onMove={(_, cellIndex) => handleMove(0, cellIndex)}
                   winCells={(() => {
                     const s = roomState.gameState as OrderChaosState;
-                    return s.terminal?.reason === 'win' && s.terminal.winner === 'X' ? (s as any).terminal.winCells ?? [] : [];
+                    return s.terminal?.reason === 'win' ? (getWinCells6x6(s.board) ?? []) : [];
                   })()}
                 />
               ) : roomState.gameState!.variantId === 'garrison' ? (
@@ -605,6 +617,11 @@ export default function RoomPage() {
                   legalDestinations={isMyTurn ? garrisonLegalDests : []}
                   onHandPieceClick={handleGarrisonHandClick}
                   onBoardSquareClick={handleGarrisonSquareClick}
+                  winSquares={
+                    roomState.gameState!.terminal?.winner
+                      ? (checkFiveInARow(roomState.gameState!.terminal.winner, (roomState.gameState as GarrisonState).pieces) ?? [])
+                      : []
+                  }
                 />
               ) : roomState.gameState!.variantId === 'gomoku' ? (
                 <GridBoard

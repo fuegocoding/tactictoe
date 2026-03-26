@@ -51,13 +51,23 @@ export default function LobbyPage() {
   const [error, setError] = useState<string | null>(null);
   const [myRating, setMyRating] = useState<{ rating: number; rd: number; wins: number; losses: number } | null>(null);
 
+  const handleTabChange = (newTab: TabId) => {
+    setTab(newTab);
+    if (newTab === 'ranked') {
+      const selectedVariant = GAME_VARIANTS.find(v => v.id === variant);
+      if (!selectedVariant?.allowRated) {
+        setVariant('ultimate_ttt');
+      }
+    }
+  };
+
   useEffect(() => {
     if (session?.user?.id) {
-      fetch('/api/ratings/me?variant=ultimate_ttt').then(res => res.json()).then(data => {
-        if (data.rating) setMyRating(data.rating);
+      fetch(`/api/ratings/me?variant=${variant}`).then(res => res.json()).then(data => {
+        setMyRating(data.rating || null);
       });
     }
-  }, [session]);
+  }, [session, variant]);
 
   // When matched, store playerIndex and redirect
   useEffect(() => {
@@ -151,7 +161,7 @@ export default function LobbyPage() {
             </div>
           </div>
           <div className={styles.variantButtons}>
-            {GAME_VARIANTS.map(({ id, name }) => {
+            {GAME_VARIANTS.filter(v => tab !== 'ranked' || v.allowRated).map(({ id, name }) => {
               const Icon = VARIANT_ICONS[id];
               return (
                 <button
@@ -169,13 +179,13 @@ export default function LobbyPage() {
 
         {/* Play mode tabs */}
         <div className={styles.tabs} style={{ marginTop: 'var(--space-5)' }}>
-          <button className={`${styles.tab} ${tab === 'quick' ? styles.activeTab : ''}`} onClick={() => setTab('quick')}>
+          <button className={`${styles.tab} ${tab === 'quick' ? styles.activeTab : ''}`} onClick={() => handleTabChange('quick')}>
             Quick Match
           </button>
-          <button className={`${styles.tab} ${tab === 'ranked' ? styles.activeTab : ''}`} onClick={() => setTab('ranked')}>
+          <button className={`${styles.tab} ${tab === 'ranked' ? styles.activeTab : ''}`} onClick={() => handleTabChange('ranked')}>
             Ranked
           </button>
-          <button className={`${styles.tab} ${tab === 'private' ? styles.activeTab : ''}`} onClick={() => setTab('private')}>
+          <button className={`${styles.tab} ${tab === 'private' ? styles.activeTab : ''}`} onClick={() => handleTabChange('private')}>
             Private Room
           </button>
         </div>

@@ -46,7 +46,7 @@ button { cursor: pointer; border: none; background: none; }
   --board-result-overlay: rgba(248, 247, 244, 0.85);
   --mark-x:        #1a1a1a;
   --mark-o:        #d97706;
-  --winline-color:  #3b82f6;
+  --winline-color:  #22c55e;
   --winline-width:  0.12;
   --winline-filter: none;
 
@@ -132,7 +132,7 @@ button { cursor: pointer; border: none; background: none; }
   --board-result-overlay: rgba(15, 15, 15, 0.85);
   --mark-x:        #f3f4f6;
   --mark-o:        #f59e0b;
-  --winline-color:  #60a5fa;
+  --winline-color:  #22c55e;
   --winline-width:  0.12;
   --winline-filter: none;
 
