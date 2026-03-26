@@ -14,6 +14,9 @@ const CSS_VAR_KEYS = [
   '--winline-color',
   '--winline-width',
   '--winline-filter',
+  '--win-bg',
+  '--win-bg-subtle',
+  '--win-border',
 ];
 
 export default function CosmeticsProvider({ children }: { children: React.ReactNode }) {

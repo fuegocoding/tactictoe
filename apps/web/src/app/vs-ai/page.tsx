@@ -7,9 +7,9 @@ import {
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
   TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison,
-  getWinCells, getGomokuWinCells,
+  getWinCells, getGomokuWinCells, getWinCells3D, getWinCells4D, getWinCells6x6, checkFiveInARow
 } from '@tactictoe/game-engine';
-import type { GameState, AIDifficulty, Player } from '@tactictoe/game-engine';
+import type { GameState, AIDifficulty, Player, Board } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
 import type { UltimateTTTState } from '@tactictoe/game-engine';
@@ -666,6 +666,12 @@ export default function VsAIPage() {
                 currentPlayer={gameState.currentPlayer}
                 disabled={!isMyTurn}
                 onMove={handleMove}
+                winCells={(() => {
+                  const s = gameState as UltimateTTTState;
+                  if (s.terminal?.reason !== 'win') return [];
+                  const metaBoard = s.boardResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null);
+                  return getWinCells(metaBoard) ?? [];
+                })()}
               />
             ) : variant === 'gomoku' ? (
               <GridBoard board={(gameState as GomokuState).board} cols={15} rows={15}
@@ -684,7 +690,10 @@ export default function VsAIPage() {
               <GridBoard board={(gameState as OrderChaosState).board} cols={6} rows={6}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
                 onMove={(_, ci) => handleMove(0, ci)}
-                winCells={[]} />
+                winCells={(() => {
+                  const s = gameState as OrderChaosState;
+                  return s.terminal?.reason === 'win' ? (getWinCells6x6(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'vanishing_ttt' ? (
               <StandardBoard
                 board={getVanishingVisible(gameState as VanishingTTTState) as any}
@@ -697,18 +706,30 @@ export default function VsAIPage() {
             ) : variant === 'ttt_3d' ? (
               <ThreeDBoard board={(gameState as TTT3DState).board}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
-                onMove={handleMove} />
+                onMove={handleMove}
+                winCells={(() => {
+                  const s = gameState as TTT3DState;
+                  return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'ttt_4d' ? (
               <FourDBoard board={(gameState as TTT4DState).board}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
-                onMove={handleMove} />
+                onMove={handleMove}
+                winCells={(() => {
+                  const s = gameState as TTT4DState;
+                  return s.terminal?.reason === 'win' ? (getWinCells4D(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'tactic_toe' ? (
               <TacticToeBoard board={(gameState as TacticToeState).board}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                 disabled={!isMyTurn}
                 moveMode={isMyTurn ? tacticMoveMode : 'place'}
                 selectedObstacle={isMyTurn ? tacticSelectedObstacle : null}
-                onCellClick={handleTacticCell} />
+                onCellClick={handleTacticCell}
+                winCells={(() => {
+                  const s = gameState as TacticToeState;
+                  return s.terminal?.reason === 'win' ? (getWinCells3D(s.board) ?? []) : [];
+                })()} />
             ) : variant === 'ultimate_3d' ? (
               <Ultimate3DBoard
                 microBoards={(gameState as Ultimate3DState).microBoards}
@@ -717,6 +738,12 @@ export default function VsAIPage() {
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'}
                 disabled={!isMyTurn}
                 onMove={handleUltimate3DMove}
+                winCells={(() => {
+                  const s = gameState as Ultimate3DState;
+                  if (s.terminal?.reason !== 'win') return [];
+                  const macroBoard = s.macroResults.map(r => r === 'X' ? 'X' : r === 'O' ? 'O' : null) as Board;
+                  return getWinCells3D(macroBoard) ?? [];
+                })()}
               />
             ) : variant === 'garrison' ? (
               <GarrisonBoard
@@ -726,6 +753,11 @@ export default function VsAIPage() {
                 legalDestinations={isMyTurn ? garrisonLegalDests : []}
                 onHandPieceClick={handleGarrisonHandClick}
                 onBoardSquareClick={handleGarrisonSquareClick}
+                winSquares={
+                  gameState.terminal?.winner
+                    ? (checkFiveInARow(gameState.terminal.winner, (gameState as GarrisonState).pieces) ?? [])
+                    : []
+                }
               />
             ) : (
               <StandardBoard
