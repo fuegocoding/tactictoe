@@ -143,7 +143,7 @@ function AxisGizmo({ rotation }: { rotation: { x: number; z: number } }) {
         }} />
         <div style={{
           position: 'absolute',
-          transform: `translate3d(-50%, 0, ${GIZMO_ARM + 6}px) ${billboard}`,
+          transform: `translate3d(-3px, 0, ${GIZMO_ARM + 6}px) ${billboard}`,
           fontSize: 9, fontWeight: 700, color: '#3b82f6', whiteSpace: 'nowrap',
         }}>Z</div>
       </div>
