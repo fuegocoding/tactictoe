@@ -2,9 +2,7 @@
 
 import React from 'react';
 import type { GarrisonState, GarrisonPiece } from '@tactictoe/game-engine';
-
-const LIGHT_SQ = '#f0d9b5';
-const DARK_SQ  = '#b58863';
+import { useCosmetics } from '../CosmeticsContext';
 
 interface GarrisonBoardProps {
   state: GarrisonState;
@@ -28,6 +26,9 @@ export function GarrisonBoard({
   winSquares = [],
 }: GarrisonBoardProps) {
   const { pieces, currentPlayer } = state;
+  const { chessSet } = useCosmetics();
+  const LIGHT_SQ = 'var(--chess-light, #f0d9b5)';
+  const DARK_SQ  = 'var(--chess-dark, #b58863)';
 
   const squarePiece = new Map<number, GarrisonPiece>();
   for (const p of pieces) {
@@ -59,7 +60,7 @@ export function GarrisonBoard({
         }}
       >
         <img
-          src={`/pieces/cburnett/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
+          src={`/pieces/${chessSet}/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
           width={30}
           height={30}
           alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
@@ -153,7 +154,7 @@ export function GarrisonBoard({
                   )}
                   {p && (
                     <img
-                      src={`/pieces/cburnett/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
+                      src={`/pieces/${chessSet}/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
                       width={38}
                       height={38}
                       alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
