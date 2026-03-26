@@ -36,7 +36,7 @@ export async function registerUser(input: RegisterInput): Promise<RegisterResult
 
   const passwordHash = await hashPassword(input.password);
 
-  const user = await prisma.$transaction(async (tx) => {
+  const user = await prisma.$transaction(async (tx: any) => {
     const newUser = await tx.user.create({
       data: { email, passwordHash },
     });

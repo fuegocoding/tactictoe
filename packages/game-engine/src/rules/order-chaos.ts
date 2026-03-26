@@ -70,7 +70,7 @@ export const WIN_LINES_6X6 = buildWinLines6x6();
 
 export function getWinCells6x6(board: Board): number[] | null {
   for (const line of WIN_LINES_6X6) {
-    const cell = board[line[0]];
+    const cell = board[line[0] as number];
     if (cell !== null && line.every(i => board[i] === cell)) return [...line];
   }
   return null;

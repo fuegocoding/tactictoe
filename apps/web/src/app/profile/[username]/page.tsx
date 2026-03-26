@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: Props) {
     },
   });
 
-  const matches: MatchCardData[] = rawMatches.map(m => ({
+  const matches: MatchCardData[] = rawMatches.map((m: any) => ({
     id: m.id,
     variantId: m.variantId,
     createdAt: m.createdAt,
@@ -66,7 +66,7 @@ export default async function ProfilePage({ params }: Props) {
         <p className={styles.empty}>No rated games yet.</p>
       ) : (
         <div className={styles.ratings}>
-          {profile.user.ratings.map(r => (
+          {profile.user.ratings.map((r: any) => (
             <div key={r.id} className={styles.ratingCard}>
                <p className={styles.ratingVariant}>{VARIANT_LABELS[r.variantId] ?? r.variantId}</p>
                <p className={styles.ratingValue}>{r.rd > 100 ? '~' : ''}{Math.round(r.rating)}</p>
