@@ -58,7 +58,7 @@ export type { TTT3DState } from './rules/ttt-3d.js';
 export { TTT4D, WIN_LINES_4D, getWinCells4D } from './rules/ttt-4d.js';
 export type { TTT4DState } from './rules/ttt-4d.js';
 
-export { OrderChaos, getWinCells6x6 } from './rules/order-chaos.js';
+export { OrderChaos, WIN_LINES_6X6, getWinCells6x6 } from './rules/order-chaos.js';
 export type { OrderChaosState, OrderChaosMove } from './rules/order-chaos.js';
 
 export { TacticToe } from './rules/tactic-toe.js';
