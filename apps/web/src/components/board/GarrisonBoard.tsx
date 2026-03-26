@@ -142,12 +142,21 @@ export function GarrisonBoard({
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: clickable ? 'pointer' : 'default',
                     boxSizing: 'border-box',
+                    position: 'relative',
                   }}
                 >
                   {isLegal && !p && (
                     <div style={{
                       width: 14, height: 14, borderRadius: '50%',
                       background: 'rgba(59,130,246,0.5)',
+                    }} />
+                  )}
+                  {isLegal && p && p.player !== currentPlayer && (
+                    <div style={{
+                      position: 'absolute',
+                      width: 42, height: 42, borderRadius: '50%',
+                      border: '3px solid rgba(220,38,38,0.85)',
+                      pointerEvents: 'none',
                     }} />
                   )}
                   {p && (
