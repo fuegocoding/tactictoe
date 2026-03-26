@@ -2,15 +2,7 @@
 
 import React from 'react';
 import type { GarrisonState } from '@tactictoe/game-engine';
-import type { GarrisonPiece, PieceType } from '@tactictoe/game-engine';
-
-const PIECE_SYMBOL: Record<PieceType, { X: string; O: string }> = {
-  K: { X: '♚', O: '♔' },
-  Q: { X: '♛', O: '♕' },
-  R: { X: '♜', O: '♖' },
-  B: { X: '♝', O: '♗' },
-  N: { X: '♞', O: '♘' },
-};
+import type { GarrisonPiece } from '@tactictoe/game-engine';
 
 const LIGHT_SQ = '#f0d9b5';
 const DARK_SQ  = '#b58863';
@@ -50,7 +42,6 @@ export function GarrisonBoard({
   const oHand = pieces.filter(p => p.player === 'O' && p.square === -1 && !p.captured);
 
   function renderHandPiece(p: GarrisonPiece) {
-    const sym = PIECE_SYMBOL[p.type][p.player];
     const isSelected = selectedPieceId === p.id;
     const isOwn = p.player === currentPlayer;
     return (
@@ -60,20 +51,22 @@ export function GarrisonBoard({
         onClick={() => !disabled && isOwn && onHandPieceClick(p.id)}
         title={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
         style={{
-          fontSize: 24,
-          lineHeight: 1,
           background: isSelected ? 'rgba(59,130,246,0.3)' : 'transparent',
           border: isSelected ? '2px solid #3b82f6' : '2px solid transparent',
           borderRadius: 4,
           cursor: isOwn && !disabled ? 'pointer' : 'default',
           padding: 2,
-          color: p.player === 'X' ? '#111' : '#eee',
-          textShadow: p.player === 'X'
-            ? '0 0 1px #fff, 0 0 1px #fff'
-            : '0 0 1px #000, 0 0 1px #000',
+          lineHeight: 0,
         }}
       >
-        {sym}
+        <img
+          src={`/pieces/cburnett/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
+          width={30}
+          height={30}
+          alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
+          draggable={false}
+          style={{ display: 'block', userSelect: 'none' }}
+        />
       </button>
     );
   }
@@ -160,15 +153,14 @@ export function GarrisonBoard({
                     }} />
                   )}
                   {p && (
-                    <span style={{
-                      fontSize: 30, lineHeight: 1,
-                      color: p.player === 'X' ? '#111' : '#fff',
-                      textShadow: p.player === 'X'
-                        ? '0 0 2px #fff, 0 0 2px #fff'
-                        : '0 0 2px #000, 0 0 2px #000, 0 0 2px #000',
-                    }}>
-                      {PIECE_SYMBOL[p.type][p.player]}
-                    </span>
+                    <img
+                      src={`/pieces/cburnett/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
+                      width={38}
+                      height={38}
+                      alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
+                      draggable={false}
+                      style={{ display: 'block', userSelect: 'none' }}
+                    />
                   )}
                 </div>
               );
