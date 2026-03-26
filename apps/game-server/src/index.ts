@@ -1,11 +1,10 @@
-import { randomInt } from 'crypto';
 import { createServer } from 'http';
 import { randomInt } from 'node:crypto';
 import { Server } from 'socket.io';
 import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import { roomManager } from './room-manager.js';
 import { QueueManager } from './queue-manager.js';
-import { startGame, handleMove, handleDisconnect, handleReconnect } from './game-session.js';
+import { startGame, handleMove, handleDisconnect, handleReconnect, handleChatMessage, handleDrawOffer, handleDrawResponse, handleForfeit } from './game-session.js';
 import type {
   CreateRoomPayload,
   JoinRoomPayload,
@@ -15,6 +14,10 @@ import type {
   JoinRatedQueuePayload,
   QueueMatchedPayload,
   QueueStatusPayload,
+  ChatMessagePayload,
+  DrawOfferPayload,
+  DrawResponsePayload,
+  ForfeitPayload,
 } from './types.js';
 
 const CASUAL_VARIANTS = new Set(GAME_VARIANTS.filter(v => v.allowCasual).map(v => v.id));
@@ -168,6 +171,53 @@ io.on('connection', (socket) => {
   // ── Make move ────────────────────────────────────────────────────────────────
   socket.on('game:move', (payload: MakeMovePayload) => {
     handleMove(io, socket, payload);
+  });
+
+  // ── Chat ─────────────────────────────────────────────────────────────────────
+  socket.on('chat:send', (payload: ChatMessagePayload) => {
+    const { roomCode, message } = payload;
+    const player = roomManager.getPlayerBySocket(socket.id);
+    const room = roomManager.getRoom(roomCode);
+    if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
+      handleChatMessage(io, socket, player.guestId, player.displayName, roomCode, message);
+    } else {
+      socket.emit('error', { message: 'You are not in this room' });
+    }
+  });
+
+  // ── Draw offer ───────────────────────────────────────────────────────────────
+  socket.on('draw:offer', (payload: DrawOfferPayload) => {
+    const { roomCode } = payload;
+    const player = roomManager.getPlayerBySocket(socket.id);
+    const room = roomManager.getRoom(roomCode);
+    if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
+      handleDrawOffer(io, socket, player.guestId, player.displayName, roomCode);
+    } else {
+      socket.emit('error', { message: 'You are not in this room' });
+    }
+  });
+
+  socket.on('draw:respond', (payload: DrawResponsePayload) => {
+    const { roomCode, accepted } = payload;
+    const player = roomManager.getPlayerBySocket(socket.id);
+    const room = roomManager.getRoom(roomCode);
+    if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
+      handleDrawResponse(io, socket, player.guestId, roomCode, accepted);
+    } else {
+      socket.emit('error', { message: 'You are not in this room' });
+    }
+  });
+
+  // ── Forfeit ──────────────────────────────────────────────────────────────────
+  socket.on('game:forfeit', (payload: ForfeitPayload) => {
+    const { roomCode } = payload;
+    const player = roomManager.getPlayerBySocket(socket.id);
+    const room = roomManager.getRoom(roomCode);
+    if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
+      handleForfeit(io, socket, player.guestId, roomCode);
+    } else {
+      socket.emit('error', { message: 'You are not in this room' });
+    }
   });
 
   // ── Queue ────────────────────────────────────────────────────────────────────

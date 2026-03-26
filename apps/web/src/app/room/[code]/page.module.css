@@ -154,6 +154,111 @@
   font-style: italic;
 }
 
+/* Chat Panel */
+.chatMessages {
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: var(--text-sm);
+  padding: var(--space-2);
+}
+
+.chatMessage {
+  padding: var(--space-2);
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius);
+  background: var(--bg-hover);
+}
+
+.chatMessage.chatMe {
+  background: var(--accent-subtle);
+  margin-left: var(--space-4);
+}
+
+.chatSender {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-right: var(--space-1);
+}
+
+.chatText {
+  color: var(--text);
+  word-break: break-word;
+}
+
+.chatForm {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.chatInput {
+  flex: 1;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+
+.chatInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.chatInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chatSend {
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chatSend:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.chatSend:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Game Actions */
+.gameActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.drawOfferBox {
+  text-align: center;
+}
+
+.drawOfferBox p {
+  margin-bottom: var(--space-3);
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+
+.drawOfferButtons {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
 /* Participants */
 .playersList {
   display: flex;

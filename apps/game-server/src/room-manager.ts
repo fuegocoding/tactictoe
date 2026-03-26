@@ -82,6 +82,15 @@ class RoomManager {
     return player;
   }
 
+  /** Find a player by their socket ID across all rooms */
+  getPlayerBySocket(socketId: string): ConnectedPlayer | null {
+    for (const room of this.rooms.values()) {
+      const player = room.players.find((p) => p.socketId === socketId);
+      if (player) return player;
+    }
+    return null;
+  }
+
   deleteRoom(code: string): void {
     const room = this.rooms.get(code);
     if (room?.disconnectTimer) clearTimeout(room.disconnectTimer);

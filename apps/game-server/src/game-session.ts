@@ -18,6 +18,21 @@ const DISCONNECT_GRACE_MS = 60_000; // 60 seconds
 const WEB_SERVER_URL = process.env['WEB_SERVER_URL'];
 const GAME_SERVER_SECRET = process.env['GAME_SERVER_SECRET'];
 
+// ─── Rate limiting for chat ────────────────────────────────────────────────────
+const messageCooldowns = new Map<string, number>();
+const RATE_LIMIT_MS = 1000; // 1 message per second
+
+// ─── XSS sanitization for chat ─────────────────────────────────────────────────
+/** Encode HTML special characters to prevent XSS attacks */
+function sanitizeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&')
+    .replace(/</g, '<')
+    .replace(/>/g, '>')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function reportResult(io: Server, room: RoomState, winner: 'X' | 'O' | null, reason: string) {
   if (!WEB_SERVER_URL) return;
   const [p1, p2] = room.players;
@@ -79,6 +94,7 @@ export function startGame(io: Server, room: RoomState): void {
   const engine = getEngine(room.variantId);
   room.gameState = engine.initialize({ variantId: room.variantId });
   room.status = 'active';
+  room.drawOfferPending = null; // Initialize draw offer state
 
   const payload: GameStartedPayload = {
     gameState: room.gameState,
@@ -156,6 +172,7 @@ export function handleMove(
 
   if (terminal !== null) {
     room.status = 'finished';
+    room.drawOfferPending = null; // Clear any pending draw offer
     const winnerPlayer =
       terminal.winner !== null
         ? room.players.find((p) => (p.playerIndex === 0 ? 'X' : 'O') === terminal.winner)
@@ -205,6 +222,7 @@ export function handleDisconnect(
     if (stillDisconnected) {
       // Forfeit: the other player wins
       current.status = 'finished';
+      current.drawOfferPending = null; // Clear any pending draw offer
       const winner = current.players.find((p) => p.guestId !== disconnectedGuestId);
       const winnerSymbol: 'X' | 'O' | null = winner
         ? winner.playerIndex === 0
@@ -247,4 +265,191 @@ export function handleReconnect(io: Server, room: RoomState, newSocketId: string
   });
 
   io.to(room.roomCode).emit('player:reconnected', { socketId: newSocketId });
+}
+
+/** Called when a player sends a chat message. Broadcasts to the room. */
+export function handleChatMessage(
+  io: Server,
+  socket: Socket,
+  guestId: string,
+  displayName: string,
+  roomCode: string,
+  message: string,
+  rm: RoomManagerInstance = defaultRoomManager
+): void {
+  const room = rm.getRoom(roomCode);
+  if (!room) {
+    socket.emit('error', { message: 'Room not found' });
+    return;
+  }
+
+  // Validate that the sender is a player in the room (not a spectator)
+  const player = room.players.find((p) => p.guestId === guestId);
+  if (!player) {
+    socket.emit('error', { message: 'Only players can send chat messages' });
+    return;
+  }
+
+  // Rate limiting check
+  const lastMessage = messageCooldowns.get(guestId);
+  if (lastMessage && Date.now() - lastMessage < RATE_LIMIT_MS) {
+    socket.emit('error', { message: 'Please wait before sending another message' });
+    return;
+  }
+  messageCooldowns.set(guestId, Date.now());
+
+  // Validate message
+  const trimmedMessage = message.trim();
+  if (!trimmedMessage) return;
+  if (trimmedMessage.length > 500) {
+    socket.emit('error', { message: 'Message too long (max 500 characters)' });
+    return;
+  }
+
+  // Broadcast the message to everyone in the room (sanitized for XSS)
+  io.to(roomCode).emit('chat:message', {
+    guestId,
+    displayName,
+    message: sanitizeHtml(trimmedMessage),
+    timestamp: Date.now(),
+  });
+}
+
+/** Called when a player offers a draw. Notifies the opponent. */
+export function handleDrawOffer(
+  io: Server,
+  socket: Socket,
+  guestId: string,
+  displayName: string,
+  roomCode: string,
+  rm: RoomManagerInstance = defaultRoomManager
+): void {
+  const room = rm.getRoom(roomCode);
+  if (!room || room.status !== 'active') {
+    socket.emit('error', { message: 'No active game in this room' });
+    return;
+  }
+
+  const player = room.players.find((p) => p.guestId === guestId);
+  if (!player) {
+    socket.emit('error', { message: 'You are not a player in this room' });
+    return;
+  }
+
+  // Check if there's already a pending draw offer
+  if (room.drawOfferPending) {
+    socket.emit('error', { message: 'A draw offer is already pending' });
+    return;
+  }
+
+  // Set the pending draw offer state
+  room.drawOfferPending = { fromGuestId: guestId };
+
+  // Notify the opponent about the draw offer
+  const opponent = room.players.find((p) => p.guestId !== guestId);
+  if (opponent) {
+    io.to(opponent.socketId).emit('draw:offered', {
+      fromGuestId: guestId,
+      fromDisplayName: displayName,
+    });
+  }
+
+  // Confirm to the sender
+  socket.emit('draw:offer_sent', {});
+}
+
+/** Called when a player responds to a draw offer. */
+export function handleDrawResponse(
+  io: Server,
+  socket: Socket,
+  guestId: string,
+  roomCode: string,
+  accepted: boolean,
+  rm: RoomManagerInstance = defaultRoomManager
+): void {
+  const room = rm.getRoom(roomCode);
+  if (!room || room.status !== 'active') {
+    socket.emit('error', { message: 'No active game in this room' });
+    return;
+  }
+
+  const player = room.players.find((p) => p.guestId === guestId);
+  if (!player) {
+    socket.emit('error', { message: 'You are not a player in this room' });
+    return;
+  }
+
+  // Validate there's a pending draw offer
+  if (!room.drawOfferPending) {
+    socket.emit('error', { message: 'No draw offer to respond to' });
+    return;
+  }
+
+  // Validate the responder is the opponent (not the offerer)
+  if (room.drawOfferPending.fromGuestId === guestId) {
+    socket.emit('error', { message: 'Cannot respond to your own draw offer' });
+    return;
+  }
+
+  if (accepted) {
+    // End the game as a draw
+    room.status = 'finished';
+    room.drawOfferPending = null;
+    
+    const gameOverPayload: GameOverPayload = {
+      gameState: room.gameState!,
+      winner: null,
+      reason: 'draw',
+      winnerDisplayName: null,
+    };
+    
+    reportResult(io, room, null, 'draw');
+    io.to(roomCode).emit('game:over', gameOverPayload);
+  } else {
+    // Notify the opponent that the draw was declined
+    const opponent = room.players.find((p) => p.guestId !== guestId);
+    if (opponent) {
+      io.to(opponent.socketId).emit('draw:declined', {});
+    }
+    // Clear the pending draw offer
+    room.drawOfferPending = null;
+  }
+}
+
+/** Called when a player forfeits the game. */
+export function handleForfeit(
+  io: Server,
+  socket: Socket,
+  guestId: string,
+  roomCode: string,
+  rm: RoomManagerInstance = defaultRoomManager
+): void {
+  const room = rm.getRoom(roomCode);
+  if (!room || room.status !== 'active') {
+    socket.emit('error', { message: 'No active game in this room' });
+    return;
+  }
+
+  const player = room.players.find((p) => p.guestId === guestId);
+  if (!player) {
+    socket.emit('error', { message: 'You are not a player in this room' });
+    return;
+  }
+
+  // The forfeiting player loses
+  room.status = 'finished';
+  room.drawOfferPending = null; // Clear any pending draw offer
+  const winnerSymbol: 'X' | 'O' = player.playerIndex === 0 ? 'O' : 'X';
+  
+  const winnerPlayer = room.players.find((p) => (p.playerIndex === 0 ? 'X' : 'O') === winnerSymbol);
+  
+  const gameOverPayload: GameOverPayload = {
+    gameState: room.gameState!,
+    winner: winnerSymbol,
+    reason: 'forfeit',
+    winnerDisplayName: winnerPlayer?.displayName ?? null,
+  };
+  
+  reportResult(io, room, winnerSymbol, 'forfeit');
+  io.to(roomCode).emit('game:over', gameOverPayload);
 }

@@ -27,6 +27,7 @@ export interface RoomState {
   disconnectTimer: ReturnType<typeof setTimeout> | null;
   createdAt: number;                 // Date.now()
   moveHistory: MoveRecord[];         // accumulates during the game
+  drawOfferPending: { fromGuestId: string } | null;  // tracks pending draw offers
 }
 
 // ─── Socket.io event payloads (client → server) ───────────────────────────────
@@ -113,4 +114,40 @@ export interface JoinRatedQueuePayload {
   guestId: string;
   userId: string;
   displayName: string;
+}
+
+// ─── Chat types ────────────────────────────────────────────────────────────────
+
+export interface ChatMessagePayload {
+  roomCode: string;
+  message: string;
+}
+
+export interface ChatMessageBroadcast {
+  guestId: string;
+  displayName: string;
+  message: string;
+  timestamp: number;
+}
+
+// ─── Draw offer types ──────────────────────────────────────────────────────────
+
+export interface DrawOfferPayload {
+  roomCode: string;
+}
+
+export interface DrawOfferBroadcast {
+  fromGuestId: string;
+  fromDisplayName: string;
+}
+
+export interface DrawResponsePayload {
+  roomCode: string;
+  accepted: boolean;
+}
+
+// ─── Forfeit types ─────────────────────────────────────────────────────────────
+
+export interface ForfeitPayload {
+  roomCode: string;
 }

@@ -27,6 +27,14 @@ interface PlayerInfo {
   playerIndex: 0 | 1;
 }
 
+interface ChatMessage {
+  guestId: string;
+  displayName: string;
+  message: string;
+  timestamp: number;
+  isMe: boolean;
+}
+
 interface RoomState {
   phase: 'waiting' | 'playing' | 'over';
   myPlayerIndex: 0 | 1 | null;
@@ -114,6 +122,16 @@ export default function RoomPage() {
   const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
 
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Draw offer state
+  const [drawOfferPending, setDrawOfferPending] = useState(false);
+  const [drawOfferReceived, setDrawOfferReceived] = useState(false);
+  const [drawOfferFrom, setDrawOfferFrom] = useState<string>('');
+
   const mySymbol: 'X' | 'O' | null =
     roomState.myPlayerIndex !== null
       ? roomState.myPlayerIndex === 0 ? 'X' : 'O'
@@ -131,6 +149,22 @@ export default function RoomPage() {
       movesRef.current.scrollTop = movesRef.current.scrollHeight;
     }
   }, [moveHistory]);
+
+  // Auto-scroll chat messages
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
+
+  // Reset draw offer state when game ends
+  useEffect(() => {
+    if (roomState.phase === 'over') {
+      setDrawOfferPending(false);
+      setDrawOfferReceived(false);
+      setDrawOfferFrom('');
+    }
+  }, [roomState.phase]);
 
   useEffect(() => {
     if (roomState.gameState?.variantId === 'numerical_ttt') {
@@ -264,6 +298,26 @@ export default function RoomPage() {
     function onMatchSaved(data: { matchId: string }) {
       dispatch({ type: 'MATCH_SAVED', matchId: data.matchId });
     }
+    function onChatMessage(data: { guestId: string; displayName: string; message: string; timestamp: number }) {
+      setChatMessages(prev => [...prev, {
+        ...data,
+        isMe: data.guestId === guest?.guestId
+      }]);
+    }
+    function onDrawOffered(data: { fromGuestId: string; fromDisplayName: string }) {
+      if (data.fromGuestId !== guest?.guestId) {
+        setDrawOfferReceived(true);
+        setDrawOfferFrom(data.fromDisplayName);
+      }
+    }
+    function onDrawOfferSent() {
+      setDrawOfferPending(true);
+    }
+    function onDrawDeclined() {
+      setDrawOfferPending(false);
+      setDrawOfferReceived(false);
+      setDrawOfferFrom('');
+    }
 
     socket.on('room:joined', onRoomJoined);
     socket.on('game:started', onGameStarted);
@@ -274,6 +328,10 @@ export default function RoomPage() {
     socket.on('room:spectating', onSpectating);
     socket.on('game:spectator_sync', onSpectatorSync);
     socket.on('game:match_saved', onMatchSaved);
+    socket.on('chat:message', onChatMessage);
+    socket.on('draw:offered', onDrawOffered);
+    socket.on('draw:offer_sent', onDrawOfferSent);
+    socket.on('draw:declined', onDrawDeclined);
 
     return () => {
       socket.off('room:joined', onRoomJoined);
@@ -285,8 +343,12 @@ export default function RoomPage() {
       socket.off('room:spectating', onSpectating);
       socket.off('game:spectator_sync', onSpectatorSync);
       socket.off('game:match_saved', onMatchSaved);
+      socket.off('chat:message', onChatMessage);
+      socket.off('draw:offered', onDrawOffered);
+      socket.off('draw:offer_sent', onDrawOfferSent);
+      socket.off('draw:declined', onDrawDeclined);
     };
-  }, [socket]);
+  }, [socket, guest]);
 
   const handleMove = useCallback(
     (boardIndex: number, cellIndex: number) => {
@@ -380,6 +442,31 @@ export default function RoomPage() {
     setGarrisonLegalDests([]);
   }, [roomState.gameState, isMyTurn, garrisonSelectedPiece, garrisonLegalDests, mySymbol, socket, code]);
 
+  const handleSendChat = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || roomState.phase !== 'playing') return;
+    socket.emit('chat:send', { roomCode: code, message: chatInput.trim() });
+    setChatInput('');
+  }, [socket, code, chatInput, roomState.phase]);
+
+  const handleDrawOffer = useCallback(() => {
+    if (roomState.phase !== 'playing') return;
+    socket.emit('draw:offer', { roomCode: code });
+  }, [socket, code, roomState.phase]);
+
+  const handleDrawResponse = useCallback((accepted: boolean) => {
+    socket.emit('draw:respond', { roomCode: code, accepted });
+    setDrawOfferReceived(false);
+    setDrawOfferFrom('');
+  }, [socket, code]);
+
+  const handleForfeit = useCallback(() => {
+    if (roomState.phase !== 'playing') return;
+    if (confirm('Are you sure you want to forfeit? You will lose the game.')) {
+      socket.emit('game:forfeit', { roomCode: code });
+    }
+  }, [socket, code, roomState.phase]);
+
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   const gameOverClass = roomState.winner === mySymbol
@@ -442,6 +529,38 @@ export default function RoomPage() {
                   ))
                 )}
               </div>
+            </div>
+
+            {/* Chat Panel */}
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>Chat</div>
+              <div className={styles.chatMessages}>
+                {chatMessages.length === 0 ? (
+                  <div className={styles.emptyMoves}>No messages yet</div>
+                ) : (
+                  chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`${styles.chatMessage} ${msg.isMe ? styles.chatMe : ''}`}>
+                      <span className={styles.chatSender}>{msg.isMe ? 'You' : msg.displayName}:</span>
+                      <span className={styles.chatText}>{msg.message}</span>
+                    </div>
+                  ))
+                )}
+                <div ref={chatEndRef} />
+              </div>
+              <form onSubmit={handleSendChat} className={styles.chatForm}>
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder={roomState.phase === 'playing' ? 'Type a message...' : 'Game not active'}
+                  disabled={roomState.phase !== 'playing'}
+                  className={styles.chatInput}
+                  maxLength={500}
+                />
+                <button type="submit" disabled={!chatInput.trim() || roomState.phase !== 'playing'} className={styles.chatSend}>
+                  Send
+                </button>
+              </form>
             </div>
           </div>
 
@@ -689,6 +808,44 @@ export default function RoomPage() {
                 </div>
               </div>
             </div>
+
+            {/* Game Actions */}
+            {roomState.phase === 'playing' && (
+              <div className={styles.panel}>
+                <div className={styles.panelHeader}>Actions</div>
+                <div className={styles.panelContent}>
+                  {drawOfferReceived ? (
+                    <div className={styles.drawOfferBox}>
+                      <p>{drawOfferFrom} offers a draw!</p>
+                      <div className={styles.drawOfferButtons}>
+                        <Button variant="primary" size="sm" onClick={() => handleDrawResponse(true)}>Accept</Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDrawResponse(false)}>Decline</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.gameActions}>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={handleDrawOffer} 
+                        disabled={drawOfferPending}
+                        full
+                      >
+                        {drawOfferPending ? 'Draw Offered' : 'Offer Draw'}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleForfeit} 
+                        full
+                      >
+                        Forfeit
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             
             {roomState.phase === 'over' && (
               <div className={styles.panel}>
