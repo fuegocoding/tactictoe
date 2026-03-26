@@ -194,7 +194,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
         3D View — drag to rotate
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
         <div
           style={{
             perspective: '800px',
@@ -228,7 +228,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
             {/* Layer outline frames — one flat border per z-slice */}
             {[0, 1, 2].map(layer => {
               const z = (layer - 1) * SPACING;
-              const frameSize = 2 * SPACING + CUBE;
+              const frameSize = 2 * SPACING + CUBE + 8;
               return (
                 <div
                   key={`layer-frame-${layer}`}
