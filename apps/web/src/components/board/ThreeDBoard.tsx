@@ -21,36 +21,47 @@ const HALF = CUBE / 2;
 function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | null; isWin: boolean; symbolX: string; symbolO: string }) {
   const isX = cell === 'X';
   const isO = cell === 'O';
-  const color = isX ? 'var(--mark-x)' : isO ? 'var(--mark-o)' : 'transparent';
+  const isOccupied = isX || isO;
+  const pieceColor = isX ? 'var(--mark-x)' : isO ? 'var(--mark-o)' : undefined;
+  const symbol = isX ? symbolX : isO ? symbolO : null;
+
   const faceStyle: React.CSSProperties = {
     position: 'absolute',
     width: CUBE,
     height: CUBE,
-    background: isWin ? 'var(--accent-subtle, rgba(59,130,246,0.5))' : 'rgba(20, 20, 20, 0.45)',
-    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid rgba(0, 0, 0, 0.7)',
+    background: isWin && isOccupied
+      ? 'var(--accent)'
+      : isWin
+      ? 'var(--accent-subtle, rgba(59,130,246,0.15))'
+      : isOccupied
+      ? pieceColor
+      : 'var(--cube-face-empty)',
+    border: isWin ? '2px solid var(--accent, #3b82f6)' : '1px solid var(--cube-face-border)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backfaceVisibility: 'visible',
+    boxSizing: 'border-box',
   };
+
+  const faceContent = isOccupied && symbol ? (
+    <PieceSymbol symbol={symbol} color="rgba(255,255,255,0.85)" size={CUBE * 0.6} />
+  ) : null;
 
   return (
     <div style={{ position: 'relative', width: CUBE, height: CUBE, transformStyle: 'preserve-3d' }}>
       {/* Front */}
-      <div style={{ ...faceStyle, transform: `translateZ(${HALF}px)` }}>
-        {isX && <PieceSymbol symbol={symbolX} color={color} size={CUBE * 0.6} />}
-        {isO && <PieceSymbol symbol={symbolO} color={color} size={CUBE * 0.6} />}
-      </div>
+      <div style={{ ...faceStyle, transform: `translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Back */}
-      <div style={{ ...faceStyle, transform: `rotateY(180deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(180deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Right */}
-      <div style={{ ...faceStyle, transform: `rotateY(90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Left */}
-      <div style={{ ...faceStyle, transform: `rotateY(-90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateY(-90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Top */}
-      <div style={{ ...faceStyle, transform: `rotateX(90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateX(90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
       {/* Bottom */}
-      <div style={{ ...faceStyle, transform: `rotateX(-90deg) translateZ(${HALF}px)` }} />
+      <div style={{ ...faceStyle, transform: `rotateX(-90deg) translateZ(${HALF}px)` }}>{faceContent}</div>
     </div>
   );
 }
