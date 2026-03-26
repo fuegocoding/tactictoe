@@ -184,6 +184,8 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
     setIsDragging(false);
   };
 
+  const billboardTransform = `rotateZ(${-rotation.z}deg) rotateX(${-rotation.x}deg)`;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{
@@ -227,6 +229,33 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
               position: 'relative',
             }}
           >
+            {/* Column labels A, B, C — front edge of bottom layer */}
+            {['A', 'B', 'C'].map((label, col) => (
+              <div key={`col-${col}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${(col - 1) * SPACING}px - 50%), calc(${1.6 * SPACING}px - 50%), ${(1 - 2) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
+            {/* Row labels 1, 2, 3 — left edge of top layer */}
+            {['1', '2', '3'].map((label, row) => (
+              <div key={`row-${row}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${-1.6 * SPACING}px - 50%), calc(${(row - 1) * SPACING}px - 50%), ${(1 - 0) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
+            {/* Layer labels L1, L2, L3 — right-back edge */}
+            {['L1', 'L2', 'L3'].map((label, layer) => (
+              <div key={`layer-lbl-${layer}`} style={{
+                position: 'absolute',
+                transform: `translate3d(calc(${1.6 * SPACING}px - 50%), calc(${-1.6 * SPACING}px - 50%), ${(1 - layer) * SPACING}px) ${billboardTransform}`,
+                fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', pointerEvents: 'none',
+              }}>{label}</div>
+            ))}
+
             {/* Layer outline frames — one flat border per z-slice */}
             {[0, 1, 2].map(layer => {
               const z = (1 - layer) * SPACING;
