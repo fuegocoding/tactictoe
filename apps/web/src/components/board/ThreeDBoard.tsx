@@ -47,7 +47,7 @@ function Cubelet({ cell, isWin, symbolX, symbolO }: { cell: string | number | nu
 
   const faceContent = isOccupied && symbol ? (
     <div style={{ color: 'var(--cube-symbol)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <PieceSymbol symbol={symbol} color="currentColor" size={CUBE * 0.6} />
+      <PieceSymbol symbol={symbol} color="currentColor" size={CUBE * 0.85} />
     </div>
   ) : null;
 
@@ -377,9 +377,9 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                           }}
                         >
                           {cell === 'X' ? (
-                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={22} />
+                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={30} />
                           ) : cell === 'O' ? (
-                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={22} />
+                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={30} />
                           ) : null}
                         </button>
                       );

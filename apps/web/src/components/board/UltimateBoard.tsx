@@ -195,9 +195,9 @@ export function UltimateBoard({
                         }}
                       >
                         {cell === 'X' ? (
-                          <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={14} />
+                          <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={20} />
                         ) : cell === 'O' ? (
-                          <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={14} />
+                          <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={20} />
                         ) : null}
                       </button>
                     ))}

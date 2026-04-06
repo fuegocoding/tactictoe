@@ -102,9 +102,9 @@ export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = 
                           }}
                         >
                           {cell === 'X' ? (
-                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={12} />
+                            <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={16} />
                           ) : cell === 'O' ? (
-                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={12} />
+                            <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={16} />
                           ) : null}
                         </button>
                       );

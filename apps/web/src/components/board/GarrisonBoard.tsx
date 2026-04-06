@@ -61,8 +61,8 @@ export function GarrisonBoard({
       >
         <img
           src={`/pieces/${chessSet}/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
-          width={30}
-          height={30}
+          width={38}
+          height={38}
           alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
           draggable={false}
           style={{ display: 'block', userSelect: 'none' }}
@@ -155,8 +155,8 @@ export function GarrisonBoard({
                   {p && (
                     <img
                       src={`/pieces/${chessSet}/${p.player === 'X' ? 'b' : 'w'}${p.type}.svg`}
-                      width={38}
-                      height={38}
+                      width={44}
+                      height={44}
                       alt={`${p.player === 'X' ? 'Black' : 'White'} ${p.type}`}
                       draggable={false}
                       style={{ display: 'block', userSelect: 'none' }}

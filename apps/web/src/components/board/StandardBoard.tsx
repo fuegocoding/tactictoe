@@ -73,9 +73,9 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
                 }}
               >
                 {cell === 'X' ? (
-                  <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={28} />
+                  <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={42} />
                 ) : cell === 'O' ? (
-                  <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={28} />
+                  <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={42} />
                 ) : null}
               </button>
             );

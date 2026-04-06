@@ -24,7 +24,7 @@ interface PieceSymbolProps {
   size?: number;
 }
 
-export function PieceSymbol({ symbol, color, size = 28 }: PieceSymbolProps) {
+export function PieceSymbol({ symbol, color, size = 40 }: PieceSymbolProps) {
   const IconComponent = ICON_MAP[symbol];
   if (IconComponent) {
     return <IconComponent size={size} strokeWidth={2.5} color={color} />;

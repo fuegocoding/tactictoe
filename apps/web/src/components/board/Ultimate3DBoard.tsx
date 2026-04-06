@@ -170,9 +170,9 @@ export function Ultimate3DBoard({
                         }}
                       >
                         {cell === 'X' ? (
-                          <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={11} />
+                          <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={16} />
                         ) : cell === 'O' ? (
-                          <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={11} />
+                          <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={16} />
                         ) : '·'}
                       </button>
                     );

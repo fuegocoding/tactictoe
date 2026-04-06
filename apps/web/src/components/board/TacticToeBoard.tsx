@@ -108,9 +108,9 @@ export function TacticToeBoard({
                       }}
                     >
                       {isObstacle ? '▪' : cell === 'X' ? (
-                        <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={18} />
+                        <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={24} />
                       ) : cell === 'O' ? (
-                        <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={18} />
+                        <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={24} />
                       ) : null}
                     </button>
                   );
