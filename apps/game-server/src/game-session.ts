@@ -141,7 +141,7 @@ export function handleMove(
 
   const moveData =
     room.variantId === 'ultimate_ttt' ? { boardIndex: payload.boardIndex, cellIndex: payload.cellIndex } :
-    (room.variantId === 'wild_ttt' || room.variantId === 'sos_ttt') ? { cellIndex: payload.cellIndex, symbol: payload.symbol } :
+    (room.variantId === 'wild_ttt' || room.variantId === 'sos_ttt' || room.variantId === 'order_chaos') ? { cellIndex: payload.cellIndex, symbol: payload.symbol } :
     room.variantId === 'numerical_ttt' ? { cellIndex: payload.cellIndex, numberPlaced: payload.numberPlaced } :
     room.variantId === 'garrison' ? (
       payload.garrisonType === 'place'
