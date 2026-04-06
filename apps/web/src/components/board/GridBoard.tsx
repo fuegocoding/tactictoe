@@ -81,7 +81,9 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
                   justifyContent: 'center',
                 }}
               >
-                {cell === 'X' ? (
+                {cell === 'S' ? (
+                  <PieceSymbol symbol='S' color='var(--mark-x)' size={cols > 5 ? 22 : 34} />
+                ) : cell === 'X' ? (
                   <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={cols > 5 ? 22 : 34} />
                 ) : cell === 'O' ? (
                   <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={cols > 5 ? 22 : 34} />
