@@ -72,7 +72,7 @@ export function GarrisonBoard({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'manipulation' }}>
       {/* O hand (top) */}
       <div style={{ display: 'flex', gap: 4, minHeight: 36, alignItems: 'center' }}>
         <span style={{ fontSize: 11, color: 'var(--text-muted)', marginRight: 4 }}>O hand:</span>

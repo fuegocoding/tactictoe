@@ -42,6 +42,9 @@ export function UltimateBoard({
         gap: '8px',
         width: '100%',
         maxWidth: '600px',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        touchAction: 'manipulation',
       }}
     >
       {/* Row labels column */}

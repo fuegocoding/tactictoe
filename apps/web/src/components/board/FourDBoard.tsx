@@ -35,6 +35,9 @@ export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = 
       alignItems: 'center',
       gap: 'var(--space-2)',
       width: '100%',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      touchAction: 'manipulation',
     }}>
       {/* Outer 3×3 meta-grid */}
       <div style={{

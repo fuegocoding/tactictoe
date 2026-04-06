@@ -30,6 +30,9 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
         width: '100%',
         maxWidth,
         margin: '0 auto',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        touchAction: 'manipulation',
       }}
     >
       {/* Corner */}

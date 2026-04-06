@@ -24,6 +24,9 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
         gap: '4px',
         width: '100%',
         maxWidth: '260px',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        touchAction: 'manipulation',
       }}
     >
       {/* Top-left corner */}

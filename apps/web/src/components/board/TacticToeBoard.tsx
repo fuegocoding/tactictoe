@@ -34,7 +34,7 @@ export function TacticToeBoard({
 }: TacticToeBoardProps) {
   const { symbolX, symbolO } = useCosmetics();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'manipulation' }}>
       <div style={{ display: 'flex', gap: 'var(--space-5)', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[0, 1, 2].map(layer => (
           <div key={layer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-2)' }}>

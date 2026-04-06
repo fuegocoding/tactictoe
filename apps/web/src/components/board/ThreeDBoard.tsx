@@ -217,7 +217,7 @@ export function ThreeDViz({ board, winCells = [], symbolX, symbolO }: { board: B
           onMouseUp={onDragEnd}
           onMouseLeave={onDragEnd}
           onTouchStart={e => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }}
-          onTouchMove={e => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
+          onTouchMove={e => { e.preventDefault(); const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }}
           onTouchEnd={onDragEnd}
         >
           <div
@@ -322,6 +322,9 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
       gap: 'var(--space-8)',
       alignItems: 'flex-start',
       flexWrap: 'wrap',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      touchAction: 'manipulation',
       justifyContent: 'center',
       width: '100%',
     }}>

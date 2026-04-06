@@ -41,7 +41,7 @@ export function Ultimate3DBoard({
   const macroCellsInLayer = Array.from({ length: 9 }, (_, i) => selectedMetaLayer * 9 + i);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'manipulation', width: '100%' }}>
       {/* Meta-layer picker */}
       <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
         <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
