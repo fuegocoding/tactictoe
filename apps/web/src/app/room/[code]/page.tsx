@@ -497,7 +497,7 @@ export default function RoomPage() {
       {roomState.phase === 'waiting' && status === 'connected' && !roomState.error && (
         <div className={styles.waiting}>
           <p className={styles.waitingTitle}>Waiting for opponent…</p>
-          {!isMatchmaking && (
+          {!isMatchmaking && !rated && (
             <>
               <p className={styles.waitingCode}>{code}</p>
               <p className={styles.waitingHint}>Share this code or scan the QR to join instantly.</p>
