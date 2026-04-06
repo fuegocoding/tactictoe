@@ -75,9 +75,9 @@ export async function processGameResult(payload: GameResultPayload) {
 
   // Award credits to logged in users based on outcome
   const getCredits = (outcome: 'win' | 'loss' | 'draw') => {
-    if (outcome === 'win') return 10;
-    if (outcome === 'draw') return 5;
-    return 2;
+    if (outcome === 'win') return 25;
+    if (outcome === 'draw') return 10;
+    return 5;
   };
 
   const updates = [];
