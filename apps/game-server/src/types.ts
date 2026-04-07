@@ -55,6 +55,11 @@ export interface MakeMovePayload {
   garrisonPieceId?: string;
   garrisonFrom?: number;
   garrisonTo?: number;
+  // tactic-toe
+  tacticType?: 'place' | 'move_obstacle';
+  tacticCellIndex?: number;
+  fromCell?: number;
+  toCell?: number;
 }
 
 // ─── Socket.io event payloads (server → client) ───────────────────────────────

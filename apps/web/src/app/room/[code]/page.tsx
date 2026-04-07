@@ -392,7 +392,9 @@ export default function RoomPage() {
     if (!roomState.gameState || roomState.gameState.variantId !== 'tactic_toe') return;
     const state = roomState.gameState as TacticToeState;
     if (tacticToeMode === 'place') {
-      socket.emit('game:move', { roomCode: code, type: 'place', cellIndex: globalIndex });
+      socket.emit('game:move', { roomCode: code, tacticType: 'place', tacticCellIndex: globalIndex, boardIndex: 0, cellIndex: globalIndex });
+      setTacticToeMode('place');
+      setTacticToeSelectedObstacle(null);
     } else {
       if (tacticToeSelectedObstacle === null) {
         if (state.board[globalIndex] === 'B') {
@@ -400,8 +402,9 @@ export default function RoomPage() {
         }
       } else {
         if (state.board[globalIndex] === null) {
-          socket.emit('game:move', { roomCode: code, type: 'move_obstacle', fromCell: tacticToeSelectedObstacle, toCell: globalIndex });
+          socket.emit('game:move', { roomCode: code, tacticType: 'move_obstacle', fromCell: tacticToeSelectedObstacle, toCell: globalIndex, boardIndex: 0, cellIndex: globalIndex });
           setTacticToeSelectedObstacle(null);
+          setTacticToeMode('place');
         } else if (state.board[globalIndex] === 'B') {
           setTacticToeSelectedObstacle(globalIndex);
         } else {

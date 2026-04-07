@@ -148,6 +148,11 @@ export function handleMove(
         ? { type: 'place', pieceId: payload.garrisonPieceId, to: payload.garrisonTo }
         : { type: 'move', pieceId: payload.garrisonPieceId, from: payload.garrisonFrom, to: payload.garrisonTo }
     ) :
+    room.variantId === 'tactic_toe' ? (
+      payload.tacticType === 'move_obstacle'
+        ? { type: 'move_obstacle', fromCell: payload.fromCell, toCell: payload.toCell }
+        : { type: 'place', cellIndex: payload.tacticCellIndex ?? payload.cellIndex }
+    ) :
     { cellIndex: payload.cellIndex };
 
   const result = engine.applyMove(
