@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
+import './global-animations.css';
+import './global-animations.css';
 import Providers from '@/components/Providers';
+import { OnboardingTutorial } from '@/components/OnboardingTutorial';
 import Sidebar from '@/components/Sidebar';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -22,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${outfit.variable}`}>
       <head>
+        <link rel='manifest' href='/manifest.json' />
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){/* ignore error if localStorage is unavailable */}` }} />
       </head>
       <body>
@@ -30,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Sidebar />
             <main className="app-main">
               {children}
+          <OnboardingTutorial />
             </main>
           </div>
         </Providers>

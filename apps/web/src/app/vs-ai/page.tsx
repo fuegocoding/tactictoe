@@ -31,6 +31,7 @@ import { FourDBoard } from '@/components/board/FourDBoard';
 import { TacticToeBoard } from '@/components/board/TacticToeBoard';
 import { Ultimate3DBoard } from '@/components/board/Ultimate3DBoard';
 import { GarrisonBoard } from '@/components/board/GarrisonBoard';
+import { useSound } from '@/hooks/useSound';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -228,7 +229,8 @@ export default function VsAIPage() {
           const term = engine.checkTerminal(result.state);
           if (term) {
             setGameState(result.state);
-            setPhase('over');
+            if (gameState.currentPlayer === 'X') { sound.play('win'); } else { sound.play('lose'); }
+      setPhase('over');
             setWinner(term.winner);
             setScores(prev => {
               const next = { ...prev };
