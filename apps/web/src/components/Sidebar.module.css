@@ -138,9 +138,9 @@
 
   .profileSection {
     position: fixed;
-    top: 0;
+    top: calc(var(--space-16) + 8px);
     right: 0;
-    width: calc(100vw - var(--sidebar-width-mobile));
+    width: auto;
     margin: 0;
     padding: var(--space-4);
     border: none;
@@ -149,7 +149,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    z-index: 100;
+    z-index: 99;
   }
   .actions { flex-direction: row; gap: var(--space-3); width: auto; }
   .actionBtn { padding: var(--space-2) var(--space-4); min-width: unset; font-size: var(--text-sm); }
