@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSound } from '@/hooks/useSound';
 import { useSession } from 'next-auth/react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -20,6 +21,8 @@ interface Cosmetic {
 export default function SettingsPage() {
   const { data: session, status } = useSession();
   const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
+  const sound = useSound();
+  const soundSettings = sound.settings;
   const [loading, setLoading] = useState(true);
 
   const fetchCosmetics = async () => {

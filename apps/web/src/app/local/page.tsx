@@ -161,7 +161,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null, garrisonSelectedPiece: null, garrisonLegalDests: [] };
     }
     case 'REMATCH':
-      setShowConfetti(false); {
+            setShowConfetti(false);
+      {
       const engine = engines[state.variant as Variant];
       const seed = Date.now();
       return {
@@ -279,7 +280,8 @@ export default function LocalPage() {
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
     if (!result.ok) { sound.play('error'); return; }
     sound.play('move');
-    if (!result.ok) return;
+    if (!result.ok) { sound.play('error'); return; }
+    sound.play('move');
 
     if (state.variant === 'numerical_ttt') {
       const nextState = result.state as NumericalTTTState;
@@ -290,6 +292,7 @@ export default function LocalPage() {
     const terminal = engine.checkTerminal(result.state);
     if (terminal) {
       sound.play('win');
+      if (result.state.terminal && result.state.terminal.winner === gameState.currentPlayer) { sound.play('win'); } else { sound.play('lose'); }
       dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate });
     } else {
       dispatch({ type: 'MOVE', gameState: result.state, coordinate });
@@ -301,7 +304,8 @@ export default function LocalPage() {
     const engine = engines['ultimate_3d'];
     const move = { data: { macroCell, microCell } };
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
-    if (!result.ok) return;
+    if (!result.ok) { sound.play('error'); return; }
+    sound.play('move');
     const metaLayer = Math.floor(macroCell / 9) + 1;
     const microLayer = Math.floor(microCell / 9) + 1;
     const coord = `M${macroCell}[m${microLayer}(${Math.floor((microCell % 9) / 3) + 1},${(microCell % 3) + 1})]`;
@@ -321,7 +325,8 @@ export default function LocalPage() {
     if (state.tacticMoveMode === 'place') {
       const move = { data: { type: 'place', cellIndex: globalIndex } };
       const result = engine.applyMove(s, move, s.currentPlayer);
-      if (!result.ok) return;
+      if (!result.ok) { sound.play('error'); return; }
+    sound.play('move');
       const coord = `L${Math.floor(globalIndex / 9) + 1}(${Math.floor((globalIndex % 9) / 3) + 1},${(globalIndex % 3) + 1})`;
       const terminal = engine.checkTerminal(result.state);
       if (terminal) {
