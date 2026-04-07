@@ -4,6 +4,7 @@ import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useGuestSession } from '@/hooks/useGuestSession';
+import { useSound } from '@/hooks/useSound';
 import { useSocket } from '@/hooks/useSocket';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { StandardBoard } from '@/components/board/StandardBoard';

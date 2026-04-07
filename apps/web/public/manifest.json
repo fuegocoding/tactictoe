@@ -1,0 +1,31 @@
+{
+  "name": "TicTacTop - Competitive Tic-Tac-Toe",
+  "short_name": "TicTacTop",
+  "description": "Play 15+ variants of Tic-Tac-Toe online, vs AI, or locally",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f7f4",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "any",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/"
+}
