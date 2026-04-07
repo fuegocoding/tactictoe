@@ -225,6 +225,7 @@ function getVanishingVisibleBoard(s: VanishingTTTState): (string | number | null
 export default function LocalPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [showConfetti, setShowConfetti] = useState(false);
+  const sound = useSound();
   const movesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -286,8 +287,6 @@ export default function LocalPage() {
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
     if (!result.ok) { sound.play('error'); return; }
     sound.play('move');
-    if (!result.ok) { sound.play('error'); return; }
-    sound.play('move');
 
     if (state.variant === 'numerical_ttt') {
       const nextState = result.state as NumericalTTTState;
@@ -297,7 +296,6 @@ export default function LocalPage() {
 
     const terminal = engine.checkTerminal(result.state);
     if (terminal) {
-      sound.play('win');
       if (result.state.terminal && result.state.terminal.winner === gameState.currentPlayer) { sound.play('win'); } else { sound.play('lose'); }
       dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate });
     } else {
