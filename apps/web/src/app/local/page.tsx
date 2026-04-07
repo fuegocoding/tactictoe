@@ -160,9 +160,7 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       }
       return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null, garrisonSelectedPiece: null, garrisonLegalDests: [] };
     }
-    case 'REMATCH':
-            setShowConfetti(false);
-      {
+    case 'REMATCH': {
       const engine = engines[state.variant as Variant];
       const seed = Date.now();
       return {
@@ -178,7 +176,6 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       };
     }
     case 'NEW_GAME':
-      setShowConfetti(false);
       return { ...state, phase: 'setup', gameState: null, moveHistory: [] };
     case 'SET_PLACING_AS':
       return { ...state, placingAs: action.symbol };
@@ -227,7 +224,16 @@ function getVanishingVisibleBoard(s: VanishingTTTState): (string | number | null
 
 export default function LocalPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [showConfetti, setShowConfetti] = useState(false);
   const movesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (state.phase === 'over') {
+      setShowConfetti(true);
+    } else {
+      setShowConfetti(false);
+    }
+  }, [state.phase]);
 
   useEffect(() => {
     if (movesRef.current) movesRef.current.scrollTop = movesRef.current.scrollHeight;
