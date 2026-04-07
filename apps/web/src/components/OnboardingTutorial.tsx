@@ -1,6 +1,6 @@
 // OnboardingTutorial - first-time user guidance overlay
 
-+Q+use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';

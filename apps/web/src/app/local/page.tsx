@@ -25,6 +25,8 @@ import type { Ultimate3DState } from '@tactictoe/game-engine';
 import type { GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
 
 type LocalGameState = GameState & { terminal?: TerminalResult | null };
+import { useSound } from '@/hooks/useSound';
+import { VictoryConfetti } from '@/components/VictoryConfetti';
 import { StandardBoard } from '@/components/board/StandardBoard';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
@@ -158,7 +160,8 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       }
       return { ...state, gameState: action.gameState, moveHistory, tacticMoveMode: 'place', tacticSelectedObstacle: null, garrisonSelectedPiece: null, garrisonLegalDests: [] };
     }
-    case 'REMATCH': {
+    case 'REMATCH':
+      setShowConfetti(false); {
       const engine = engines[state.variant as Variant];
       const seed = Date.now();
       return {
@@ -174,6 +177,7 @@ function reducer(state: LocalState, action: LocalAction): LocalState {
       };
     }
     case 'NEW_GAME':
+      setShowConfetti(false);
       return { ...state, phase: 'setup', gameState: null, moveHistory: [] };
     case 'SET_PLACING_AS':
       return { ...state, placingAs: action.symbol };
@@ -273,6 +277,8 @@ export default function LocalPage() {
     }
 
     const result = engine.applyMove(state.gameState, move, state.gameState.currentPlayer);
+    if (!result.ok) { sound.play('error'); return; }
+    sound.play('move');
     if (!result.ok) return;
 
     if (state.variant === 'numerical_ttt') {
@@ -283,6 +289,7 @@ export default function LocalPage() {
 
     const terminal = engine.checkTerminal(result.state);
     if (terminal) {
+      sound.play('win');
       dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate });
     } else {
       dispatch({ type: 'MOVE', gameState: result.state, coordinate });
@@ -426,7 +433,9 @@ export default function LocalPage() {
   const isSymbolPickerVariant = variant === 'wild_ttt' || variant === 'sos_ttt' || variant === 'order_chaos';
 
   return (
-    <div className={styles.page}>
+    <> 
+      <VictoryConfetti active={showConfetti} />
+      <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Local Game</h1>
         <p className={styles.subtitle}>Same screen. Take turns.</p>
@@ -784,6 +793,7 @@ export default function LocalPage() {
       )}
 
       {phase === 'setup' && <Link href="/" className={styles.backLink}>← Back to lobby</Link>}
-    </div>
+      </div>
+    </>
   );
 }

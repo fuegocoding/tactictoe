@@ -4,6 +4,7 @@ import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useGuestSession } from '@/hooks/useGuestSession';
+import { VictoryConfetti } from '@/components/VictoryConfetti';
 import { useSound } from '@/hooks/useSound';
 import { useSocket } from '@/hooks/useSocket';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
@@ -119,6 +120,10 @@ export default function RoomPage() {
   const [tacticToeSelectedObstacle, setTacticToeSelectedObstacle] = useState<number | null>(null);
   const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
   const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
+
+  const sound = useSound();
+  const [showConfetti, setShowConfetti] = useState(false);
+
   const prevStateRef = useRef<GameState | null>(null);
   const movesRef = useRef<HTMLDivElement>(null);
   const joined = useRef(false);
@@ -289,6 +294,13 @@ export default function RoomPage() {
     }) {
       dispatch({ type: 'STATE_UPDATE', gameState: data.gameState });
       dispatch({ type: 'GAME_OVER', winner: data.winner, reason: data.reason, winnerDisplayName: data.winnerDisplayName });
+      // Sound + confetti on game over
+      var isWin = mySymbol && mySymbol === data.winner;
+      var isDraw = data.winner === null;
+      if (isWin) sound.play('win');
+      else if (isDraw) sound.play('draw');
+      else sound.play('lose');
+      if (isWin) setTimeout(function(){setShowConfetti(false)},3000);
     }
     function onGameReconnect(data: { gameState: GameState; myPlayerIndex: 0 | 1; players: PlayerInfo[] }) {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.myPlayerIndex, players: data.players });
@@ -296,6 +308,7 @@ export default function RoomPage() {
     }
     function onError(data: { message: string }) {
       dispatch({ type: 'ERROR', message: data.message });
+      sound.play('error');
     }
     function onSpectating() {
       dispatch({ type: 'ERROR', message: 'This room is full. Watching as spectator.' });
@@ -356,6 +369,7 @@ export default function RoomPage() {
       socket.off('draw:offered', onDrawOffered);
       socket.off('draw:offer_sent', onDrawOfferSent);
       socket.off('draw:declined', onDrawDeclined);
+      socket.off('game:spectator_sync', onSpectatorSync);
     };
   }, [socket, guest]);
 
@@ -369,6 +383,7 @@ export default function RoomPage() {
         { roomCode: code, boardIndex, cellIndex };
 
       socket.emit('game:move', moveData);
+      sound.play('move');
     },
     [socket, code, roomState.gameState, placingAs]
   );
@@ -487,7 +502,9 @@ export default function RoomPage() {
   const moveRows = formatMoveRows(moveHistory);
 
   return (
-    <div className={styles.page}>
+    <> 
+      <VictoryConfetti active={showConfetti} />
+      <div className={styles.page}>
       <div className={styles.header}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span className={styles.roomCode}>Room: {code}</span>
@@ -873,6 +890,7 @@ export default function RoomPage() {
 
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
