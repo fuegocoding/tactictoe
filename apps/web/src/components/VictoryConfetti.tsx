@@ -1,7 +1,7 @@
 // VictoryConfetti - lightweight canvas particle celebration
 // No external dependencies - pure canvas rendering
 
-+Q+use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 

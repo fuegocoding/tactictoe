@@ -68,7 +68,7 @@ export function OnboardingTutorial({ onComplete }: { onComplete?: () => void }) 
         </button>
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>Step {step + 1} of {STEPS.length}</p>
         <div style={{ height: '4px', background: 'var(--bg-subtle)', borderRadius: '2px', marginBottom: '16px' }}>
-          <div style={{ height: '100%', width: '((step + 1) / STEPS.length * 100) + '%', background: 'var(--accent)', borderRadius: '2px', transition: 'width 0.3s ease' }} />
+          <div style={{ height: '100%', width: String(((step + 1) / STEPS.length) * 100) + '%', background: 'var(--accent)', borderRadius: '2px', transition: 'width 0.3s ease' }} />
         </div>
         <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: '600', marginBottom: '8px' }}>{current.title}</h3>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.6 }}>{current.description}</p>
