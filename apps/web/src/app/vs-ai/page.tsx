@@ -102,6 +102,7 @@ export default function VsAIPage() {
   const [tacticSelectedObstacle, setTacticSelectedObstacle] = useState<number | null>(null);
   const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
   const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
+  const sound = useSound();
   const movesRef = useRef<HTMLDivElement>(null);
   const creditAwardedRef = useRef(false);
 
