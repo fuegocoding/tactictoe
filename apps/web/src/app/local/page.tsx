@@ -296,7 +296,7 @@ export default function LocalPage() {
 
     const terminal = engine.checkTerminal(result.state);
     if (terminal) {
-      if (result.state.terminal && result.state.terminal.winner === gameState.currentPlayer) { sound.play('win'); } else { sound.play('lose'); }
+      if (terminal.winner === gameState.currentPlayer) { sound.play('win'); } else { sound.play('lose'); }
       dispatch({ type: 'GAME_OVER', gameState: { ...result.state, terminal }, coordinate });
     } else {
       dispatch({ type: 'MOVE', gameState: result.state, coordinate });
