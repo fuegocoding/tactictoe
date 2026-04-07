@@ -242,6 +242,7 @@ export default function LocalPage() {
 
   const handleMove = (boardIndex: number, cellIndex: number) => {
     if (!state.gameState) return;
+    const gameState = state.gameState;
     if (state.variant === 'tactic_toe' || state.variant === 'garrison') return; // handled separately
     const engine = engines[state.variant as Variant];
 
