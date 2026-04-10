@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import {
+import { GAME_VARIANTS, 
   StandardTTT, UltimateTTT, MisereTTT, NotaktoTTT, WildTTT, Gomoku, SOSTTT, NumericalTTT,
   VanishingTTT, VANISHING_FADE_AFTER,
   TTT3D, TTT4D, OrderChaos, TacticToe, Ultimate3D, Garrison,
   getWinCells, getGomokuWinCells, getWinCells3D, getWinCells4D, getWinCells6x6, checkFiveInARow
-} from '@tactictoe/game-engine';
+ } from '@tactictoe/game-engine';
 import type { GameState, AIDifficulty, Player, Board } from '@tactictoe/game-engine';
 import type { GameRules } from '@tactictoe/game-engine';
 import type { StandardTTTState } from '@tactictoe/game-engine';
@@ -24,6 +24,7 @@ import type { TacticToeState } from '@tactictoe/game-engine';
 import type { Ultimate3DState } from '@tactictoe/game-engine';
 import type { GarrisonState, GarrisonMove } from '@tactictoe/game-engine';
 import { StandardBoard } from '@/components/board/StandardBoard';
+import { VictoryConfetti } from '@/components/VictoryConfetti';
 import { UltimateBoard } from '@/components/board/UltimateBoard';
 import { GridBoard } from '@/components/board/GridBoard';
 import { ThreeDBoard } from '@/components/board/ThreeDBoard';
@@ -42,7 +43,7 @@ import styles from './page.module.css';
 import localStyles from '../local/page.module.css';
 
 type Variant =
-  | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto'
+  | 'standard_3x3' | 'ultimate_ttt' | 'misere_ttt' | 'wild_ttt' | 'notakto_ttt'
   | 'gomoku' | 'sos_ttt' | 'numerical_ttt'
   | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d'
   | 'garrison';
@@ -52,7 +53,7 @@ const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: 
   ultimate_ttt:  { label: 'Ultimate',    description: '9 boards in one. The flagship.',                        Icon: Table2 },
   misere_ttt:    { label: 'Misère',      description: 'Force your opponent to get 3-in-a-row to win.',         Icon: Target },
   wild_ttt:      { label: 'Wild',        description: 'Choose to place X or O on every turn.',                 Icon: Asterisk },
-  notakto:       { label: 'Notakto',     description: 'Both players place X. Avoid making 3-in-a-row!',        Icon: Ban },
+  notakto_ttt:       { label: 'Notakto',     description: 'Both players place X. Avoid making 3-in-a-row!',        Icon: Ban },
   gomoku:        { label: 'Gomoku',      description: '15×15 board. First to 5-in-a-row wins.',                Icon: Grip },
   sos_ttt:       { label: 'SOS',         description: 'Spell S-O-S for points + extra turns.',                 Icon: Type },
   numerical_ttt: { label: 'Numerical',   description: 'Sum exactly 15 with three numbers.',                    Icon: Hash },
@@ -70,7 +71,7 @@ const engines: Record<Variant, GameRules> = {
   ultimate_ttt:  new UltimateTTT(),
   misere_ttt:    new MisereTTT(),
   wild_ttt:      new WildTTT(),
-  notakto:       new NotaktoTTT(),
+  notakto_ttt:       new NotaktoTTT(),
   gomoku:        new Gomoku(),
   sos_ttt:       new SOSTTT(),
   numerical_ttt: new NumericalTTT(),
@@ -102,12 +103,22 @@ export default function VsAIPage() {
   const [tacticSelectedObstacle, setTacticSelectedObstacle] = useState<number | null>(null);
   const [garrisonSelectedPiece, setGarrisonSelectedPiece] = useState<string | null>(null);
   const [garrisonLegalDests, setGarrisonLegalDests] = useState<number[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
   const sound = useSound();
   const movesRef = useRef<HTMLDivElement>(null);
   const creditAwardedRef = useRef(false);
 
   const ai = useAI(variant as AIVariant, difficulty);
   const aiPlayer: Player = humanPlayer === 'X' ? 'O' : 'X';
+
+  useEffect(() => {
+    if (phase === 'over' && winner === humanPlayer) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
+    } else {
+      setShowConfetti(false);
+    }
+  }, [phase, winner, humanPlayer]);
 
   useEffect(() => {
     if (movesRef.current) movesRef.current.scrollTop = movesRef.current.scrollHeight;
@@ -488,8 +499,10 @@ export default function VsAIPage() {
   }
 
   return (
-    <div className={localStyles.page}>
-      <div className={localStyles.header}>
+    <>
+      <VictoryConfetti active={showConfetti} />
+      <div className={localStyles.page}>
+        <div className={localStyles.header}>
         <h1 className={localStyles.title}>Play vs AI</h1>
         <p className={localStyles.subtitle}>Test your skills against the computer.</p>
       </div>
@@ -502,9 +515,9 @@ export default function VsAIPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <p className={localStyles.variantLabel}>Game mode</p>
                   <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-                    <div className={localStyles.variantInfo} title={VARIANT_INFO[variant]?.description}>
+                    <div className={localStyles.variantInfo} title={GAME_VARIANTS.find(v => v.id === variant)?.description}>
                       <HelpCircle size={14} style={{ marginRight: 4 }} />
-                      {VARIANT_INFO[variant]?.description}
+                      {GAME_VARIANTS.find(v => v.id === variant)?.description}
                     </div>
                     <a href={`/learn#${variant}`} className={localStyles.learnMoreLink}>Learn more →</a>
                   </div>
@@ -564,7 +577,7 @@ export default function VsAIPage() {
               <div className={localStyles.panelContent}>
                 <div className={localStyles.scoreboard}>
                   <div className={`${localStyles.scoreCard} ${gameState.currentPlayer === humanPlayer && phase === 'playing' ? localStyles.active : ''}`}>
-                    <span className={localStyles.scoreName}>{playerName}{variant !== 'notakto' ? ` (${humanPlayer})` : ''}</span>
+                    <span className={localStyles.scoreName}>{playerName}{variant !== 'notakto_ttt' ? ` (${humanPlayer})` : ''}</span>
                     <span className={localStyles.scoreValue}>
                       {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt' ? (gameState as SOSTTTState).scores[humanPlayer] : scores.human}
                     </span>
@@ -574,7 +587,7 @@ export default function VsAIPage() {
                     <span className={localStyles.scoreValue}>{scores.draws}</span>
                   </div>
                   <div className={`${localStyles.scoreCard} ${gameState.currentPlayer === aiPlayer && phase === 'playing' ? localStyles.active : ''}`}>
-                    <span className={localStyles.scoreName}>AI{variant !== 'notakto' ? ` (${aiPlayer})` : ''} · {DIFFICULTY_LABELS[difficulty]}</span>
+                    <span className={localStyles.scoreName}>AI{variant !== 'notakto_ttt' ? ` (${aiPlayer})` : ''} · {DIFFICULTY_LABELS[difficulty]}</span>
                     <span className={localStyles.scoreValue}>
                       {variant === 'sos_ttt' && gameState.variantId === 'sos_ttt' ? (gameState as SOSTTTState).scores[aiPlayer] : scores.ai}
                     </span>
@@ -587,7 +600,7 @@ export default function VsAIPage() {
                       <><div className={styles.thinkingDot} />AI is thinking…</>
                     ) : (
                       <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
-                        Your turn{variant !== 'notakto' && ` (${humanPlayer})`}
+                        Your turn{variant !== 'notakto_ttt' && ` (${humanPlayer})`}
                       </span>
                     )}
                   </div>
@@ -798,5 +811,6 @@ export default function VsAIPage() {
 
       <Link href="/" className={localStyles.backLink}>← Back to lobby</Link>
     </div>
+    </>
   );
 }

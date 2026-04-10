@@ -300,7 +300,10 @@ export default function RoomPage() {
       if (isWin) sound.play('win');
       else if (isDraw) sound.play('draw');
       else sound.play('lose');
-      if (isWin) setTimeout(function(){setShowConfetti(false)},3000);
+      if (isWin) {
+        setShowConfetti(true);
+        setTimeout(function(){setShowConfetti(false)},3000);
+      }
     }
     function onGameReconnect(data: { gameState: GameState; myPlayerIndex: 0 | 1; players: PlayerInfo[] }) {
       dispatch({ type: 'SET_MY_INDEX', playerIndex: data.myPlayerIndex, players: data.players });
@@ -831,6 +834,11 @@ export default function RoomPage() {
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span className={styles.playerName}>{p.displayName}</span>
                           {isMe && <span className={styles.playerYou}>You</span>}
+                          {roomState.gameState?.variantId === 'sos_ttt' && (
+                            <span className={styles.playerYou} style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                              SOS: {(roomState.gameState as any).scores[sym]}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );

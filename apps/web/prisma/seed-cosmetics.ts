@@ -28,6 +28,9 @@ async function main() {
     { name: 'Royalty',   type: 'piece', cssValue: '{"--mark-x":"#f1c40f","--mark-o":"#95a5a6","symbolX":"Crown","symbolO":"Sword"}', requiredScore: 0, price: 600 },
     { name: 'Fire & Ice', type: 'piece', cssValue: '{"--mark-x":"#e74c3c","--mark-o":"#3498db","symbolX":"Flame","symbolO":"Snowflake"}', requiredScore: 0, price: 750 },
     { name: 'Dark Arts', type: 'piece', cssValue: '{"--mark-x":"#8e44ad","--mark-o":"#2c3e50","symbolX":"Skull","symbolO":"Ghost"}', requiredScore: 0, price: 1000 },
+    { name: 'Emoticons', type: 'piece', cssValue: '{"--mark-x":"#f1c40f","--mark-o":"#e74c3c","symbolX":"😁","symbolO":"😡"}', requiredScore: 0, price: 250 },
+    { name: 'Weather',   type: 'piece', cssValue: '{"--mark-x":"#f1c40f","--mark-o":"#3498db","symbolX":"Sun","symbolO":"CloudRain"}', requiredScore: 0, price: 350 },
+    { name: 'Tech',      type: 'piece', cssValue: '{"--mark-x":"#2ecc71","--mark-o":"#9b59b6","symbolX":"Cpu","symbolO":"Database"}', requiredScore: 0, price: 450 },
 
     // ── Win Line Skins ────────────────────────────────────────
     { name: 'Classic Line', type: 'winline', cssValue: '{"--winline-color":"#3b82f6","--winline-width":"0.12","--winline-filter":"none"}', requiredScore: 0, price: 0 },
