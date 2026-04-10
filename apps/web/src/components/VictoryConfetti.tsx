@@ -60,7 +60,7 @@ export function VictoryConfetti({ active }: { active: boolean }) {
     const drag = 0.98;
 
     function animate() {
-      if (!activeRef.current) return;
+      if (!activeRef.current || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let alive = false;
       for (const p of particles) {
@@ -70,7 +70,7 @@ export function VictoryConfetti({ active }: { active: boolean }) {
         p.x += p.vx;
         p.y += p.vy;
         p.rotation += p.rv;
-        if (p.y < canvas.height + 50) alive = true;
+        if (canvas && p.y < canvas.height + 50) alive = true;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
@@ -82,7 +82,7 @@ export function VictoryConfetti({ active }: { active: boolean }) {
       frame++;
       if (alive && frame < 200) {
         animFrameRef.current = requestAnimationFrame(animate);
-      } else {
+      } else if (canvas) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
