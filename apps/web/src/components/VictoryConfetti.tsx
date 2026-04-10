@@ -47,7 +47,7 @@ export function VictoryConfetti({ active }: { active: boolean }) {
         y: canvas.height / 2,
         vx: (Math.random() - 0.5) * 16,
         vy: -Math.random() * 18 - 4,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        color: COLORS[Math.floor(Math.random() * COLORS.length)]!,
         size: Math.random() * 8 + 4,
         rotation: Math.random() * Math.PI * 2,
         rv: (Math.random() - 0.5) * 0.2,
