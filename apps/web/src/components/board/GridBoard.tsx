@@ -12,9 +12,10 @@ interface GridBoardProps {
   disabled: boolean;
   onMove: (boardIndex: number, cellIndex: number) => void;
   winCells?: number[];
+  disableCosmetics?: boolean;
 }
 
-export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, winCells = [] }: GridBoardProps) {
+export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, winCells = [], disableCosmetics = false }: GridBoardProps) {
   const { symbolX, symbolO } = useCosmetics();
   const colLabels = Array.from({ length: cols }, (_, i) => String.fromCharCode(97 + i));
   const maxWidth = cols >= 15 ? '600px' : '400px';
@@ -38,7 +39,7 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
       {/* Corner */}
       <div />
       {/* Col labels */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap }}>
         {colLabels.map((c) => (
           <div key={c} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
             {c}
@@ -47,7 +48,7 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
       </div>
 
       {/* Row labels */}
-      <div style={{ display: 'grid', gridTemplateRows: `repeat(${rows}, 1fr)`, gap }}>
+      <div style={{ display: 'grid', gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`, gap }}>
         {Array.from({ length: rows }, (_, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
             {i + 1}
@@ -56,7 +57,7 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
       </div>
 
       {/* Cells with WinLine */}
-      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap }}>
+      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap }}>
         {Array.from({ length: rows }, (_, row) =>
           Array.from({ length: cols }, (_, col) => {
             const index = row * cols + col;
@@ -70,6 +71,9 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
                 }}
                 style={{
                   aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                   fontSize: cols > 5 ? 'clamp(14px, 2.5vw, 18px)' : 'clamp(20px, 5vw, 32px)',
                   fontWeight: 'bold',
                   cursor: disabled || cell !== null ? 'default' : 'pointer',
@@ -84,9 +88,9 @@ export function GridBoard({ board, cols, rows, currentPlayer, disabled, onMove, 
                 {cell === 'S' ? (
                   <PieceSymbol symbol='S' color='var(--mark-x)' size={cols > 5 ? 22 : 34} />
                 ) : cell === 'X' ? (
-                  <PieceSymbol symbol={symbolX} color="var(--mark-x)" size={cols > 5 ? 22 : 34} />
+                  <PieceSymbol symbol={disableCosmetics ? 'X' : symbolX} color="var(--mark-x)" size={cols > 5 ? 22 : 34} />
                 ) : cell === 'O' ? (
-                  <PieceSymbol symbol={symbolO} color="var(--mark-o)" size={cols > 5 ? 22 : 34} />
+                  <PieceSymbol symbol={disableCosmetics ? 'O' : symbolO} color="var(--mark-o)" size={cols > 5 ? 22 : 34} />
                 ) : null}
               </button>
             );

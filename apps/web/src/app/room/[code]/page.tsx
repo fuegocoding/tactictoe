@@ -180,17 +180,17 @@ export default function RoomPage() {
         setPlacingAs(available[0]!);
       }
     }
-  }, [roomState.gameState, placingAs]);
-
-  // Auto-fix placingAs for SOS variant — default 'X' is invalid, must be 'S' or 'O'
-  useEffect(() => {
-    const v = roomState.gameState?.variantId;
-    if (v === 'sos_ttt' && placingAs !== 'S' && placingAs !== 'O') {
-      setPlacingAs('S');
-    }
-  }, [roomState.gameState, placingAs]);
-
-  useEffect(() => {
+  }, [roomState.gameState, placingAs]);
+
+  // Auto-fix placingAs for SOS variant — default 'X' is invalid, must be 'S' or 'O'
+  useEffect(() => {
+    const v = roomState.gameState?.variantId;
+    if (v === 'sos_ttt' && placingAs !== 'S' && placingAs !== 'O') {
+      setPlacingAs('S');
+    }
+  }, [roomState.gameState, placingAs]);
+
+  useEffect(() => {
     const prevState = prevStateRef.current;
     if (roomState.gameState) {
       if (!prevState || roomState.gameState.moveCount <= prevState.moveCount) {
@@ -786,6 +786,7 @@ export default function RoomPage() {
                 />
               ) : roomState.gameState!.variantId === 'sos_ttt' ? (
                 <GridBoard
+                  disableCosmetics={true}
                   board={(roomState.gameState as SOSTTTState).board}
                   cols={8}
                   rows={8}

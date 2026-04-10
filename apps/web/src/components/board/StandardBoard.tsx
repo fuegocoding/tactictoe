@@ -32,7 +32,7 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
       {/* Top-left corner */}
       <div />
       {/* Col labels */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '4px' }}>
         {['a', 'b', 'c'].map((col) => (
           <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
             {col}
@@ -41,7 +41,7 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
       </div>
 
       {/* Row labels */}
-      <div style={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', gap: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateRows: 'repeat(3, minmax(0, 1fr))', gap: '4px' }}>
         {[1, 2, 3].map((row) => (
           <div key={row} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
             {row}
@@ -50,7 +50,7 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
       </div>
 
       {/* Cells grid — position:relative hosts the WinLine overlay */}
-      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '4px' }}>
         {[0, 1, 2].map((row) =>
           [0, 1, 2].map((col) => {
             const index = row * 3 + col;
@@ -64,6 +64,9 @@ export function StandardBoard({ board, currentPlayer, disabled, onMove, winCells
                 }}
                 style={{
                   aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                   fontSize: 'clamp(20px, 5vw, 32px)',
                   fontWeight: 'bold',
                   cursor: disabled || cell !== null ? 'default' : 'pointer',

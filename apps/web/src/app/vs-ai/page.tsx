@@ -686,6 +686,7 @@ export default function VsAIPage() {
                 })()} />
             ) : variant === 'sos_ttt' ? (
               <GridBoard board={(gameState as SOSTTTState).board} cols={8} rows={8}
+                disableCosmetics={true}
                 currentPlayer={gameState.currentPlayer as 'X' | 'O'} disabled={!isMyTurn}
                 onMove={(_, ci) => handleMove(0, ci)}
                 winCells={[]} />

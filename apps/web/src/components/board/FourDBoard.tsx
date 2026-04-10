@@ -70,7 +70,7 @@ export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = 
                 {/* Inner 3×3 mini-grid */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
                   gap: '2px',
                   width: '90px',
                 }}>
@@ -89,6 +89,9 @@ export function FourDBoard({ board, currentPlayer, disabled, onMove, winCells = 
                           }}
                           style={{
                             aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                             fontSize: '14px',
                             fontWeight: 'bold',
                             cursor: disabled || cell !== null ? 'default' : 'pointer',

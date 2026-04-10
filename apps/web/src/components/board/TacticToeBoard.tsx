@@ -50,7 +50,7 @@ export function TacticToeBoard({
 
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
               gap: '4px',
               width: '168px',
             }}>
@@ -82,6 +82,9 @@ export function TacticToeBoard({
                       title={isObstacle ? 'Obstacle — can be moved' : undefined}
                       style={{
                         aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                         fontSize: 'clamp(14px, 3.5vw, 22px)',
                         fontWeight: 'bold',
                         cursor: clickable ? 'pointer' : 'default',

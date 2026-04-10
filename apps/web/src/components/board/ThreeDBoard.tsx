@@ -367,6 +367,9 @@ export function ThreeDBoard({ board, currentPlayer, disabled, onMove, winCells =
                           onClick={() => { if (!disabled && cell === null) onMove(layer, row * 3 + col); }}
                           style={{
                             aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                             fontSize: 'clamp(16px, 4vw, 26px)',
                             fontWeight: 'bold',
                             cursor: disabled || cell !== null ? 'default' : 'pointer',

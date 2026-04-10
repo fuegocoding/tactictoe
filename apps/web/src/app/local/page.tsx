@@ -640,6 +640,7 @@ export default function LocalPage() {
                 />
               ) : variant === 'sos_ttt' ? (
                 <GridBoard
+                  disableCosmetics={true}
                   board={(gameState as SOSTTTState).board}
                   cols={8} rows={8}
                   currentPlayer={gameState.currentPlayer as 'X' | 'O'}

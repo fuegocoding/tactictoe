@@ -141,7 +141,7 @@ export function Ultimate3DBoard({
               {/* Micro-board for the selected micro-layer (micro-layer = 9 cells) */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
                 gap: '2px',
                 width: '108px',
                 opacity: macroResult ? 0.4 : 1,
@@ -158,6 +158,9 @@ export function Ultimate3DBoard({
                         onClick={() => { if (clickable) onMove(macroCell, microCell); }}
                         style={{
                           aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                           fontSize: '13px',
                           fontWeight: 'bold',
                           cursor: clickable ? 'pointer' : 'default',

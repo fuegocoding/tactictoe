@@ -186,6 +186,9 @@ export function UltimateBoard({
                         }}
                         style={{
                           aspectRatio: '1',
+                  minWidth: 0,
+                  minHeight: 0,
+                  padding: 0,
                           fontSize: 'clamp(12px, 2vw, 20px)',
                           fontWeight: 'bold',
                           cursor: !playable || cell !== null ? 'default' : 'pointer',
