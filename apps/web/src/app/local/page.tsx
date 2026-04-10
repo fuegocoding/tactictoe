@@ -47,22 +47,22 @@ type Variant =
   | 'vanishing_ttt' | 'ttt_3d' | 'ttt_4d' | 'order_chaos' | 'tactic_toe' | 'ultimate_3d'
   | 'garrison';
 
-const VARIANT_INFO: Record<Variant, { label: string; description: string; Icon: any }> = {
-  standard_3x3:  { label: 'Standard',    description: 'Classic. Quick casual games.',                          Icon: Grid3x3 },
-  ultimate_ttt:  { label: 'Ultimate',    description: '9 boards in one. The flagship.',                        Icon: Table2 },
-  misere_ttt:    { label: 'Misère',      description: 'Force your opponent to get 3-in-a-row to win.',         Icon: Target },
-  wild_ttt:      { label: 'Wild',        description: 'Choose to place X or O on every turn.',                 Icon: Asterisk },
-  notakto_ttt:       { label: 'Notakto',     description: 'Both players place X. Avoid making 3-in-a-row!',        Icon: Ban },
-  gomoku:        { label: 'Gomoku',      description: '15×15 board. First to 5-in-a-row wins.',                Icon: Grip },
-  sos_ttt:       { label: 'SOS',         description: 'Spell S-O-S for points + extra turns.',                 Icon: Type },
-  numerical_ttt: { label: 'Numerical',   description: 'Sum exactly 15 with three numbers.',                    Icon: Hash },
-  vanishing_ttt: { label: 'Vanishing',   description: 'Pieces disappear after 6 moves. Can you remember?',    Icon: Eye },
-  ttt_3d:        { label: '3D TTT',      description: '3×3×3 cube. Win in any dimension.',                     Icon: Layers },
-  ttt_4d:        { label: '4D TTT',      description: '3×3×3×3 hypercube. 4-dimensional strategy.',           Icon: Box },
-  order_chaos:   { label: 'Order&Chaos', description: 'Order creates 5-in-a-row; Chaos prevents it.',          Icon: Shuffle },
-  tactic_toe:    { label: 'Tactic Toe',  description: '3D board with 8 obstacles. Place or move obstacles.',   Icon: Swords },
-  ultimate_3d:   { label: 'Ultimate 3D', description: '27 macro-cells × 27 micro-cells. 3D Ultimate TTT.',      Icon: Network },
-  garrison:      { label: 'Garrison',    description: 'Place chess pieces on an 8×8 board. Get 5-in-a-row.',    Icon: Shield },
+const VARIANT_ICONS: Record<string, any> = {
+  standard_3x3:  Grid3x3,
+  ultimate_ttt:  Table2,
+  misere_ttt:    Target,
+  wild_ttt:      Asterisk,
+  notakto_ttt:   Ban,
+  gomoku:        Grip,
+  sos_ttt:       Type,
+  numerical_ttt: Hash,
+  vanishing_ttt: Eye,
+  ttt_3d:        Layers,
+  ttt_4d:        Box,
+  order_chaos:   Shuffle,
+  tactic_toe:    Swords,
+  ultimate_3d:   Network,
+  garrison:      Shield,
 };
 
 const engines: Record<Variant, GameRules> = {
@@ -469,16 +469,16 @@ export default function LocalPage() {
                   </div>
                 </div>
                 <div className={styles.variantButtons} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-                  {(Object.keys(VARIANT_INFO) as Variant[]).map((v) => {
-                    const { label, Icon } = VARIANT_INFO[v]!;
+                  {GAME_VARIANTS.map((v) => {
+                    const Icon = VARIANT_ICONS[v.id as Variant];
                     return (
                       <button
-                        key={v}
-                        className={`${styles.variantBtn} ${variant === v ? styles.selected : ''}`}
-                        onClick={() => dispatch({ type: 'SET_VARIANT', variant: v })}
+                        key={v.id}
+                        className={`${styles.variantBtn} ${variant === v.id ? styles.selected : ''}`}
+                        onClick={() => dispatch({ type: 'SET_VARIANT', variant: v.id as Variant })}
                       >
                         <Icon size={16} strokeWidth={2.5} style={{ marginBottom: 4 }} />
-                        <span>{label}</span>
+                        <span>{v.name}</span>
                       </button>
                     );
                   })}
