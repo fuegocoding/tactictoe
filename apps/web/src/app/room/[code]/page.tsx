@@ -138,6 +138,10 @@ export default function RoomPage() {
   const [drawOfferReceived, setDrawOfferReceived] = useState(false);
   const [drawOfferFrom, setDrawOfferFrom] = useState<string>('');
 
+  // Rematch state
+  const [rematchRequested, setRematchRequested] = useState(false);
+  const [rematchReceived, setRematchReceived] = useState(false);
+
   const mySymbol: 'X' | 'O' | null =
     roomState.myPlayerIndex !== null
       ? roomState.myPlayerIndex === 0 ? 'X' : 'O'
@@ -163,12 +167,15 @@ export default function RoomPage() {
     }
   }, [chatMessages]);
 
-  // Reset draw offer state when game ends
+  // Reset draw/rematch offer state when game state changes
   useEffect(() => {
     if (roomState.phase === 'over') {
       setDrawOfferPending(false);
       setDrawOfferReceived(false);
       setDrawOfferFrom('');
+    } else if (roomState.phase === 'playing') {
+      setRematchRequested(false);
+      setRematchReceived(false);
     }
   }, [roomState.phase]);
 
@@ -343,6 +350,11 @@ export default function RoomPage() {
       setDrawOfferReceived(false);
       setDrawOfferFrom('');
     }
+    function onRematchRequested(data: { fromGuestId: string }) {
+      if (data.fromGuestId !== guest?.guestId) {
+        setRematchReceived(true);
+      }
+    }
 
     socket.on('room:joined', onRoomJoined);
     socket.on('game:started', onGameStarted);
@@ -357,6 +369,7 @@ export default function RoomPage() {
     socket.on('draw:offered', onDrawOffered);
     socket.on('draw:offer_sent', onDrawOfferSent);
     socket.on('draw:declined', onDrawDeclined);
+    socket.on('rematch:requested', onRematchRequested);
 
     return () => {
       socket.off('room:joined', onRoomJoined);
@@ -373,6 +386,7 @@ export default function RoomPage() {
       socket.off('draw:offer_sent', onDrawOfferSent);
       socket.off('draw:declined', onDrawDeclined);
       socket.off('game:spectator_sync', onSpectatorSync);
+      socket.off('rematch:requested', onRematchRequested);
     };
   }, [socket, guest]);
 
@@ -495,6 +509,12 @@ export default function RoomPage() {
     if (confirm('Are you sure you want to forfeit? You will lose the game.')) {
       socket.emit('game:forfeit', { roomCode: code });
     }
+  }, [socket, code, roomState.phase]);
+
+  const handleRematch = useCallback(() => {
+    if (roomState.phase !== 'over') return;
+    socket.emit('game:rematch_request', { roomCode: code });
+    setRematchRequested(true);
   }, [socket, code, roomState.phase]);
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
@@ -894,7 +914,12 @@ export default function RoomPage() {
                       <Button variant="secondary" onClick={() => router.push(`/replay/${roomState.matchId}`)} full>Watch Replay</Button>
                     </div>
                   )}
-                  <Button variant="primary" onClick={() => router.push('/')} full>Back to Lobby</Button>
+                  <div style={{ marginBottom: 'var(--space-3)' }}>
+                    <Button variant="primary" onClick={handleRematch} disabled={rematchRequested} full>
+                      {rematchRequested ? 'Rematch Requested...' : rematchReceived ? 'Accept Rematch' : 'Request Rematch'}
+                    </Button>
+                  </div>
+                  <Button variant="secondary" onClick={() => router.push('/')} full>Back to Lobby</Button>
                 </div>
               </div>
             )}

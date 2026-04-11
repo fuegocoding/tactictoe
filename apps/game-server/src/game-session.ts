@@ -458,3 +458,45 @@ export function handleForfeit(
   reportResult(io, room, winnerSymbol, 'forfeit');
   io.to(roomCode).emit('game:over', gameOverPayload);
 }
+
+/** Called when a player requests a rematch */
+export function handleRematchRequest(
+  io: Server,
+  socket: Socket,
+  guestId: string,
+  roomCode: string,
+  rm: RoomManagerInstance = defaultRoomManager
+): void {
+  const room = rm.getRoom(roomCode);
+  if (!room || room.status !== 'finished') {
+    socket.emit('error', { message: 'Can only rematch a finished game' });
+    return;
+  }
+
+  const player = room.players.find((p) => p.guestId === guestId);
+  if (!player) {
+    socket.emit('error', { message: 'You are not a player in this room' });
+    return;
+  }
+
+  if (!room.rematchRequests.includes(guestId)) {
+    room.rematchRequests.push(guestId);
+  }
+
+  if (room.rematchRequests.length === 2) {
+    // Both players want a rematch. Swap players if it's a 2-player game.
+    room.players.forEach(p => {
+      p.playerIndex = p.playerIndex === 0 ? 1 : 0;
+    });
+    room.rematchRequests = [];
+    room.moveHistory = [];
+    startGame(io, room);
+  } else {
+    // Notify the other player
+    const opponent = room.players.find(p => p.guestId !== guestId);
+    if (opponent) {
+      io.to(opponent.socketId).emit('rematch:requested', { fromGuestId: guestId });
+    }
+  }
+}
+

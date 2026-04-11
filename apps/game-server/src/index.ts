@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import { GAME_VARIANTS } from '@tactictoe/game-engine';
 import { roomManager } from './room-manager.js';
 import { QueueManager } from './queue-manager.js';
-import { startGame, handleMove, handleDisconnect, handleReconnect, handleChatMessage, handleDrawOffer, handleDrawResponse, handleForfeit } from './game-session.js';
+import { startGame, handleMove, handleDisconnect, handleReconnect, handleChatMessage, handleDrawOffer, handleDrawResponse, handleForfeit, handleRematchRequest } from './game-session.js';
 import type {
   CreateRoomPayload,
   JoinRoomPayload,
@@ -215,6 +215,18 @@ io.on('connection', (socket) => {
     const room = roomManager.getRoom(roomCode);
     if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
       handleForfeit(io, socket, player.guestId, roomCode);
+    } else {
+      socket.emit('error', { message: 'You are not in this room' });
+    }
+  });
+
+  // ── Rematch ──────────────────────────────────────────────────────────────────
+  socket.on('game:rematch_request', (payload: { roomCode: string }) => {
+    const { roomCode } = payload;
+    const player = roomManager.getPlayerBySocket(socket.id);
+    const room = roomManager.getRoom(roomCode);
+    if (player && room && room.players.some((p) => p.guestId === player.guestId)) {
+      handleRematchRequest(io, socket, player.guestId, roomCode);
     } else {
       socket.emit('error', { message: 'You are not in this room' });
     }

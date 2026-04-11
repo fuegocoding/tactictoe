@@ -793,7 +793,7 @@ export default function LocalPage() {
                 <div className={styles.panelContent}>
                   <div className={styles.gameActions}>
                     <Button onClick={() => dispatch({ type: 'REMATCH' })} full>
-                      {phase === 'over' ? 'Play again' : 'Restart game'}
+                      {phase === 'over' ? 'Rematch' : 'Restart game'}
                     </Button>
                     <Button variant="secondary" onClick={() => dispatch({ type: 'NEW_GAME' })} full>Change settings</Button>
                   </div>

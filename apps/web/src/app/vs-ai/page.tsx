@@ -614,7 +614,7 @@ export default function VsAIPage() {
                         : "It's a draw!"}
                     </p>
                     <div className={localStyles.gameActions}>
-                      <Button onClick={startGame}>Play again</Button>
+                      <Button onClick={startGame}>Rematch</Button>
                       <Button variant="secondary" onClick={() => setPhase('setup')}>Change settings</Button>
                     </div>
                   </div>

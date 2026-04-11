@@ -39,6 +39,8 @@ class RoomManager {
       disconnectTimer: null,
       createdAt: Date.now(),
       moveHistory: [],
+      drawOfferPending: null,
+      rematchRequests: [],
     };
     this.rooms.set(code, room);
     return room;

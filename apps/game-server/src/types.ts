@@ -28,6 +28,7 @@ export interface RoomState {
   createdAt: number;                 // Date.now()
   moveHistory: MoveRecord[];         // accumulates during the game
   drawOfferPending: { fromGuestId: string } | null;  // tracks pending draw offers
+  rematchRequests: string[];         // guestIds who have requested a rematch
 }
 
 // ─── Socket.io event payloads (client → server) ───────────────────────────────
