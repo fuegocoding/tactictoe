@@ -20,9 +20,9 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!profile) notFound();
 
-  const allAchievements = await (prisma as any).achievement.findMany({ orderBy: { id: 'asc' } });
-  const userAchievements = await (prisma as any).userAchievement.findMany({ where: { userId: profile.userId } });
-  const unlockedIds = new Set(userAchievements.map((ua: any) => ua.achievementId));
+  const allAchievements = await prisma.achievement.findMany({ orderBy: { id: 'asc' } });
+  const userAchievements = await prisma.userAchievement.findMany({ where: { userId: profile.userId } });
+  const unlockedIds = new Set(userAchievements.map((ua) => ua.achievementId));
 
   const rawMatches = await prisma.match.findMany({
     where: { OR: [{ player1Id: profile.userId }, { player2Id: profile.userId }] },

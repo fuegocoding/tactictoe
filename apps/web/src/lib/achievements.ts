@@ -20,17 +20,17 @@ async function checkPlayer(userId: string, payload: GameResultPayload, symbol: '
   const isDraw = winner === null;
 
   // Fetch current user stats
-  const ratings = await (prisma as any).rating.findMany({ where: { userId } });
-  const totalWins = ratings.reduce((acc: number, r: any) => acc + r.wins, 0);
+  const ratings = await prisma.rating.findMany({ where: { userId } });
+  const totalWins = ratings.reduce((acc, r) => acc + r.wins, 0);
 
   // Fetch all achievements
-  const allAchievements = await (prisma as any).achievement.findMany();
+  const allAchievements = await prisma.achievement.findMany();
   if (!allAchievements.length) return;
 
   // Fetch user's unlocked achievements
-  const userUnlocked = await (prisma as any).userAchievement.findMany({ where: { userId } });
+  const userUnlocked = await prisma.userAchievement.findMany({ where: { userId } });
   const unlockedCodes = new Set(
-    userUnlocked.map((ua: any) => allAchievements.find((a: any) => a.id === ua.achievementId)?.conditionCode)
+    userUnlocked.map((ua) => allAchievements.find((a) => a.id === ua.achievementId)?.conditionCode)
   );
 
   const newlyUnlocked: string[] = [];
@@ -59,10 +59,10 @@ async function checkPlayer(userId: string, payload: GameResultPayload, symbol: '
 
   // Insert newly unlocked
   if (newlyUnlocked.length > 0) {
-    const toInsert = allAchievements.filter((a: any) => newlyUnlocked.includes(a.conditionCode));
-    
-    await (prisma as any).userAchievement.createMany({
-      data: toInsert.map((a: any) => ({
+    const toInsert = allAchievements.filter((a) => newlyUnlocked.includes(a.conditionCode));
+
+    await prisma.userAchievement.createMany({
+      data: toInsert.map((a) => ({
         userId,
         achievementId: a.id
       })),

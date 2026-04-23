@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  let cosmetics = await (prisma as any).cosmetic.findMany({
+  let cosmetics = await prisma.cosmetic.findMany({
     orderBy: { requiredScore: 'asc' }
   });
 
@@ -38,14 +38,14 @@ export async function GET() {
       { id: 'chess_board_purple',   name: 'Purple',    type: 'chess_board', cssValue: '{"--chess-light":"#e8d9eb","--chess-dark":"#9f72b5"}', requiredScore: 0, price: 500 },
       { id: 'chess_board_marble',   name: 'Marble',    type: 'chess_board', cssValue: '{"--chess-light":"#f0ece4","--chess-dark":"#7a9e7e"}', requiredScore: 0, price: 750 },
     ];
-    await (prisma as any).cosmetic.createMany({ data: DEFAULT_COSMETICS });
-    cosmetics = await (prisma as any).cosmetic.findMany({ orderBy: { requiredScore: 'asc' } });
+    await prisma.cosmetic.createMany({ data: DEFAULT_COSMETICS });
+    cosmetics = await prisma.cosmetic.findMany({ orderBy: { requiredScore: 'asc' } });
   }
 
   if (!session?.user?.id) {
     return NextResponse.json({
       credits: 0,
-      cosmetics: cosmetics.map((c: any) => ({
+      cosmetics: cosmetics.map((c) => ({
         ...c,
         isUnlocked: c.requiredScore <= 0,
         isEquipped: false
@@ -60,11 +60,11 @@ export async function GET() {
       where: { userId },
       orderBy: { rating: 'desc' },
     }),
-    (prisma as any).user.findUnique({
+    prisma.user.findUnique({
       where: { id: userId },
       select: { credits: true }
     }),
-    (prisma as any).userCosmetic.findMany({
+    prisma.userCosmetic.findMany({
       where: { userId }
     })
   ]);
@@ -72,8 +72,8 @@ export async function GET() {
   const maxScore = highestRating?.rating ?? 1500;
   const credits = userDbData?.credits ?? 0;
 
-  const response = cosmetics.map((c: any) => {
-    const uc = userCosmetics.find((u: any) => u.cosmeticId === c.id);
+  const response = cosmetics.map((c) => {
+    const uc = userCosmetics.find((u) => u.cosmeticId === c.id);
     // If it's a paid item (price > 0), you have to buy it (so it's unlocked if you own it)
     // If it's a score-based free item (price == 0), you unlock it by reaching the required score.
     // If requiredScore is <= 0 and price is <= 0, it's default unlocked.
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
 
-  const cosmetic = await (prisma as any).cosmetic.findUnique({ where: { id: cosmeticId } });
+  const cosmetic = await prisma.cosmetic.findUnique({ where: { id: cosmeticId } });
   if (!cosmetic) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const highestRating = await prisma.rating.findFirst({
@@ -114,17 +114,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Cosmetic remains locked. Increase your rating!' }, { status: 403 });
   }
 
+  // Paid cosmetics must be purchased before equipping
+  if (cosmetic.price > 0) {
+    const ownership = await prisma.userCosmetic.findUnique({
+      where: { userId_cosmeticId: { userId, cosmeticId } }
+    });
+    if (!ownership) {
+      return NextResponse.json({ error: 'Cosmetic not purchased' }, { status: 403 });
+    }
+  }
+
   if (equip) {
     // Only one theme of a given type can be equipped
-    const allOfType = await (prisma as any).cosmetic.findMany({ where: { type: cosmetic.type } });
-    const localIds = allOfType.map((c: any) => c.id);
-    await (prisma as any).userCosmetic.updateMany({
+    const allOfType = await prisma.cosmetic.findMany({ where: { type: cosmetic.type } });
+    const localIds = allOfType.map((c) => c.id);
+    await prisma.userCosmetic.updateMany({
       where: { userId, cosmeticId: { in: localIds } },
       data: { isEquipped: false }
     });
   }
 
-  const updated = await (prisma as any).userCosmetic.upsert({
+  const updated = await prisma.userCosmetic.upsert({
     where: {
       userId_cosmeticId: { userId, cosmeticId }
     },

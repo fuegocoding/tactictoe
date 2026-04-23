@@ -46,8 +46,6 @@ pnpm build
 pnpm test
 ```
 
-> Note: the current workspace includes `packages/glicko2` with no test files, which can cause `pnpm test` to fail until tests are added or that package test script is adjusted.
-
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](./LICENSE).

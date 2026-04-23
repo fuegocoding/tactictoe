@@ -29,27 +29,31 @@ export function useQueue(): UseQueueResult {
     listenersAttached.current = true;
     const socket = getSocket();
 
-    socket.on('queue:status', ({ position }: { position: number }) => {
+    const onStatus = ({ position }: { position: number }) => {
       setPosition(position);
       setQueueState('waiting');
-    });
+    };
 
-    socket.on('queue:matched', ({ roomCode, playerIndex, rated }: { roomCode: string; playerIndex: number; rated?: boolean }) => {
+    const onMatched = ({ roomCode, playerIndex, rated }: { roomCode: string; playerIndex: number; rated?: boolean }) => {
       setQueueState('matched');
       setMatchedRoomCode(roomCode);
       setMatchedPlayerIndex(playerIndex);
       setMatchedRated(rated ?? false);
-    });
+    };
 
-    socket.on('queue:left', () => {
+    const onLeft = () => {
       setQueueState('idle');
       setPosition(0);
-    });
+    };
+
+    socket.on('queue:status', onStatus);
+    socket.on('queue:matched', onMatched);
+    socket.on('queue:left', onLeft);
 
     return () => {
-      socket.off('queue:status');
-      socket.off('queue:matched');
-      socket.off('queue:left');
+      socket.off('queue:status', onStatus);
+      socket.off('queue:matched', onMatched);
+      socket.off('queue:left', onLeft);
       listenersAttached.current = false;
     };
   }, []);

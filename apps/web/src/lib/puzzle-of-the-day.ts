@@ -11,7 +11,7 @@ export function getTodayDayNumber(): number {
 /** Returns today's date string in YYYY-MM-DD for localStorage keying. */
 export function getTodayString(): string {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
 /** Returns the puzzle ID for today's daily challenge. */

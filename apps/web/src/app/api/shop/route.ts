@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
 
-  const cosmetic = await (prisma as any).cosmetic.findUnique({ where: { id: cosmeticId } });
+  const cosmetic = await prisma.cosmetic.findUnique({ where: { id: cosmeticId } });
   if (!cosmetic) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   if (cosmetic.price <= 0) {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   }
 
   // Check if user already owns it
-  const existing = await (prisma as any).userCosmetic.findUnique({
+  const existing = await prisma.userCosmetic.findUnique({
     where: { userId_cosmeticId: { userId, cosmeticId } }
   });
   if (existing) {
@@ -32,18 +32,18 @@ export async function POST(req: Request) {
   }
 
   // Find user and check credits
-  const user = await (prisma as any).user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user || user.credits < cosmetic.price) {
     return NextResponse.json({ error: 'Not enough credits' }, { status: 403 });
   }
 
   // Deduct credits and unlock cosmetic in a transaction
   await prisma.$transaction([
-    (prisma as any).user.update({
+    prisma.user.update({
       where: { id: userId },
       data: { credits: { decrement: cosmetic.price } }
     }),
-    (prisma as any).userCosmetic.create({
+    prisma.userCosmetic.create({
       data: { userId, cosmeticId, isEquipped: false }
     })
   ]);

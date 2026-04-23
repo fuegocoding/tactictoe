@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   }
 
   const earned = CREDIT_MAP[outcome];
-  const updated = await (prisma as any).user.update({
+  const updated = await prisma.user.update({
     where: { id: session.user.id },
     data: { credits: { increment: earned } },
     select: { credits: true },

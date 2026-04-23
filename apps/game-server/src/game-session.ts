@@ -26,9 +26,9 @@ const RATE_LIMIT_MS = 1000; // 1 message per second
 /** Encode HTML special characters to prevent XSS attacks */
 function sanitizeHtml(str: string): string {
   return str
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }

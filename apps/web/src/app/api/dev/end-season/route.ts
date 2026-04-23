@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { concludeSeason } from '@/lib/season';
 
-export async function POST() {
-  // In a production app, verify an Admin Secret Header or Role here
-  if (process.env.NODE_ENV === 'production' && process.env.ADMIN_SECRET !== 'tactictoe-dev') {
-    // For safety, allow it to run in dev without secrets, but block prod unless secret provided
-    // (Actual auth skip for brevity context)
+export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  // Require an admin secret header in production for defense-in-depth
+  if (process.env.NODE_ENV === 'production') {
+    const adminSecret = request.headers.get('x-admin-secret');
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
   }
 
   try {

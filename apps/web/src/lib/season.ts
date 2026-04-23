@@ -1,7 +1,7 @@
 import { prisma } from './prisma';
 
 export async function concludeSeason() {
-  return await (prisma as any).$transaction(async (tx: any) => {
+  return await prisma.$transaction(async (tx) => {
     // 1. Find the current active season
     let currentSeason = await tx.season.findFirst({
       where: { isActive: true },
@@ -36,7 +36,10 @@ export async function concludeSeason() {
         seasonId: endedSeason.id,
         userId: r.userId,
         variantId: r.variantId,
-        finalRating: r.rating
+        finalRating: r.rating,
+        wins: r.wins,
+        losses: r.losses,
+        draws: r.draws,
       }));
 
       await tx.leaderboardSnapshot.createMany({
